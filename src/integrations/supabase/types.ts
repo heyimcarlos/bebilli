@@ -194,7 +194,6 @@ export type Database = {
           goal_amount: number | null
           id: string | null
           image_url: string | null
-          invite_code: string | null
           name: string | null
           updated_at: string | null
         }
@@ -204,7 +203,6 @@ export type Database = {
           goal_amount?: number | null
           id?: string | null
           image_url?: string | null
-          invite_code?: never
           name?: string | null
           updated_at?: string | null
         }
@@ -214,7 +212,6 @@ export type Database = {
           goal_amount?: number | null
           id?: string | null
           image_url?: string | null
-          invite_code?: never
           name?: string | null
           updated_at?: string | null
         }
@@ -223,42 +220,33 @@ export type Database = {
       profiles_public: {
         Row: {
           avatar_url: string | null
-          city: string | null
           consistency_days: number | null
-          country: string | null
           created_at: string | null
           id: string | null
           is_premium: boolean | null
+          level: number | null
           max_saved: number | null
           name: string | null
-          phone: string | null
-          updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
-          city?: string | null
           consistency_days?: number | null
-          country?: string | null
           created_at?: string | null
           id?: string | null
           is_premium?: boolean | null
+          level?: number | null
           max_saved?: number | null
           name?: string | null
-          phone?: never
-          updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
-          city?: string | null
           consistency_days?: number | null
-          country?: string | null
           created_at?: string | null
           id?: string | null
           is_premium?: boolean | null
+          level?: number | null
           max_saved?: number | null
           name?: string | null
-          phone?: never
-          updated_at?: string | null
         }
         Relationships: []
       }
