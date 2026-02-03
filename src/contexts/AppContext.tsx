@@ -143,6 +143,7 @@ const translations: Record<Language, Record<string, string>> = {
     noNotifications: 'Nenhuma notificação',
     newContribution: 'Nova contribuição!',
     contributedTo: 'contribuiu para',
+    continue: 'Continuar',
   },
   en: {
     welcome: 'Welcome',
@@ -216,6 +217,7 @@ const translations: Record<Language, Record<string, string>> = {
     noNotifications: 'No notifications',
     newContribution: 'New contribution!',
     contributedTo: 'contributed to',
+    continue: 'Continue',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -289,6 +291,7 @@ const translations: Record<Language, Record<string, string>> = {
     noNotifications: 'Aucune notification',
     newContribution: 'Nouvelle contribution!',
     contributedTo: 'a contribué à',
+    continue: 'Continuer',
   },
 };
 

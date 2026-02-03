@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Rocket, Turtle, Send, Bot, Lock, Check, Gift, Share2 } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteModal from '@/components/InviteModal';
+import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter } from '@/components/animations';
 
 interface GroupPageProps {
   groupId: string;
@@ -45,8 +47,25 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     return date < weekAgo;
   };
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, x: -20 },
+    show: { opacity: 1, x: 0 }
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <motion.div 
+      className="min-h-screen bg-background pb-24"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
       {/* Header */}
       <div className="relative">
         <div className="absolute inset-0 h-48">
@@ -60,41 +79,69 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         
         <div className="relative z-10 px-6 pt-12 pb-6">
           <div className="flex items-center justify-between mb-4">
-            <button
+            <motion.button
               onClick={onBack}
               className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
               <ArrowLeft className="w-5 h-5" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={() => setShowInviteModal(true)}
               className="w-10 h-10 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
               <Share2 className="w-5 h-5 text-primary-foreground" />
-            </button>
+            </motion.button>
           </div>
           
-          <h1 className="text-2xl font-bold mb-2">{group.name}</h1>
-          <p className="text-muted-foreground text-sm">{group.description}</p>
+          <motion.h1 
+            className="text-2xl font-bold mb-2"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            {group.name}
+          </motion.h1>
+          <motion.p 
+            className="text-muted-foreground text-sm"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {group.description}
+          </motion.p>
         </div>
       </div>
 
       {/* Progress */}
-      <div className="px-6 mb-6">
+      <motion.div 
+        className="px-6 mb-6"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
         <div className="glass-card p-4">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-muted-foreground">{t('groupGoal')}</span>
-            <span className="text-sm font-semibold text-primary">{progress.toFixed(0)}% {t('reached')}</span>
+            <motion.span 
+              className="text-sm font-semibold text-primary"
+              key={progress}
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
+            >
+              <AnimatedCounter value={progress} suffix="%" duration={1.5} className="font-semibold" /> {t('reached')}
+            </motion.span>
           </div>
-          <div className="progress-bar mb-2">
-            <div className="progress-fill" style={{ width: `${Math.min(progress, 100)}%` }} />
-          </div>
-          <div className="flex items-center justify-between text-sm">
+          <AnimatedProgressBar progress={progress} height={12} showMilestones />
+          <div className="flex items-center justify-between text-sm mt-3">
             <span className="text-muted-foreground">{formatCurrency(group.current)}</span>
             <span className="font-semibold">{formatCurrency(group.goal)}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Tabs */}
       <div className="px-6">
@@ -105,46 +152,66 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             <TabsTrigger value="dream" className="flex-1">{t('dreamPanel')}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="ranking" className="space-y-3">
-            {group.members.map((member, index) => (
-              <div
-                key={member.id}
-                className="glass-card p-4 flex items-center gap-4"
-              >
-                {index === 0 ? (
-                  <div className="badge-rocket">
-                    <Rocket className="w-4 h-4 text-primary-foreground" />
+          <TabsContent value="ranking">
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="space-y-3"
+            >
+              {group.members.map((member, index) => (
+                <motion.div
+                  key={member.id}
+                  variants={item}
+                  className="glass-card p-4 flex items-center gap-4"
+                  whileHover={{ scale: 1.02, x: 5 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  {index === 0 ? (
+                    <AnimatedBadge type="rocket" size="md" />
+                  ) : isLastWeek(member.lastContribution) ? (
+                    <AnimatedBadge type="turtle" size="md" />
+                  ) : (
+                    <motion.div 
+                      className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center font-bold text-muted-foreground"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      {index + 1}
+                    </motion.div>
+                  )}
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{member.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isLastWeek(member.lastContribution)
+                        ? `${t('noContributions')} 7+ ${t('days')}`
+                        : `${t('yourContribution')}: ${formatCurrency(member.contribution)}`}
+                    </p>
                   </div>
-                ) : isLastWeek(member.lastContribution) ? (
-                  <div className="badge-turtle">
-                    <Turtle className="w-4 h-4" />
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center font-bold text-muted-foreground">
-                    {index + 1}
-                  </div>
-                )}
-                
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{member.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {isLastWeek(member.lastContribution)
-                      ? `${t('noContributions')} 7+ ${t('days')}`
-                      : `${t('yourContribution')}: ${formatCurrency(member.contribution)}`}
-                  </p>
-                </div>
-                
-                <span className={`text-sm font-semibold ${index === 0 ? 'gradient-gold-text' : 'text-primary'}`}>
-                  {formatCurrency(member.contribution)}
-                </span>
-              </div>
-            ))}
+                  
+                  <motion.span 
+                    className={`text-sm font-semibold ${index === 0 ? 'gradient-gold-text' : 'text-primary'}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                  >
+                    {formatCurrency(member.contribution)}
+                  </motion.span>
+                </motion.div>
+              ))}
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-4">
             <div className="glass-card p-4 min-h-[300px] max-h-[400px] overflow-y-auto space-y-3">
               {/* Bot welcome message */}
-              <div className="flex gap-3">
+              <motion.div 
+                className="flex gap-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary" />
                 </div>
@@ -152,10 +219,16 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                   <p className="text-xs text-primary font-medium mb-1">Bili Bot</p>
                   <p className="text-sm">Bilionário Lucas acabou de contribuir R$ 500! 🚀</p>
                 </div>
-              </div>
+              </motion.div>
               
-              {group.messages.map((msg) => (
-                <div key={msg.id} className={`flex gap-3 ${msg.isBot ? '' : 'justify-end'}`}>
+              {group.messages.map((msg, i) => (
+                <motion.div 
+                  key={msg.id} 
+                  className={`flex gap-3 ${msg.isBot ? '' : 'justify-end'}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                >
                   {msg.isBot && (
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                       <Bot className="w-4 h-4 text-primary" />
@@ -167,16 +240,24 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     {msg.isBot && <p className="text-xs text-primary font-medium mb-1">{msg.userName}</p>}
                     <p className="text-sm">{msg.content}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
               
-              {messages.map((msg) => (
-                <div key={msg.id} className="flex gap-3 justify-end">
-                  <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-none px-4 py-2 max-w-[80%]">
-                    <p className="text-sm">{msg.content}</p>
-                  </div>
-                </div>
-              ))}
+              <AnimatePresence>
+                {messages.map((msg) => (
+                  <motion.div 
+                    key={msg.id} 
+                    className="flex gap-3 justify-end"
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                  >
+                    <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-none px-4 py-2 max-w-[80%]">
+                      <p className="text-sm">{msg.content}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
             
             <div className="flex gap-2">
@@ -187,18 +268,24 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 className="bg-secondary"
               />
-              <Button
-                onClick={handleSendMessage}
-                className="btn-primary text-primary-foreground w-12 h-12"
-              >
-                <Send className="w-5 h-5" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={handleSendMessage}
+                  className="btn-primary text-primary-foreground w-12 h-12"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </motion.div>
             </div>
           </TabsContent>
 
           <TabsContent value="dream" className="space-y-4">
             {/* Thermometer */}
-            <div className="glass-card p-6">
+            <motion.div 
+              className="glass-card p-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Gift className="w-5 h-5 text-primary" />
                 {t('partners')}
@@ -206,43 +293,76 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               
               <div className="relative h-64 mb-6">
                 <div className="absolute left-1/2 -translate-x-1/2 w-8 h-full bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-accent transition-all duration-1000"
-                    style={{ height: `${Math.min(progress, 100)}%` }}
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-accent"
+                    initial={{ height: 0 }}
+                    animate={{ height: `${Math.min(progress, 100)}%` }}
+                    transition={{ duration: 1.5, ease: [0.34, 1.56, 0.64, 1] }}
                   />
                 </div>
                 
                 {/* Milestones */}
-                {[25, 50, 75, 100].map((milestone) => (
-                  <div
+                {[25, 50, 75, 100].map((milestone, i) => (
+                  <motion.div
                     key={milestone}
                     className="absolute left-1/2 -translate-x-1/2 flex items-center"
                     style={{ bottom: `${milestone - 5}%` }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
                   >
-                    <div className={`w-4 h-4 rounded-full ${progress >= milestone ? 'bg-success' : 'bg-muted'} flex items-center justify-center`}>
+                    <motion.div 
+                      className={`w-4 h-4 rounded-full ${progress >= milestone ? 'bg-success' : 'bg-muted'} flex items-center justify-center`}
+                      animate={progress >= milestone ? {
+                        scale: [1, 1.3, 1],
+                        boxShadow: [
+                          '0 0 0 0 rgba(34, 197, 94, 0)',
+                          '0 0 0 8px rgba(34, 197, 94, 0.3)',
+                          '0 0 0 0 rgba(34, 197, 94, 0)',
+                        ],
+                      } : undefined}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                    >
                       {progress >= milestone && <Check className="w-3 h-3 text-success-foreground" />}
-                    </div>
+                    </motion.div>
                     <span className="ml-8 text-xs text-muted-foreground whitespace-nowrap">{milestone}%</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Partner Cards */}
-            <div className="grid grid-cols-2 gap-3">
-              {partners.map((partner) => {
+            <motion.div 
+              className="grid grid-cols-2 gap-3"
+              variants={container}
+              initial="hidden"
+              animate="show"
+            >
+              {partners.map((partner, i) => {
                 const isUnlocked = progress >= partner.unlockAt;
                 return (
-                  <button
+                  <motion.button
                     key={partner.name}
+                    variants={item}
                     disabled={!isUnlocked}
                     className={`glass-card p-4 text-center transition-all ${
                       isUnlocked
                         ? 'hover:border-primary/50 cursor-pointer'
                         : 'grayscale opacity-50 cursor-not-allowed'
                     }`}
+                    whileHover={isUnlocked ? { scale: 1.05, y: -5 } : undefined}
+                    whileTap={isUnlocked ? { scale: 0.95 } : undefined}
                   >
-                    <div className="text-3xl mb-2">{partner.logo}</div>
+                    <motion.div 
+                      className="text-3xl mb-2"
+                      animate={isUnlocked ? { 
+                        rotate: [0, -10, 10, 0],
+                        scale: [1, 1.1, 1],
+                      } : undefined}
+                      transition={{ duration: 0.5, delay: i * 0.2 }}
+                    >
+                      {partner.logo}
+                    </motion.div>
                     <p className="font-medium text-sm">{partner.name}</p>
                     <p className={`text-xs ${isUnlocked ? 'text-success' : 'text-muted-foreground'}`}>
                       {partner.discount}
@@ -253,10 +373,10 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                         <span>{t('unlockAt')} {partner.unlockAt}%</span>
                       </div>
                     )}
-                  </button>
+                  </motion.button>
                 );
               })}
-            </div>
+            </motion.div>
           </TabsContent>
         </Tabs>
       </div>
@@ -268,7 +388,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         groupName={group.name}
         inviteCode={group.inviteCode}
       />
-    </div>
+    </motion.div>
   );
 };
 
