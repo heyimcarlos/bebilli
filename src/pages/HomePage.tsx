@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2, ImagePlus, X } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
-import GroupCard from '@/components/GroupCard';
+import EnhancedGroupCard from '@/components/EnhancedGroupCard';
+import UserStatsCard from '@/components/UserStatsCard';
+import MotivationalBanner from '@/components/MotivationalBanner';
+import DailyChallenge from '@/components/DailyChallenge';
 import { Button } from '@/components/ui/button';
 import billiLogo from '@/assets/billi-logo.png';
 import JoinGroupModal from '@/components/JoinGroupModal';
@@ -44,12 +48,16 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     if (code) {
       setInitialCode(code.toUpperCase());
       setJoinModalOpen(true);
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
   const totalBalance = groups.reduce((sum, g) => sum + g.current_amount, 0);
+
+  // Check if user contributed today
+  const hasContributedToday = profile?.last_contribution_at 
+    ? new Date(profile.last_contribution_at).toDateString() === new Date().toDateString()
+    : false;
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -78,7 +86,6 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     
     let imageUrl: string | undefined;
     
-    // Upload image if selected
     if (selectedImage) {
       const uploadedUrl = await uploadGroupImage(selectedImage, user.id);
       if (uploadedUrl) {
@@ -130,23 +137,57 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     return true;
   };
 
+  const handleDailyChallengeContribute = () => {
+    if (groups.length > 0) {
+      onGroupClick(groups[0].id);
+    }
+  };
+
+  // Sort groups by progress for ranking
+  const sortedGroups = [...groups].sort((a, b) => {
+    const progressA = (a.current_amount / a.goal_amount) * 100;
+    const progressB = (b.current_amount / b.goal_amount) * 100;
+    return progressB - progressA;
+  });
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="relative px-6 pt-12 pb-8">
+      <div className="relative px-6 pt-12 pb-6">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
         
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between mb-6"
+          >
             <div>
               <p className="text-muted-foreground text-sm">Hello, {t('billionaire')}</p>
               <h1 className="text-2xl font-bold">{profile?.name || 'Billionaire'}</h1>
             </div>
-            <img src={billiLogo} alt="Billi" className="w-12 h-12" />
-          </div>
+            <motion.img 
+              src={billiLogo} 
+              alt="Billi" 
+              className="w-12 h-12"
+              animate={{ 
+                rotate: [0, -5, 5, 0],
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                repeatDelay: 3
+              }}
+            />
+          </motion.div>
 
           {/* Balance Card */}
-          <div className="glass-card p-6 glow-primary">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="glass-card p-6 glow-primary mb-4"
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-muted-foreground text-sm">{t('totalBalance')}</span>
               <button
@@ -157,27 +198,63 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
               </button>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-black gradient-text">
-                {showBalance ? formatCurrency(totalBalance) : '••••••'}
-              </span>
+              <AnimatePresence mode="wait">
+                <motion.span 
+                  key={showBalance ? 'visible' : 'hidden'}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-4xl font-black gradient-text"
+                >
+                  {showBalance ? formatCurrency(totalBalance) : '••••••'}
+                </motion.span>
+              </AnimatePresence>
             </div>
-            <div className="flex items-center gap-2 mt-3 text-success text-sm">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center gap-2 mt-3 text-success text-sm"
+            >
               <TrendingUp className="w-4 h-4" />
-              <span>+12.5% this month</span>
-            </div>
-          </div>
+              <span>+{groups.length} active groups</span>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="px-6 mb-6">
-        <div className="grid grid-cols-2 gap-3">
+      {/* Main Content */}
+      <div className="px-6">
+        {/* User Stats */}
+        {profile && (
+          <UserStatsCard
+            currentStreak={profile.current_streak || 0}
+            bestStreak={profile.best_streak || 0}
+            totalContributions={profile.total_contributions || 0}
+            level={profile.level || 1}
+            maxSaved={profile.max_saved || 0}
+          />
+        )}
+
+        {/* Motivational Banner */}
+        <MotivationalBanner />
+
+        {/* Daily Challenge */}
+        <DailyChallenge 
+          hasContributedToday={hasContributedToday}
+          onContribute={handleDailyChallengeContribute}
+        />
+
+        {/* Actions */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
           <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button className="h-14 btn-primary text-primary-foreground font-semibold rounded-xl">
-                <Plus className="w-5 h-5 mr-2" />
-                {t('createGroup')}
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button className="w-full h-14 btn-primary text-primary-foreground font-semibold rounded-xl">
+                  <Plus className="w-5 h-5 mr-2" />
+                  {t('createGroup')}
+                </Button>
+              </motion.div>
             </DialogTrigger>
             <DialogContent className="bg-card border-border">
               <DialogHeader>
@@ -249,46 +326,53 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
             </DialogContent>
           </Dialog>
 
-          <Button 
-            variant="outline" 
-            className="h-14 border-border font-semibold rounded-xl"
-            onClick={() => setJoinModalOpen(true)}
-          >
-            <Hash className="w-5 h-5 mr-2" />
-            {t('enterCode')}
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              variant="outline" 
+              className="w-full h-14 border-border font-semibold rounded-xl"
+              onClick={() => setJoinModalOpen(true)}
+            >
+              <Hash className="w-5 h-5 mr-2" />
+              {t('enterCode')}
+            </Button>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Groups */}
-      <div className="px-6">
-        <h2 className="text-lg font-semibold mb-4">{t('myGroups')}</h2>
-        
-        {groupsLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : groups.length === 0 ? (
-          <div className="glass-card p-8 text-center">
-            <p className="text-muted-foreground mb-4">You don't have any groups yet.</p>
-            <p className="text-sm text-muted-foreground">Create a new group or join one with an invite code!</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {groups.map((group) => (
-              <GroupCard
-                key={group.id}
-                id={group.id}
-                name={group.name}
-                image={group.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'}
-                goal={group.goal_amount}
-                current={group.current_amount}
-                membersCount={group.members.length}
-                onClick={() => onGroupClick(group.id)}
-              />
-            ))}
-          </div>
-        )}
+        {/* Groups */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold mb-4">{t('myGroups')}</h2>
+          
+          {groupsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : groups.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="glass-card p-8 text-center"
+            >
+              <p className="text-muted-foreground mb-4">You don't have any groups yet.</p>
+              <p className="text-sm text-muted-foreground">Create a new group or join one with an invite code!</p>
+            </motion.div>
+          ) : (
+            <div className="space-y-3">
+              {sortedGroups.map((group, index) => (
+                <EnhancedGroupCard
+                  key={group.id}
+                  id={group.id}
+                  name={group.name}
+                  image={group.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'}
+                  goal={group.goal_amount}
+                  current={group.current_amount}
+                  membersCount={group.members.length}
+                  onClick={() => onGroupClick(group.id)}
+                  rank={index + 1}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Join Group Modal */}

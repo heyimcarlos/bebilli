@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2 } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, DollarSign, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -7,19 +7,35 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteModal from '@/components/InviteModal';
+import QuickWinModal from '@/components/QuickWinModal';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter } from '@/components/animations';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface GroupPageProps {
   groupId: string;
   onBack: () => void;
 }
 
+const QUICK_AMOUNTS = [5, 10, 20, 50, 100];
+
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const { t, formatCurrency } = useApp();
-  const { groups, profile } = useAuthContext();
+  const { groups, profile, addContribution, refreshGroups } = useAuthContext();
+  const { toast } = useToast();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ id: string; name: string; content: string; isBot?: boolean }>>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showContributeModal, setShowContributeModal] = useState(false);
+  const [showWinModal, setShowWinModal] = useState(false);
+  const [contributionAmount, setContributionAmount] = useState('');
+  const [contributing, setContributing] = useState(false);
+  const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
 
   const group = groups.find((g) => g.id === groupId);
   if (!group) return null;
@@ -32,6 +48,62 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     { name: 'Airbnb', logo: '🏠', discount: '25% OFF', unlockAt: 75 },
     { name: 'Air Canada', logo: '🛫', discount: '30% OFF', unlockAt: 100 },
   ];
+
+  const handleContribute = async () => {
+    const amount = Number(contributionAmount);
+    if (!amount || amount <= 0) return;
+
+    setContributing(true);
+    const { error } = await addContribution(groupId, amount);
+    setContributing(false);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      setShowContributeModal(false);
+      setContributionAmount('');
+      
+      // Show celebration
+      setLastContribution({ 
+        amount, 
+        streak: (profile?.current_streak || 0) + 1 
+      });
+      setShowWinModal(true);
+      
+      // Refresh groups to update progress
+      await refreshGroups();
+    }
+  };
+
+  const handleQuickContribute = async (amount: number) => {
+    setContributing(true);
+    const { error } = await addContribution(groupId, amount);
+    setContributing(false);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      setShowContributeModal(false);
+      
+      // Show celebration
+      setLastContribution({ 
+        amount, 
+        streak: (profile?.current_streak || 0) + 1 
+      });
+      setShowWinModal(true);
+      
+      // Refresh groups to update progress
+      await refreshGroups();
+    }
+  };
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
@@ -58,7 +130,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background pb-24"
+      className="min-h-screen bg-background pb-32"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -136,6 +208,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             <span className="text-muted-foreground">{formatCurrency(group.current_amount)}</span>
             <span className="font-semibold">{formatCurrency(group.goal_amount)}</span>
           </div>
+          
+          {/* Your contribution */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{t('yourContribution')}</span>
+              <span className="font-semibold text-success">{formatCurrency(group.user_contribution)}</span>
+            </div>
+          </div>
         </div>
       </motion.div>
 
@@ -164,7 +244,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                   <motion.div
                     key={member.id}
                     variants={item}
-                    className="glass-card p-4 flex items-center gap-4"
+                    className={`glass-card p-4 flex items-center gap-4 ${member.user_id === profile?.id ? 'border-primary/50' : ''}`}
                     whileHover={{ scale: 1.02, x: 5 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
@@ -182,7 +262,12 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     )}
                     
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{member.profile.name}</p>
+                      <p className="font-medium truncate">
+                        {member.profile.name}
+                        {member.user_id === profile?.id && (
+                          <span className="text-xs text-primary ml-2">(you)</span>
+                        )}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {t('yourContribution')}: {formatCurrency(member.total_contribution)}
                       </p>
@@ -357,12 +442,105 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         </Tabs>
       </div>
 
+      {/* Floating Contribute Button */}
+      <motion.div
+        className="fixed bottom-24 left-0 right-0 px-6 z-40"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <motion.button
+          onClick={() => setShowContributeModal(true)}
+          className="w-full h-14 btn-primary text-primary-foreground font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          animate={{
+            boxShadow: [
+              '0 0 20px hsl(var(--primary) / 0.3)',
+              '0 0 40px hsl(var(--primary) / 0.5)',
+              '0 0 20px hsl(var(--primary) / 0.3)',
+            ],
+          }}
+          transition={{
+            boxShadow: { duration: 2, repeat: Infinity },
+          }}
+        >
+          <Plus className="w-5 h-5" />
+          Add Contribution
+        </motion.button>
+      </motion.div>
+
+      {/* Contribute Modal */}
+      <Dialog open={showContributeModal} onOpenChange={setShowContributeModal}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-primary" />
+              Add Contribution
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Quick amounts */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Quick amounts</p>
+              <div className="flex flex-wrap gap-2">
+                {QUICK_AMOUNTS.map((amount) => (
+                  <motion.button
+                    key={amount}
+                    onClick={() => handleQuickContribute(amount)}
+                    disabled={contributing}
+                    className="flex-1 min-w-[60px] h-12 rounded-xl bg-secondary hover:bg-secondary/80 font-semibold transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    ${amount}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom amount */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Or enter custom amount</p>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={contributionAmount}
+                  onChange={(e) => setContributionAmount(e.target.value)}
+                  className="bg-secondary"
+                />
+                <Button
+                  onClick={handleContribute}
+                  disabled={contributing || !contributionAmount}
+                  className="btn-primary text-primary-foreground px-6"
+                >
+                  {contributing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    'Add'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Invite Modal */}
       <InviteModal
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         groupName={group.name}
         inviteCode={group.invite_code}
+      />
+
+      {/* Quick Win Modal */}
+      <QuickWinModal
+        isOpen={showWinModal}
+        onClose={() => setShowWinModal(false)}
+        amount={lastContribution.amount}
+        newStreak={lastContribution.streak}
       />
     </motion.div>
   );
