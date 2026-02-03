@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import billiLogo from '@/assets/billi-logo.png';
+import { useToast } from '@/hooks/use-toast';
 import {
   Select,
   SelectContent,
@@ -13,34 +15,52 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-interface LoginPageProps {
-  onLogin: () => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-  const { t, setUser, setLanguage, setCurrency, language, currency } = useApp();
+const LoginPage: React.FC = () => {
+  const { t, setLanguage, setCurrency, language, currency } = useApp();
+  const { signUp, signIn } = useAuthContext();
+  const { toast } = useToast();
   const [isSignup, setIsSignup] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     country: 'CA',
     gender: '' as 'M' | 'F' | 'O' | '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUser({
-      id: '1',
-      name: formData.name || 'Billionaire',
-      email: formData.email,
-      country: formData.country,
-      gender: (formData.gender || 'O') as 'M' | 'F' | 'O',
-      isPremium: false,
-      consistencyDays: 45,
-      maxSaved: 750,
-      totalBalance: 2350,
-    });
-    onLogin();
+    setLoading(true);
+
+    try {
+      if (isSignup) {
+        const { error } = await signUp(formData.email, formData.password, formData.name);
+        if (error) {
+          toast({
+            title: 'Error',
+            description: error.message,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Check your email',
+            description: 'We sent you a confirmation link to verify your account.',
+          });
+        }
+      } else {
+        const { error } = await signIn(formData.email, formData.password);
+        if (error) {
+          toast({
+            title: 'Error',
+            description: error.message,
+            variant: 'destructive',
+          });
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -78,6 +98,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="bg-secondary border-border"
+                  required
                 />
               </div>
             )}
@@ -91,6 +112,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="bg-secondary border-border"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="bg-secondary border-border"
+                required
+                minLength={6}
               />
             </div>
 
@@ -175,10 +211,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           <Button
             type="submit"
+            disabled={loading}
             className="w-full h-14 btn-primary text-primary-foreground font-semibold text-lg rounded-2xl"
           >
-            {isSignup ? t('signup') : t('login')}
-            <ArrowRight className="w-5 h-5 ml-2" />
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                {isSignup ? t('signup') : t('login')}
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </>
+            )}
           </Button>
 
           <button

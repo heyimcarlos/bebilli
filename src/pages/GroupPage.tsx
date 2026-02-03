@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,7 +15,8 @@ interface GroupPageProps {
 }
 
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
-  const { groups, t, formatCurrency } = useApp();
+  const { t, formatCurrency } = useApp();
+  const { groups, profile } = useAuthContext();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ id: string; name: string; content: string; isBot?: boolean }>>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -22,13 +24,13 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const group = groups.find((g) => g.id === groupId);
   if (!group) return null;
 
-  const progress = (group.current / group.goal) * 100;
+  const progress = group.goal_amount > 0 ? (group.current_amount / group.goal_amount) * 100 : 0;
 
   const partners = [
-    { name: 'Decolar', logo: '✈️', discount: '15% OFF', unlockAt: 25 },
+    { name: 'Expedia', logo: '✈️', discount: '15% OFF', unlockAt: 25 },
     { name: 'Booking', logo: '🏨', discount: '20% OFF', unlockAt: 50 },
     { name: 'Airbnb', logo: '🏠', discount: '25% OFF', unlockAt: 75 },
-    { name: 'JAL Airlines', logo: '🛫', discount: '30% OFF', unlockAt: 100 },
+    { name: 'Air Canada', logo: '🛫', discount: '30% OFF', unlockAt: 100 },
   ];
 
   const handleSendMessage = () => {
@@ -36,15 +38,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     
     setMessages([
       ...messages,
-      { id: Date.now().toString(), name: 'Você', content: message },
+      { id: Date.now().toString(), name: profile?.name || 'You', content: message },
     ]);
     setMessage('');
-  };
-
-  const isLastWeek = (date: Date) => {
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return date < weekAgo;
   };
 
   const container = {
@@ -70,7 +66,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       <div className="relative">
         <div className="absolute inset-0 h-48">
           <img
-            src={group.image}
+            src={group.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'}
             alt={group.name}
             className="w-full h-full object-cover"
           />
@@ -111,7 +107,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {group.description}
+            {group.members.length} {t('members')}
           </motion.p>
         </div>
       </div>
@@ -137,8 +133,8 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </div>
           <AnimatedProgressBar progress={progress} height={12} showMilestones />
           <div className="flex items-center justify-between text-sm mt-3">
-            <span className="text-muted-foreground">{formatCurrency(group.current)}</span>
-            <span className="font-semibold">{formatCurrency(group.goal)}</span>
+            <span className="text-muted-foreground">{formatCurrency(group.current_amount)}</span>
+            <span className="font-semibold">{formatCurrency(group.goal_amount)}</span>
           </div>
         </div>
       </motion.div>
@@ -159,48 +155,50 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               animate="show"
               className="space-y-3"
             >
-              {group.members.map((member, index) => (
-                <motion.div
-                  key={member.id}
-                  variants={item}
-                  className="glass-card p-4 flex items-center gap-4"
-                  whileHover={{ scale: 1.02, x: 5 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
-                >
-                  {index === 0 ? (
-                    <AnimatedBadge type="rocket" size="md" />
-                  ) : isLastWeek(member.lastContribution) ? (
-                    <AnimatedBadge type="turtle" size="md" />
-                  ) : (
-                    <motion.div 
-                      className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center font-bold text-muted-foreground"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      {index + 1}
-                    </motion.div>
-                  )}
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{member.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {isLastWeek(member.lastContribution)
-                        ? `${t('noContributions')} 7+ ${t('days')}`
-                        : `${t('yourContribution')}: ${formatCurrency(member.contribution)}`}
-                    </p>
-                  </div>
-                  
-                  <motion.span 
-                    className={`text-sm font-semibold ${index === 0 ? 'gradient-gold-text' : 'text-primary'}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
+              {group.members.length === 0 ? (
+                <div className="glass-card p-8 text-center">
+                  <p className="text-muted-foreground">No members yet. Invite your friends!</p>
+                </div>
+              ) : (
+                group.members.map((member, index) => (
+                  <motion.div
+                    key={member.id}
+                    variants={item}
+                    className="glass-card p-4 flex items-center gap-4"
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
                   >
-                    {formatCurrency(member.contribution)}
-                  </motion.span>
-                </motion.div>
-              ))}
+                    {index === 0 ? (
+                      <AnimatedBadge type="rocket" size="md" />
+                    ) : (
+                      <motion.div 
+                        className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center font-bold text-muted-foreground"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        {index + 1}
+                      </motion.div>
+                    )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{member.profile.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('yourContribution')}: {formatCurrency(member.total_contribution)}
+                      </p>
+                    </div>
+                    
+                    <motion.span 
+                      className={`text-sm font-semibold ${index === 0 ? 'gradient-gold-text' : 'text-primary'}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 + index * 0.1 }}
+                    >
+                      {formatCurrency(member.total_contribution)}
+                    </motion.span>
+                  </motion.div>
+                ))
+              )}
             </motion.div>
           </TabsContent>
 
@@ -217,31 +215,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 </div>
                 <div className="bg-secondary rounded-2xl rounded-tl-none px-4 py-2 max-w-[80%]">
                   <p className="text-xs text-primary font-medium mb-1">Bili Bot</p>
-                  <p className="text-sm">Bilionário Lucas acabou de contribuir R$ 500! 🚀</p>
+                  <p className="text-sm">Welcome to {group.name}! Start contributing and invite your friends! 🚀</p>
                 </div>
               </motion.div>
-              
-              {group.messages.map((msg, i) => (
-                <motion.div 
-                  key={msg.id} 
-                  className={`flex gap-3 ${msg.isBot ? '' : 'justify-end'}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  {msg.isBot && (
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
-                  )}
-                  <div className={`rounded-2xl px-4 py-2 max-w-[80%] ${
-                    msg.isBot ? 'bg-secondary rounded-tl-none' : 'bg-primary text-primary-foreground rounded-tr-none'
-                  }`}>
-                    {msg.isBot && <p className="text-xs text-primary font-medium mb-1">{msg.userName}</p>}
-                    <p className="text-sm">{msg.content}</p>
-                  </div>
-                </motion.div>
-              ))}
               
               <AnimatePresence>
                 {messages.map((msg) => (
@@ -262,7 +238,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             
             <div className="flex gap-2">
               <Input
-                placeholder="Digite sua mensagem..."
+                placeholder="Type your message..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -386,7 +362,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         groupName={group.name}
-        inviteCode={group.inviteCode}
+        inviteCode={group.invite_code}
       />
     </motion.div>
   );

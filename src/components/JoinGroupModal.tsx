@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import { Users, ArrowRight, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/contexts/AppContext';
-import { toast } from '@/hooks/use-toast';
 
 interface JoinGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onJoinSuccess: (groupId: string) => void;
+  onJoinSuccess: (code: string) => Promise<boolean>;
   initialCode?: string;
 }
 
@@ -19,31 +18,31 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
   onJoinSuccess,
   initialCode = '' 
 }) => {
-  const { t, groups } = useApp();
+  const { t } = useApp();
   const [code, setCode] = useState(initialCode);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleJoin = () => {
+  useEffect(() => {
+    if (initialCode) {
+      setCode(initialCode);
+    }
+  }, [initialCode]);
+
+  const handleJoin = async () => {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const group = groups.find(g => g.inviteCode?.toUpperCase() === code.toUpperCase());
-      
-      if (group) {
-        toast({
-          title: t('joinedGroup'),
-          description: `${t('welcome')} ${group.name}! 🎉`,
-        });
-        onJoinSuccess(group.id);
-        onClose();
-      } else {
+    try {
+      const success = await onJoinSuccess(code);
+      if (!success) {
         setError(t('invalidCode'));
       }
+    } catch (err) {
+      setError(t('invalidCode'));
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +90,7 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
             className="w-full btn-primary text-primary-foreground h-12"
           >
             {isLoading ? (
-              <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
                 {t('joinGroup')}
@@ -100,9 +99,8 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
             )}
           </Button>
 
-          {/* Demo codes hint */}
           <p className="text-xs text-muted-foreground text-center">
-            {t('demoCodes')}: <span className="text-primary font-mono">JAPAO1</span>, <span className="text-primary font-mono">BYDCAR</span>
+            Create a group to get an invite code to share with friends!
           </p>
         </div>
       </DialogContent>
