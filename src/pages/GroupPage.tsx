@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Rocket, Turtle, Send, Bot, Lock, Check, Gift } from 'lucide-react';
+import { ArrowLeft, Rocket, Turtle, Send, Bot, Lock, Check, Gift, Share2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import InviteModal from '@/components/InviteModal';
 
 interface GroupPageProps {
   groupId: string;
@@ -14,6 +15,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const { groups, t, formatCurrency } = useApp();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ id: string; name: string; content: string; isBot?: boolean }>>([]);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const group = groups.find((g) => g.id === groupId);
   if (!group) return null;
@@ -57,12 +59,20 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         </div>
         
         <div className="relative z-10 px-6 pt-12 pb-6">
-          <button
-            onClick={onBack}
-            className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={onBack}
+              className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="w-10 h-10 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center"
+            >
+              <Share2 className="w-5 h-5 text-primary-foreground" />
+            </button>
+          </div>
           
           <h1 className="text-2xl font-bold mb-2">{group.name}</h1>
           <p className="text-muted-foreground text-sm">{group.description}</p>
@@ -250,6 +260,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Invite Modal */}
+      <InviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        groupName={group.name}
+        inviteCode={group.inviteCode}
+      />
     </div>
   );
 };

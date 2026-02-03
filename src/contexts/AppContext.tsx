@@ -25,6 +25,7 @@ interface Group {
   current: number;
   members: GroupMember[];
   messages: ChatMessage[];
+  inviteCode: string;
 }
 
 interface GroupMember {
@@ -119,6 +120,20 @@ const translations: Record<Language, Record<string, string>> = {
     members: 'membros',
     of: 'de',
     reached: 'alcançado',
+    inviteFriends: 'Convidar Amigos',
+    inviteCode: 'Código de Convite',
+    inviteLink: 'Link de Convite',
+    shareOn: 'Compartilhar em',
+    codeCopied: 'Código copiado!',
+    linkCopied: 'Link copiado!',
+    shareWithFriends: 'Compartilhe com seus amigos!',
+    more: 'Mais',
+    enterCodeDescription: 'Digite o código de 6 dígitos do grupo',
+    joinGroup: 'Entrar no Grupo',
+    joinedGroup: 'Você entrou no grupo!',
+    invalidCode: 'Código inválido. Tente novamente.',
+    demoCodes: 'Códigos demo',
+    shareGroup: 'Compartilhar Grupo',
   },
   en: {
     welcome: 'Welcome',
@@ -169,6 +184,20 @@ const translations: Record<Language, Record<string, string>> = {
     members: 'members',
     of: 'of',
     reached: 'reached',
+    inviteFriends: 'Invite Friends',
+    inviteCode: 'Invite Code',
+    inviteLink: 'Invite Link',
+    shareOn: 'Share on',
+    codeCopied: 'Code copied!',
+    linkCopied: 'Link copied!',
+    shareWithFriends: 'Share with your friends!',
+    more: 'More',
+    enterCodeDescription: 'Enter the 6-digit group code',
+    joinGroup: 'Join Group',
+    joinedGroup: 'You joined the group!',
+    invalidCode: 'Invalid code. Try again.',
+    demoCodes: 'Demo codes',
+    shareGroup: 'Share Group',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -219,6 +248,20 @@ const translations: Record<Language, Record<string, string>> = {
     members: 'membres',
     of: 'de',
     reached: 'atteint',
+    inviteFriends: 'Inviter des Amis',
+    inviteCode: 'Code d\'Invitation',
+    inviteLink: 'Lien d\'Invitation',
+    shareOn: 'Partager sur',
+    codeCopied: 'Code copié!',
+    linkCopied: 'Lien copié!',
+    shareWithFriends: 'Partagez avec vos amis!',
+    more: 'Plus',
+    enterCodeDescription: 'Entrez le code à 6 chiffres du groupe',
+    joinGroup: 'Rejoindre le Groupe',
+    joinedGroup: 'Vous avez rejoint le groupe!',
+    invalidCode: 'Code invalide. Réessayez.',
+    demoCodes: 'Codes démo',
+    shareGroup: 'Partager le Groupe',
   },
 };
 
@@ -261,6 +304,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         { id: '1', userId: 'bot', userName: 'Bili Bot', content: 'Bilionário Lucas acabou de contribuir R$ 500!', timestamp: new Date(), isBot: true },
         { id: '2', userId: '2', userName: 'Maria Santos', content: 'Vamos conseguir! 🚀', timestamp: new Date(Date.now() - 3600000) },
       ],
+      inviteCode: 'JAPAO1',
     },
     {
       id: '2',
@@ -276,6 +320,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         { id: '4', name: 'Juliana Alves', contribution: 8000, lastContribution: new Date(Date.now() - 604800000 * 3), rank: 4 },
       ],
       messages: [],
+      inviteCode: 'BYDCAR',
     },
   ]);
 
