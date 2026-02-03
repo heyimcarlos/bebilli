@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Compass, Search, Users, MessageCircle, Lightbulb, TrendingUp, Loader2, Check } from 'lucide-react';
+import { Compass, Search, Users, MessageCircle, Lightbulb, TrendingUp, Loader2, Check, Plus } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useCommunities, Community } from '@/hooks/useCommunities';
@@ -9,16 +9,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import CommunityDetailPage from './CommunityDetailPage';
+import CreateCommunityModal from '@/components/CreateCommunityModal';
 
 const ExplorePage: React.FC = () => {
   const { t } = useApp();
   const { user } = useAuthContext();
-  const { communities, loading, joinCommunity, leaveCommunity, refreshCommunities } = useCommunities(user?.id);
+  const { communities, loading, createCommunity, joinCommunity, leaveCommunity, refreshCommunities } = useCommunities(user?.id);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [joiningId, setJoiningId] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Categories for filtering
   const categories = [
@@ -83,6 +85,23 @@ const ExplorePage: React.FC = () => {
     }
   };
 
+  const handleCreateCommunity = async (data: { name: string; description: string; category: string; image_url?: string }) => {
+    const { error } = await createCommunity(data);
+
+    if (error) {
+      toast({
+        title: t('error'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: '🎉 ' + (t('communityCreated') || 'Community created!'),
+        description: `${data.name} ${t('isNowAvailable') || 'is now available'}`,
+      });
+    }
+  };
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -114,11 +133,21 @@ const ExplorePage: React.FC = () => {
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="px-6 pt-12 pb-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-            <Compass className="w-5 h-5 text-primary" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <Compass className="w-5 h-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold">{t('exploreCommunities')}</h1>
           </div>
-          <h1 className="text-2xl font-bold">{t('exploreCommunities')}</h1>
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            size="sm"
+            className="btn-primary"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            {t('create')}
+          </Button>
         </div>
         <p className="text-muted-foreground text-sm ml-13">
           {t('exploreDescription')}
@@ -273,6 +302,13 @@ const ExplorePage: React.FC = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Create Community Modal */}
+      <CreateCommunityModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateCommunity}
+      />
     </div>
   );
 };
