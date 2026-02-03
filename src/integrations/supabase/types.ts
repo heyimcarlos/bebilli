@@ -47,6 +47,13 @@ export type Database = {
             referencedRelation: "groups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contributions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       group_memberships: {
@@ -77,6 +84,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_memberships_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups_public"
             referencedColumns: ["id"]
           },
         ]
@@ -149,7 +163,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      groups_public: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          goal_amount: number | null
+          id: string | null
+          image_url: string | null
+          invite_code: string | null
+          name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          goal_amount?: number | null
+          id?: string | null
+          image_url?: string | null
+          invite_code?: never
+          name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          goal_amount?: number | null
+          id?: string | null
+          image_url?: string | null
+          invite_code?: never
+          name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       is_group_admin: { Args: { group_uuid: string }; Returns: boolean }
