@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2, ImagePlus, X } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import GroupCard from '@/components/GroupCard';
 import { Button } from '@/components/ui/button';
 import billiLogo from '@/assets/billi-logo.png';
 import JoinGroupModal from '@/components/JoinGroupModal';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import {
   Dialog,
   DialogContent,
@@ -23,14 +24,18 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const { formatCurrency, t } = useApp();
-  const { profile, groups, groupsLoading, createGroup, joinGroupByCode } = useAuthContext();
+  const { user, profile, groups, groupsLoading, createGroup, joinGroupByCode } = useAuthContext();
   const { toast } = useToast();
+  const { uploadGroupImage, uploading } = useImageUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showBalance, setShowBalance] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [initialCode, setInitialCode] = useState('');
   const [creating, setCreating] = useState(false);
   const [newGroup, setNewGroup] = useState({ name: '', goal: '' });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Check for invite code in URL
   useEffect(() => {
@@ -46,11 +51,42 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
 
   const totalBalance = groups.reduce((sum, g) => sum + g.current_amount, 0);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleCreateGroup = async () => {
-    if (!newGroup.name || !newGroup.goal) return;
+    if (!newGroup.name || !newGroup.goal || !user) return;
     
     setCreating(true);
-    const { error } = await createGroup(newGroup.name, Number(newGroup.goal));
+    
+    let imageUrl: string | undefined;
+    
+    // Upload image if selected
+    if (selectedImage) {
+      const uploadedUrl = await uploadGroupImage(selectedImage, user.id);
+      if (uploadedUrl) {
+        imageUrl = uploadedUrl;
+      }
+    }
+    
+    const { error } = await createGroup(newGroup.name, Number(newGroup.goal), imageUrl);
     setCreating(false);
 
     if (error) {
@@ -66,6 +102,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
       });
       setCreateModalOpen(false);
       setNewGroup({ name: '', goal: '' });
+      clearImage();
     }
   };
 
@@ -147,6 +184,41 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                 <DialogTitle>{t('createGroup')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label>Group Photo</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                  {imagePreview ? (
+                    <div className="relative w-full h-32 rounded-xl overflow-hidden">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={clearImage}
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-background/80 flex items-center justify-center hover:bg-background transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-32 border-2 border-dashed border-border rounded-xl hover:border-primary/50 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground"
+                    >
+                      <ImagePlus className="w-8 h-8" />
+                      <span className="text-sm">Add a photo for your group</span>
+                    </button>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label>Group Name</Label>
                   <Input 
@@ -168,10 +240,10 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                 </div>
                 <Button
                   onClick={handleCreateGroup}
-                  disabled={creating || !newGroup.name || !newGroup.goal}
+                  disabled={creating || uploading || !newGroup.name || !newGroup.goal}
                   className="w-full btn-primary text-primary-foreground"
                 >
-                  {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Group'}
+                  {creating || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Group'}
                 </Button>
               </div>
             </DialogContent>
