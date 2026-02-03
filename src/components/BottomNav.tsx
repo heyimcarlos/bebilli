@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Users, User, Scan, Clock } from 'lucide-react';
+import { Home, User, Scan, Compass } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import billiLogo from '@/assets/billi-logo.png';
 
@@ -14,7 +14,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
 
   const tabs = [
     { id: 'home', icon: Home, label: t('home') },
-    { id: 'timeline', icon: Clock, label: t('timeline') },
+    { id: 'explore', icon: Compass, label: t('explore') },
     { id: 'scan', icon: Scan, label: 'Scan', special: true },
     { id: 'profile', icon: User, label: t('profile') },
   ];

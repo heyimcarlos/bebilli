@@ -11,7 +11,7 @@ import InstallPWA from '@/components/InstallPWA';
 import WeeklySummaryModal from '@/components/WeeklySummaryModal';
 import LoginPage from '@/pages/LoginPage';
 import HomePage from '@/pages/HomePage';
-import TimelinePage from '@/pages/TimelinePage';
+import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
 import { useToast } from '@/hooks/use-toast';
@@ -204,7 +204,7 @@ const AppContent: React.FC = () => {
           transition={{ duration: 0.2 }}
         >
           {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
-          {activeTab === 'timeline' && <TimelinePage onGroupClick={handleGroupClick} />}
+          {activeTab === 'explore' && <ExplorePage />}
           {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
         </motion.div>
       </AnimatePresence>
