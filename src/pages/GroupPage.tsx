@@ -247,7 +247,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             >
               {group.members.length === 0 ? (
                 <div className="glass-card p-8 text-center">
-                  <p className="text-muted-foreground">No members yet. Invite your friends!</p>
+                  <p className="text-muted-foreground">{t('noMembersYet')}</p>
                 </div>
               ) : (
                 group.members.map((member, index) => (
@@ -275,7 +275,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                       <p className="font-medium truncate">
                         {member.profile.name}
                         {member.user_id === profile?.id && (
-                          <span className="text-xs text-primary ml-2">(you)</span>
+                          <span className="text-xs text-primary ml-2">{t('youUser')}</span>
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -310,7 +310,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 </div>
                 <div className="bg-secondary rounded-2xl rounded-tl-none px-4 py-2 max-w-[80%]">
                   <p className="text-xs text-primary font-medium mb-1">Bili Bot</p>
-                  <p className="text-sm">Welcome to {group.name}! Start contributing and invite your friends! 🚀</p>
+                  <p className="text-sm">{t('welcomeToGroup')} {group.name}! {t('startContributing')} 🚀</p>
                 </div>
               </motion.div>
               

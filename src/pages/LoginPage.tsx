@@ -40,21 +40,21 @@ const LoginPage: React.FC = () => {
         const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone, formData.country, formData.city);
         if (error) {
           toast({
-            title: 'Error',
+            title: t('error'),
             description: error.message,
             variant: 'destructive',
           });
         } else {
           toast({
-            title: 'Check your email',
-            description: 'We sent you a confirmation link to verify your account.',
+            title: '✉️ ' + t('checkEmail'),
+            description: t('confirmationSent'),
           });
         }
       } else {
         const { error } = await signIn(formData.email, formData.password);
         if (error) {
           toast({
-            title: 'Error',
+            title: t('error'),
             description: error.message,
             variant: 'destructive',
           });
@@ -96,7 +96,7 @@ const LoginPage: React.FC = () => {
                 <Label htmlFor="name">{t('name')}</Label>
                 <Input
                   id="name"
-                  placeholder="Your name"
+                  placeholder={t('enterName')}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="bg-secondary border-border"
@@ -107,7 +107,7 @@ const LoginPage: React.FC = () => {
 
             {isSignup && (
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('phone')}</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -125,7 +125,7 @@ const LoginPage: React.FC = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="your@email.com"
+                placeholder={t('enterEmail')}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="bg-secondary border-border"
@@ -134,7 +134,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -157,7 +157,7 @@ const LoginPage: React.FC = () => {
                       onValueChange={(value) => setFormData({ ...formData, country: value })}
                     >
                       <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue placeholder="Country" />
+                        <SelectValue placeholder={t('selectCountry')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CA">🇨🇦 Canada</SelectItem>
@@ -169,9 +169,9 @@ const LoginPage: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>City</Label>
+                    <Label>{t('city')}</Label>
                     <Input
-                      placeholder="Toronto"
+                      placeholder={t('cityPlaceholder')}
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       className="bg-secondary border-border"
@@ -257,7 +257,7 @@ const LoginPage: React.FC = () => {
             onClick={() => setIsSignup(!isSignup)}
             className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isSignup ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+            {isSignup ? t('hasAccount') + ' ' + t('signInNow') : t('noAccount') + ' ' + t('signUpNow')}
           </button>
         </form>
       </div>

@@ -187,7 +187,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
           className="w-full mt-6 h-12 border-destructive text-destructive hover:bg-destructive/10"
         >
           <LogOut className="w-5 h-5 mr-2" />
-          Sign Out
+          {t('signOut')}
         </Button>
       </div>
     </div>

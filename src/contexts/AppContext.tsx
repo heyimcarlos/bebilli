@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Language = 'pt' | 'en' | 'fr';
-type Currency = 'BRL' | 'USD' | 'EUR' | 'CAD';
+export type Language = 'pt' | 'en' | 'fr';
+export type Currency = 'BRL' | 'USD' | 'EUR' | 'CAD';
+
+const STORAGE_KEY_LANGUAGE = 'billi-language';
+const STORAGE_KEY_CURRENCY = 'billi-currency';
 
 interface User {
   id: string;
@@ -153,6 +156,55 @@ const translations: Record<Language, Record<string, string>> = {
     addToHomeScreen: 'Adicionar à Tela Inicial',
     addToHomeScreenDesc: 'Role e toque na opção',
     understood: 'Entendi',
+    // New translations
+    groupPhoto: 'Foto do Grupo',
+    addPhotoForGroup: 'Adicione uma foto para o grupo',
+    groupName: 'Nome do Grupo',
+    groupNamePlaceholder: 'Ex: Viagem para Paris',
+    goalAmount: 'Meta',
+    description: 'Descrição',
+    descriptionOptional: 'Descrição (opcional)',
+    descriptionPlaceholder: 'Descreva o objetivo do grupo...',
+    createGroupButton: 'Criar Grupo',
+    error: 'Erro',
+    groupCreated: 'Grupo criado!',
+    groupCreatedDesc: 'está pronto para receber contribuições.',
+    noGroupsYet: 'Você ainda não tem grupos.',
+    createOrJoin: 'Crie um novo grupo ou entre com um código de convite!',
+    activeGroups: 'grupos ativos',
+    signOut: 'Sair',
+    subscribePremium: 'Assinar Premium',
+    perMonth: '/mês',
+    password: 'Senha',
+    forgotPassword: 'Esqueceu a senha?',
+    noAccount: 'Não tem conta?',
+    hasAccount: 'Já tem conta?',
+    signUpNow: 'Cadastre-se',
+    signInNow: 'Entre',
+    welcomeBack: 'Bem-vindo de volta',
+    createAccount: 'Criar conta',
+    enterEmail: 'Digite seu e-mail',
+    enterPassword: 'Digite sua senha',
+    enterName: 'Digite seu nome',
+    selectCountry: 'Selecione seu país',
+    hello: 'Olá',
+    youUser: '(você)',
+    noMembersYet: 'Sem membros ainda. Convide seus amigos!',
+    welcomeToGroup: 'Bem-vindo ao',
+    startContributing: 'Comece a contribuir e convide amigos!',
+    quickContribution: 'Contribuição rápida',
+    customAmount: 'Valor personalizado',
+    enterAmount: 'Digite o valor',
+    confirmContribution: 'Confirmar contribuição',
+    contributionSuccess: 'Contribuição realizada!',
+    addedToGroup: 'adicionados ao grupo',
+    streakDay: 'dia de streak',
+    streakDays: 'dias de streak',
+    phone: 'Telefone',
+    city: 'Cidade',
+    cityPlaceholder: 'Toronto',
+    checkEmail: 'Verifique seu e-mail',
+    confirmationSent: 'Enviamos um link de confirmação para verificar sua conta.',
   },
   en: {
     welcome: 'Welcome',
@@ -236,6 +288,55 @@ const translations: Record<Language, Record<string, string>> = {
     addToHomeScreen: 'Add to Home Screen',
     addToHomeScreenDesc: 'Scroll down and tap the option',
     understood: 'Got it',
+    // New translations
+    groupPhoto: 'Group Photo',
+    addPhotoForGroup: 'Add a photo for your group',
+    groupName: 'Group Name',
+    groupNamePlaceholder: 'Ex: Trip to Paris',
+    goalAmount: 'Goal',
+    description: 'Description',
+    descriptionOptional: 'Description (optional)',
+    descriptionPlaceholder: 'Describe your group\'s goal...',
+    createGroupButton: 'Create Group',
+    error: 'Error',
+    groupCreated: 'Group created!',
+    groupCreatedDesc: 'is ready to receive contributions.',
+    noGroupsYet: 'You don\'t have any groups yet.',
+    createOrJoin: 'Create a new group or join one with an invite code!',
+    activeGroups: 'active groups',
+    signOut: 'Sign Out',
+    subscribePremium: 'Subscribe Premium',
+    perMonth: '/month',
+    password: 'Password',
+    forgotPassword: 'Forgot password?',
+    noAccount: 'Don\'t have an account?',
+    hasAccount: 'Already have an account?',
+    signUpNow: 'Sign up',
+    signInNow: 'Sign in',
+    welcomeBack: 'Welcome back',
+    createAccount: 'Create account',
+    enterEmail: 'Enter your email',
+    enterPassword: 'Enter your password',
+    enterName: 'Enter your name',
+    selectCountry: 'Select your country',
+    hello: 'Hello',
+    youUser: '(you)',
+    noMembersYet: 'No members yet. Invite your friends!',
+    welcomeToGroup: 'Welcome to',
+    startContributing: 'Start contributing and invite your friends!',
+    quickContribution: 'Quick contribution',
+    customAmount: 'Custom amount',
+    enterAmount: 'Enter amount',
+    confirmContribution: 'Confirm contribution',
+    contributionSuccess: 'Contribution made!',
+    addedToGroup: 'added to the group',
+    streakDay: 'day streak',
+    streakDays: 'days streak',
+    phone: 'Phone',
+    city: 'City',
+    cityPlaceholder: 'Toronto',
+    checkEmail: 'Check your email',
+    confirmationSent: 'We sent you a confirmation link to verify your account.',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -319,6 +420,55 @@ const translations: Record<Language, Record<string, string>> = {
     addToHomeScreen: 'Ajouter à l\'écran d\'accueil',
     addToHomeScreenDesc: 'Faites défiler et appuyez sur l\'option',
     understood: 'Compris',
+    // New translations
+    groupPhoto: 'Photo du Groupe',
+    addPhotoForGroup: 'Ajoutez une photo pour votre groupe',
+    groupName: 'Nom du Groupe',
+    groupNamePlaceholder: 'Ex: Voyage à Paris',
+    goalAmount: 'Objectif',
+    description: 'Description',
+    descriptionOptional: 'Description (optionnel)',
+    descriptionPlaceholder: 'Décrivez l\'objectif du groupe...',
+    createGroupButton: 'Créer le Groupe',
+    error: 'Erreur',
+    groupCreated: 'Groupe créé!',
+    groupCreatedDesc: 'est prêt à recevoir des contributions.',
+    noGroupsYet: 'Vous n\'avez pas encore de groupes.',
+    createOrJoin: 'Créez un nouveau groupe ou rejoignez-en un avec un code d\'invitation!',
+    activeGroups: 'groupes actifs',
+    signOut: 'Déconnexion',
+    subscribePremium: 'Souscrire Premium',
+    perMonth: '/mois',
+    password: 'Mot de passe',
+    forgotPassword: 'Mot de passe oublié?',
+    noAccount: 'Pas de compte?',
+    hasAccount: 'Déjà un compte?',
+    signUpNow: 'Inscrivez-vous',
+    signInNow: 'Connectez-vous',
+    welcomeBack: 'Bon retour',
+    createAccount: 'Créer un compte',
+    enterEmail: 'Entrez votre e-mail',
+    enterPassword: 'Entrez votre mot de passe',
+    enterName: 'Entrez votre nom',
+    selectCountry: 'Sélectionnez votre pays',
+    hello: 'Bonjour',
+    youUser: '(vous)',
+    noMembersYet: 'Pas encore de membres. Invitez vos amis!',
+    welcomeToGroup: 'Bienvenue dans',
+    startContributing: 'Commencez à contribuer et invitez vos amis!',
+    quickContribution: 'Contribution rapide',
+    customAmount: 'Montant personnalisé',
+    enterAmount: 'Entrez le montant',
+    confirmContribution: 'Confirmer la contribution',
+    contributionSuccess: 'Contribution effectuée!',
+    addedToGroup: 'ajoutés au groupe',
+    streakDay: 'jour de série',
+    streakDays: 'jours de série',
+    phone: 'Téléphone',
+    city: 'Ville',
+    cityPlaceholder: 'Toronto',
+    checkEmail: 'Vérifiez votre e-mail',
+    confirmationSent: 'Nous vous avons envoyé un lien de confirmation pour vérifier votre compte.',
   },
 };
 
@@ -339,10 +489,45 @@ const currencySymbols: Record<Currency, string> = {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// Helper to safely get from localStorage
+const getStoredValue = <T,>(key: string, defaultValue: T): T => {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? (stored as T) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+};
+
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
-  const [currency, setCurrency] = useState<Currency>('CAD');
+  const [language, setLanguageState] = useState<Language>(() => 
+    getStoredValue<Language>(STORAGE_KEY_LANGUAGE, 'en')
+  );
+  const [currency, setCurrencyState] = useState<Currency>(() => 
+    getStoredValue<Currency>(STORAGE_KEY_CURRENCY, 'CAD')
+  );
   const [user, setUser] = useState<User | null>(null);
+
+  // Persist language to localStorage
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    try {
+      localStorage.setItem(STORAGE_KEY_LANGUAGE, lang);
+    } catch (e) {
+      console.error('Failed to save language preference:', e);
+    }
+  };
+
+  // Persist currency to localStorage
+  const setCurrency = (curr: Currency) => {
+    setCurrencyState(curr);
+    try {
+      localStorage.setItem(STORAGE_KEY_CURRENCY, curr);
+    } catch (e) {
+      console.error('Failed to save currency preference:', e);
+    }
+  };
   const [groups, setGroups] = useState<Group[]>([
     {
       id: '1',
