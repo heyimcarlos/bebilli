@@ -202,15 +202,18 @@ const LoginPage: React.FC = () => {
                     <Label>{t('language')}</Label>
                     <Select
                       value={language}
-                      onValueChange={(value) => setLanguage(value as 'pt' | 'en' | 'fr')}
+                      onValueChange={(value) => setLanguage(value as 'pt' | 'en' | 'fr' | 'es' | 'it' | 'de')}
                     >
                       <SelectTrigger className="bg-secondary border-border">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="en">🇨🇦 English</SelectItem>
-                        <SelectItem value="fr">🇨🇦 Français</SelectItem>
+                        <SelectItem value="fr">🇫🇷 Français</SelectItem>
                         <SelectItem value="pt">🇧🇷 Português</SelectItem>
+                        <SelectItem value="es">🇪🇸 Español</SelectItem>
+                        <SelectItem value="it">🇮🇹 Italiano</SelectItem>
+                        <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -219,7 +222,7 @@ const LoginPage: React.FC = () => {
                     <Label>{t('currency')}</Label>
                     <Select
                       value={currency}
-                      onValueChange={(value) => setCurrency(value as 'BRL' | 'USD' | 'EUR' | 'CAD')}
+                      onValueChange={(value) => setCurrency(value as 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP')}
                     >
                       <SelectTrigger className="bg-secondary border-border">
                         <SelectValue />
@@ -228,7 +231,10 @@ const LoginPage: React.FC = () => {
                         <SelectItem value="CAD">$ CAD</SelectItem>
                         <SelectItem value="USD">US$ USD</SelectItem>
                         <SelectItem value="EUR">€ EUR</SelectItem>
+                        <SelectItem value="GBP">£ GBP</SelectItem>
                         <SelectItem value="BRL">R$ BRL</SelectItem>
+                        <SelectItem value="MXN">MX$ MXN</SelectItem>
+                        <SelectItem value="CHF">CHF</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
