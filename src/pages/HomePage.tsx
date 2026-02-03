@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
 interface HomePageProps {
@@ -37,7 +38,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [initialCode, setInitialCode] = useState('');
   const [creating, setCreating] = useState(false);
-  const [newGroup, setNewGroup] = useState({ name: '', goal: '' });
+  const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '' });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -93,7 +94,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
       }
     }
     
-    const { error } = await createGroup(newGroup.name, Number(newGroup.goal), imageUrl);
+    const { error } = await createGroup(newGroup.name, Number(newGroup.goal), imageUrl, newGroup.description || undefined);
     setCreating(false);
 
     if (error) {
@@ -108,7 +109,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
         description: `${newGroup.name} is ready to receive contributions.`,
       });
       setCreateModalOpen(false);
-      setNewGroup({ name: '', goal: '' });
+      setNewGroup({ name: '', goal: '', description: '' });
       clearImage();
     }
   };
@@ -313,6 +314,16 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                     className="bg-secondary"
                     value={newGroup.goal}
                     onChange={(e) => setNewGroup({ ...newGroup, goal: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Description (optional)</Label>
+                  <Textarea 
+                    placeholder="Describe your group's goal..." 
+                    className="bg-secondary resize-none"
+                    rows={3}
+                    value={newGroup.description}
+                    onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
                   />
                 </div>
                 <Button
