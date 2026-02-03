@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import billiLogo from '@/assets/billi-logo.png';
+import PostReactions from '@/components/PostReactions';
 
 interface CommunityDetailPageProps {
   community: Community;
@@ -186,6 +187,7 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                     >
                       <p className="text-sm whitespace-pre-wrap">{post.content}</p>
                     </div>
+                    <PostReactions postId={post.id} userId={user?.id} isOwn={isOwn} />
                   </div>
                 </motion.div>
               );
