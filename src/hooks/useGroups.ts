@@ -67,9 +67,9 @@ export const useGroups = (userId: string | undefined) => {
 
     const groupIds = memberships.map(m => m.group_id);
 
-    // Fetch groups
+    // Fetch groups using the secure view (hides invite_code for non-admins)
     const { data: groupsData, error: groupsError } = await supabase
-      .from('groups')
+      .from('groups_public')
       .select('*')
       .in('id', groupIds);
 
@@ -277,6 +277,22 @@ export const useGroups = (userId: string | undefined) => {
     return { data, error };
   };
 
+  const leaveGroup = async (groupId: string) => {
+    if (!userId) return { error: new Error('Not authenticated') };
+
+    const { error } = await supabase
+      .from('group_memberships')
+      .delete()
+      .eq('group_id', groupId)
+      .eq('user_id', userId);
+
+    if (!error) {
+      await fetchGroups();
+    }
+
+    return { error };
+  };
+
   return {
     groups,
     loading,
@@ -284,5 +300,6 @@ export const useGroups = (userId: string | undefined) => {
     createGroup,
     joinGroupByCode,
     addContribution,
+    leaveGroup,
   };
 };
