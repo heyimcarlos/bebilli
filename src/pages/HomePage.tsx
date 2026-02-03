@@ -99,14 +99,14 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
 
     if (error) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message,
         variant: 'destructive',
       });
     } else {
       toast({
-        title: '🎉 Group created!',
-        description: `${newGroup.name} is ready to receive contributions.`,
+        title: '🎉 ' + t('groupCreated'),
+        description: `${newGroup.name} ${t('groupCreatedDesc')}`,
       });
       setCreateModalOpen(false);
       setNewGroup({ name: '', goal: '', description: '' });
@@ -119,7 +119,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     
     if (error) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -128,7 +128,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
 
     toast({
       title: '🎉 ' + t('joinedGroup'),
-      description: `You joined ${data.name}!`,
+      description: `${t('joinedGroup')} - ${data.name}!`,
     });
     setJoinModalOpen(false);
     setInitialCode('');
@@ -164,8 +164,8 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
             className="flex items-center justify-between mb-6"
           >
             <div>
-              <p className="text-muted-foreground text-sm">Hello, {t('billionaire')}</p>
-              <h1 className="text-2xl font-bold">{profile?.name || 'Billionaire'}</h1>
+              <p className="text-muted-foreground text-sm">{t('hello')}, {t('billionaire')}</p>
+              <h1 className="text-2xl font-bold">{profile?.name || t('billionaire')}</h1>
             </div>
             <motion.img 
               src={billiLogo} 
@@ -218,7 +218,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
               className="flex items-center gap-2 mt-3 text-success text-sm"
             >
               <TrendingUp className="w-4 h-4" />
-              <span>+{groups.length} active groups</span>
+              <span>+{groups.length} {t('activeGroups')}</span>
             </motion.div>
           </motion.div>
         </div>
@@ -264,7 +264,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
               <div className="space-y-4 py-4">
                 {/* Image Upload */}
                 <div className="space-y-2">
-                  <Label>Group Photo</Label>
+                  <Label>{t('groupPhoto')}</Label>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -292,22 +292,22 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                       className="w-full h-32 border-2 border-dashed border-border rounded-xl hover:border-primary/50 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground"
                     >
                       <ImagePlus className="w-8 h-8" />
-                      <span className="text-sm">Add a photo for your group</span>
+                      <span className="text-sm">{t('addPhotoForGroup')}</span>
                     </button>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Group Name</Label>
+                  <Label>{t('groupName')}</Label>
                   <Input 
-                    placeholder="Ex: Trip to Paris" 
+                    placeholder={t('groupNamePlaceholder')} 
                     className="bg-secondary"
                     value={newGroup.name}
                     onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Goal ($)</Label>
+                  <Label>{t('goalAmount')} ($)</Label>
                   <Input 
                     type="number" 
                     placeholder="50000" 
@@ -317,9 +317,9 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Description (optional)</Label>
+                  <Label>{t('descriptionOptional')}</Label>
                   <Textarea 
-                    placeholder="Describe your group's goal..." 
+                    placeholder={t('descriptionPlaceholder')} 
                     className="bg-secondary resize-none"
                     rows={3}
                     value={newGroup.description}
@@ -331,7 +331,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                   disabled={creating || uploading || !newGroup.name || !newGroup.goal}
                   className="w-full btn-primary text-primary-foreground"
                 >
-                  {creating || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Group'}
+                  {creating || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('createGroupButton')}
                 </Button>
               </div>
             </DialogContent>
@@ -363,8 +363,8 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
               animate={{ opacity: 1 }}
               className="glass-card p-8 text-center"
             >
-              <p className="text-muted-foreground mb-4">You don't have any groups yet.</p>
-              <p className="text-sm text-muted-foreground">Create a new group or join one with an invite code!</p>
+              <p className="text-muted-foreground mb-4">{t('noGroupsYet')}</p>
+              <p className="text-sm text-muted-foreground">{t('createOrJoin')}</p>
             </motion.div>
           ) : (
             <div className="space-y-3">
