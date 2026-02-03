@@ -1,6 +1,7 @@
 import React from 'react';
 import { Home, Users, User, Scan } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import billiLogo from '@/assets/billi-logo.png';
 
 interface BottomNavProps {
   activeTab: string;
@@ -33,8 +34,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
             }`}
           >
             {tab.special ? (
-              <div className="w-14 h-14 rounded-full btn-primary flex items-center justify-center glow-primary animate-pulse-glow">
-                <tab.icon className="w-6 h-6 text-primary-foreground" />
+              <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center glow-primary animate-pulse-glow overflow-hidden p-2">
+                <img src={billiLogo} alt="Scan" className="w-full h-full object-contain" />
               </div>
             ) : (
               <>
