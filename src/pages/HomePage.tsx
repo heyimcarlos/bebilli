@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Plus, Hash, TrendingUp } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import GroupCard from '@/components/GroupCard';
 import { Button } from '@/components/ui/button';
 import billiLogo from '@/assets/billi-logo.png';
+import JoinGroupModal from '@/components/JoinGroupModal';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,20 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const { user, groups, formatCurrency, t } = useApp();
   const [showBalance, setShowBalance] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [codeModalOpen, setCodeModalOpen] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [initialCode, setInitialCode] = useState('');
+
+  // Check for invite code in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    if (code) {
+      setInitialCode(code.toUpperCase());
+      setJoinModalOpen(true);
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const totalBalance = groups.reduce((sum, g) => sum + g.current, 0);
 
@@ -98,31 +112,14 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={codeModalOpen} onOpenChange={setCodeModalOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="h-14 border-border font-semibold rounded-xl">
-                <Hash className="w-5 h-5 mr-2" />
-                {t('enterCode')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-card border-border">
-              <DialogHeader>
-                <DialogTitle>{t('enterCode')}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Código do Grupo</Label>
-                  <Input placeholder="ABC123" className="bg-secondary text-center text-2xl tracking-widest" />
-                </div>
-                <Button
-                  onClick={() => setCodeModalOpen(false)}
-                  className="w-full btn-primary text-primary-foreground"
-                >
-                  Entrar no Grupo
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            variant="outline" 
+            className="h-14 border-border font-semibold rounded-xl"
+            onClick={() => setJoinModalOpen(true)}
+          >
+            <Hash className="w-5 h-5 mr-2" />
+            {t('enterCode')}
+          </Button>
         </div>
       </div>
 
@@ -144,6 +141,17 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
           ))}
         </div>
       </div>
+
+      {/* Join Group Modal */}
+      <JoinGroupModal
+        isOpen={joinModalOpen}
+        onClose={() => {
+          setJoinModalOpen(false);
+          setInitialCode('');
+        }}
+        onJoinSuccess={onGroupClick}
+        initialCode={initialCode}
+      />
     </div>
   );
 };
