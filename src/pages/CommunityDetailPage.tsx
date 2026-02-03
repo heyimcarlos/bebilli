@@ -187,7 +187,7 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                     >
                       <p className="text-sm whitespace-pre-wrap">{post.content}</p>
                     </div>
-                    <PostReactions postId={post.id} userId={user?.id} isOwn={isOwn} />
+                    <PostReactions postId={post.id} userId={user?.id} isOwn={isOwn} postOwnerId={post.user_id} postOwnerName={post.profile.name} />
                   </div>
                 </motion.div>
               );

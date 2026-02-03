@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Bell, BellOff, Check, Trash2, TrendingUp, Gift, Users } from 'lucide-react';
+import { X, Bell, BellOff, Check, Trash2, TrendingUp, Gift, Users, Heart } from 'lucide-react';
 import { useNotifications, Notification } from '@/contexts/NotificationContext';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose, 
         return <Gift className="w-5 h-5 text-accent" />;
       case 'welcome':
         return <Users className="w-5 h-5 text-primary" />;
+      case 'reaction':
+        return <Heart className="w-5 h-5 text-pink-500" />;
       default:
         return <Bell className="w-5 h-5 text-muted-foreground" />;
     }

@@ -3,7 +3,7 @@ import { toast } from '@/hooks/use-toast';
 
 export interface Notification {
   id: string;
-  type: 'contribution' | 'achievement' | 'milestone' | 'welcome';
+  type: 'contribution' | 'achievement' | 'milestone' | 'welcome' | 'reaction';
   title: string;
   message: string;
   groupId?: string;
