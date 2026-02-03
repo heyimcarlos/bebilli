@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface Group {
   id: string;
@@ -40,6 +41,7 @@ export interface GroupWithDetails extends Group {
 export const useGroups = (userId: string | undefined) => {
   const [groups, setGroups] = useState<GroupWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   const fetchGroups = useCallback(async () => {
     if (!userId) {
@@ -129,9 +131,36 @@ export const useGroups = (userId: string | undefined) => {
     setLoading(false);
   }, [userId]);
 
+  // Set up realtime subscription
   useEffect(() => {
     fetchGroups();
-  }, [fetchGroups]);
+
+    // Subscribe to contribution changes
+    if (userId) {
+      channelRef.current = supabase
+        .channel('contributions-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'contributions',
+          },
+          (payload) => {
+            console.log('Realtime contribution update:', payload);
+            // Refresh groups when any contribution changes
+            fetchGroups();
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
+  }, [fetchGroups, userId]);
 
   const createGroup = async (name: string, goalAmount: number, imageUrl?: string) => {
     if (!userId) return { error: new Error('Not authenticated') };
