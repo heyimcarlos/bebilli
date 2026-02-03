@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { toast } from '@/hooks/use-toast';
 
 export interface Group {
   id: string;
@@ -142,13 +143,33 @@ export const useGroups = (userId: string | undefined) => {
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'INSERT',
             schema: 'public',
             table: 'contributions',
           },
-          (payload) => {
+          async (payload) => {
             console.log('Realtime contribution update:', payload);
-            // Refresh groups when any contribution changes
+            const newContribution = payload.new as { user_id: string; amount: number; group_id: string };
+            
+            // Show toast only for other users' contributions
+            if (newContribution.user_id !== userId) {
+              // Fetch the contributor's profile
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('name')
+                .eq('id', newContribution.user_id)
+                .single();
+              
+              // Find the group name
+              const group = groups.find(g => g.id === newContribution.group_id);
+              
+              toast({
+                title: '💰 New contribution!',
+                description: `${profile?.name || 'A member'} added $${newContribution.amount.toFixed(2)} to ${group?.name || 'a group'}`,
+              });
+            }
+            
+            // Refresh groups
             fetchGroups();
           }
         )
