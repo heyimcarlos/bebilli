@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Smile } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 interface Reaction {
   emoji: string;
@@ -14,14 +15,17 @@ interface PostReactionsProps {
   postId: string;
   userId?: string;
   isOwn?: boolean;
+  postOwnerId?: string;
+  postOwnerName?: string;
 }
 
 const AVAILABLE_EMOJIS = ['👍', '❤️', '🔥', '💡', '👏'];
 
-const PostReactions: React.FC<PostReactionsProps> = ({ postId, userId, isOwn }) => {
+const PostReactions: React.FC<PostReactionsProps> = ({ postId, userId, isOwn, postOwnerId, postOwnerName }) => {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { addNotification } = useNotifications();
 
   const fetchReactions = async () => {
     const { data } = await supabase
@@ -70,6 +74,15 @@ const PostReactions: React.FC<PostReactionsProps> = ({ postId, userId, isOwn }) 
       await supabase
         .from('post_reactions')
         .insert({ post_id: postId, user_id: userId, emoji });
+
+      // Notify post owner if it's not their own post
+      if (postOwnerId && postOwnerId !== userId) {
+        addNotification({
+          type: 'reaction',
+          title: `${emoji} Nova reação!`,
+          message: `Alguém reagiu ao seu post${postOwnerName ? ` de ${postOwnerName}` : ''}`,
+        });
+      }
     }
 
     await fetchReactions();
