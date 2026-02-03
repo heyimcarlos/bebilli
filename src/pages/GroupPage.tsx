@@ -166,15 +166,25 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </div>
           
           <motion.h1 
-            className="text-2xl font-bold mb-2"
+            className="text-2xl font-bold mb-1"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
           >
             {group.name}
           </motion.h1>
+          {group.description && (
+            <motion.p 
+              className="text-muted-foreground text-sm mb-2"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.15 }}
+            >
+              {group.description}
+            </motion.p>
+          )}
           <motion.p 
-            className="text-muted-foreground text-sm"
+            className="text-muted-foreground/70 text-xs"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}

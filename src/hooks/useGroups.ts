@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 export interface Group {
   id: string;
   name: string;
+  description: string | null;
   image_url: string | null;
   goal_amount: number;
   invite_code: string | null;
@@ -80,7 +81,7 @@ export const useGroups = (userId: string | undefined) => {
     }
 
     // Filter out any groups with null ids (shouldn't happen but TypeScript needs this)
-    const validGroups = groupsData.filter((g): g is typeof g & { id: string; name: string; goal_amount: number; invite_code: string | null; created_by: string | null; created_at: string | null } => 
+    const validGroups = groupsData.filter((g): g is typeof g & { id: string; name: string; description: string | null; goal_amount: number; invite_code: string | null; created_by: string | null; created_at: string | null } => 
       g.id !== null && g.name !== null && g.goal_amount !== null
     );
 
@@ -188,7 +189,7 @@ export const useGroups = (userId: string | undefined) => {
     };
   }, [fetchGroups, userId]);
 
-  const createGroup = async (name: string, goalAmount: number, imageUrl?: string) => {
+  const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string) => {
     if (!userId) return { error: new Error('Not authenticated') };
 
     // Create the group
@@ -196,6 +197,7 @@ export const useGroups = (userId: string | undefined) => {
       .from('groups')
       .insert({
         name,
+        description: description || null,
         goal_amount: goalAmount,
         image_url: imageUrl || null,
         created_by: userId,
