@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera, Loader2, Compass, TrendingUp, Users, Lightbulb } from 'lucide-react';
+import { X, Camera, Loader2, Compass, TrendingUp, Users, Lightbulb, Upload } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,11 +25,34 @@ const categories = [
 
 const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const { t } = useApp();
+  const { user } = useAuthContext();
+  const { uploadCommunityImage, uploading } = useImageUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Travel');
   const [imageUrl, setImageUrl] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to storage
+    const url = await uploadCommunityImage(file, user.id);
+    if (url) {
+      setImageUrl(url);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,13 +64,14 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
         name: name.trim(),
         description: description.trim(),
         category,
-        image_url: imageUrl.trim() || undefined,
+        image_url: imageUrl || undefined,
       });
       // Reset form
       setName('');
       setDescription('');
       setCategory('Travel');
       setImageUrl('');
+      setImagePreview(null);
       onClose();
     } finally {
       setLoading(false);
@@ -61,6 +87,8 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
       default: return id;
     }
   };
+
+  const displayImage = imagePreview || imageUrl;
 
   return (
     <AnimatePresence>
@@ -92,6 +120,49 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <Label>{t('coverImage') || 'Cover Image'}</Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full h-32 rounded-xl border-2 border-dashed border-border bg-secondary/50 hover:bg-secondary/80 transition-colors flex flex-col items-center justify-center gap-2 overflow-hidden relative"
+                >
+                  {displayImage ? (
+                    <>
+                      <img 
+                        src={displayImage} 
+                        alt="Preview" 
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <div className="text-white text-sm font-medium flex items-center gap-2">
+                          <Camera className="w-4 h-4" />
+                          {t('changeImage') || 'Change image'}
+                        </div>
+                      </div>
+                    </>
+                  ) : uploading ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  ) : (
+                    <>
+                      <Upload className="w-6 h-6 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        {t('uploadImage') || 'Upload image'}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               {/* Name */}
               <div className="space-y-2">
                 <Label htmlFor="community-name">{t('communityName')}</Label>
@@ -139,34 +210,13 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
                 </div>
               </div>
 
-              {/* Image URL */}
-              <div className="space-y-2">
-                <Label htmlFor="community-image">{t('imageUrlOptional')}</Label>
-                <div className="flex gap-2">
-                  <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {imageUrl ? (
-                      <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <Camera className="w-5 h-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <Input
-                    id="community-image"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="bg-secondary border-border"
-                  />
-                </div>
-              </div>
-
               {/* Submit */}
               <Button
                 type="submit"
-                disabled={loading || !name.trim()}
+                disabled={loading || uploading || !name.trim()}
                 className="w-full btn-primary"
               >
-                {loading ? (
+                {(loading || uploading) ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
                 {t('createCommunity')}

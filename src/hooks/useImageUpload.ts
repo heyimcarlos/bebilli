@@ -7,7 +7,7 @@ export const useImageUpload = () => {
   const uploadImage = async (
     file: File, 
     userId: string, 
-    bucket: 'group-images' | 'avatars'
+    bucket: 'group-images' | 'avatars' | 'community-images'
   ): Promise<string | null> => {
     setUploading(true);
     
@@ -48,9 +48,14 @@ export const useImageUpload = () => {
     return uploadImage(file, userId, 'avatars');
   };
 
+  const uploadCommunityImage = async (file: File, userId: string) => {
+    return uploadImage(file, userId, 'community-images');
+  };
+
   return {
     uploadGroupImage,
     uploadAvatar,
+    uploadCommunityImage,
     uploading,
   };
 };
