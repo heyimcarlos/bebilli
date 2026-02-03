@@ -1,9 +1,11 @@
-import React from 'react';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import billiLogo from '@/assets/billi-logo.png';
 import {
   Select,
@@ -19,7 +21,36 @@ interface ProfilePageProps {
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const { t, language, setLanguage, currency, setCurrency, formatCurrency } = useApp();
-  const { profile, user } = useAuthContext();
+  const { profile, user, updateProfile } = useAuthContext();
+  const { uploadAvatar, uploading } = useImageUpload();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    const avatarUrl = await uploadAvatar(file, user.id);
+    if (avatarUrl) {
+      const { error } = await updateProfile({ avatar_url: avatarUrl });
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to update avatar',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: '✨ Avatar updated!',
+          description: 'Your profile photo has been changed.',
+        });
+      }
+    }
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -28,8 +59,38 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[120px]" />
         
         <div className="relative z-10 text-center">
-          <div className="w-24 h-24 mx-auto rounded-full bg-primary p-3 mb-4 glow-primary">
-            <img src={billiLogo} alt="Billi" className="w-full h-full object-contain" />
+          <div className="relative w-24 h-24 mx-auto mb-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
+            <div className="w-24 h-24 rounded-full bg-primary overflow-hidden glow-primary">
+              {profile?.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt={profile.name} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full p-3">
+                  <img src={billiLogo} alt="Billi" className="w-full h-full object-contain" />
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-secondary border-2 border-background flex items-center justify-center hover:bg-secondary/80 transition-colors disabled:opacity-50"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4" />
+              )}
+            </button>
           </div>
           
           <h1 className="text-2xl font-bold mb-1">{profile?.name || 'Billionaire'}</h1>
