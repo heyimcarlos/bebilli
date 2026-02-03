@@ -9,7 +9,7 @@ interface AuthContextType {
   groups: GroupWithDetails[];
   loading: boolean;
   groupsLoading: boolean;
-  signUp: (email: string, password: string, name: string) => Promise<any>;
+  signUp: (email: string, password: string, name: string, phone?: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<any>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<any>;

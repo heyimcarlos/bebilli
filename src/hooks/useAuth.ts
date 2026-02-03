@@ -6,6 +6,7 @@ export interface UserProfile {
   id: string;
   name: string;
   avatar_url: string | null;
+  phone: string | null;
   is_premium: boolean;
   consistency_days: number;
   max_saved: number;
@@ -65,13 +66,13 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, name: string, phone?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { name },
+        data: { name, phone },
       },
     });
     return { data, error };

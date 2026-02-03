@@ -137,6 +137,7 @@ export type Database = {
           is_premium: boolean | null
           max_saved: number | null
           name: string
+          phone: string | null
           updated_at: string | null
         }
         Insert: {
@@ -147,6 +148,7 @@ export type Database = {
           is_premium?: boolean | null
           max_saved?: number | null
           name: string
+          phone?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -157,6 +159,7 @@ export type Database = {
           is_premium?: boolean | null
           max_saved?: number | null
           name?: string
+          phone?: string | null
           updated_at?: string | null
         }
         Relationships: []

@@ -24,6 +24,7 @@ const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     country: 'CA',
     gender: '' as 'M' | 'F' | 'O' | '',
@@ -35,7 +36,7 @@ const LoginPage: React.FC = () => {
 
     try {
       if (isSignup) {
-        const { error } = await signUp(formData.email, formData.password, formData.name);
+        const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone);
         if (error) {
           toast({
             title: 'Error',
@@ -97,6 +98,21 @@ const LoginPage: React.FC = () => {
                   placeholder="Your name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="bg-secondary border-border"
+                  required
+                />
+              </div>
+            )}
+
+            {isSignup && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="bg-secondary border-border"
                   required
                 />
