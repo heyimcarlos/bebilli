@@ -205,6 +205,9 @@ const translations: Record<Language, Record<string, string>> = {
     cityPlaceholder: 'Toronto',
     checkEmail: 'Verifique seu e-mail',
     confirmationSent: 'Enviamos um link de confirmação para verificar sua conta.',
+    editGroup: 'Editar Grupo',
+    saveChanges: 'Salvar Alterações',
+    groupUpdated: 'Grupo atualizado!',
   },
   en: {
     welcome: 'Welcome',
@@ -337,6 +340,9 @@ const translations: Record<Language, Record<string, string>> = {
     cityPlaceholder: 'Toronto',
     checkEmail: 'Check your email',
     confirmationSent: 'We sent you a confirmation link to verify your account.',
+    editGroup: 'Edit Group',
+    saveChanges: 'Save Changes',
+    groupUpdated: 'Group updated!',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -469,6 +475,9 @@ const translations: Record<Language, Record<string, string>> = {
     cityPlaceholder: 'Toronto',
     checkEmail: 'Vérifiez votre e-mail',
     confirmationSent: 'Nous vous avons envoyé un lien de confirmation pour vérifier votre compte.',
+    editGroup: 'Modifier le Groupe',
+    saveChanges: 'Enregistrer',
+    groupUpdated: 'Groupe mis à jour!',
   },
 };
 
