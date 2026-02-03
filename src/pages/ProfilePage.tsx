@@ -1,6 +1,7 @@
 import React from 'react';
 import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import billiLogo from '@/assets/billi-logo.png';
@@ -17,7 +18,8 @@ interface ProfilePageProps {
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
-  const { user, t, language, setLanguage, currency, setCurrency, formatCurrency } = useApp();
+  const { t, language, setLanguage, currency, setCurrency, formatCurrency } = useApp();
+  const { profile, user } = useAuthContext();
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -30,10 +32,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
             <img src={billiLogo} alt="Billi" className="w-full h-full object-contain" />
           </div>
           
-          <h1 className="text-2xl font-bold mb-1">{user?.name || 'Bilionário'}</h1>
+          <h1 className="text-2xl font-bold mb-1">{profile?.name || 'Billionaire'}</h1>
           <p className="text-muted-foreground text-sm">{user?.email}</p>
           
-          {user?.isPremium ? (
+          {profile?.is_premium ? (
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-medium mt-2">
               <Crown className="w-3 h-3" />
               Billi Premium
@@ -45,7 +47,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               className="mt-3 border-accent text-accent hover:bg-accent/10"
             >
               <Crown className="w-4 h-4 mr-2" />
-              Assinar Premium - {formatCurrency(4.90)}/mês
+              Subscribe Premium - {formatCurrency(5.90)}/month
             </Button>
           )}
         </div>
@@ -58,7 +60,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
             <div className="w-12 h-12 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-2">
               <Flame className="w-6 h-6 text-primary" />
             </div>
-            <p className="text-2xl font-bold gradient-text">{user?.consistencyDays || 45}</p>
+            <p className="text-2xl font-bold gradient-text">{profile?.consistency_days || 0}</p>
             <p className="text-xs text-muted-foreground">{t('consistencyDays')}</p>
           </div>
           
@@ -66,7 +68,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
             <div className="w-12 h-12 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-2">
               <Trophy className="w-6 h-6 text-accent" />
             </div>
-            <p className="text-2xl font-bold gradient-gold-text">{formatCurrency(user?.maxSaved || 2500)}</p>
+            <p className="text-2xl font-bold gradient-gold-text">{formatCurrency(profile?.max_saved || 0)}</p>
             <p className="text-xs text-muted-foreground">{t('maxSaved')}</p>
           </div>
         </div>
@@ -124,7 +126,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
           className="w-full mt-6 h-12 border-destructive text-destructive hover:bg-destructive/10"
         >
           <LogOut className="w-5 h-5 mr-2" />
-          Sair
+          Sign Out
         </Button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppProvider, useApp } from '@/contexts/AppContext';
+import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import BottomNav from '@/components/BottomNav';
 import ScannerOverlay from '@/components/ScannerOverlay';
@@ -14,9 +15,11 @@ import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
 import { useToast } from '@/hooks/use-toast';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
+import { Loader2 } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const { user, setUser, groups, formatCurrency, t } = useApp();
+  const { formatCurrency, t } = useApp();
+  const { user, profile, groups, loading, signOut, addContribution } = useAuthContext();
   const { addNotification } = useNotifications();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('home');
@@ -61,29 +64,43 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleScanSuccess = (amount: number) => {
-    const group = selectedGroupId ? groups.find(g => g.id === selectedGroupId) : groups[0];
+  const handleScanSuccess = async (amount: number) => {
+    const group = selectedGroupId 
+      ? groups.find(g => g.id === selectedGroupId) 
+      : groups[0];
     
-    toast({
-      title: '🚀 Aporte registrado!',
-      description: `Seu aporte de ${formatCurrency(amount)} foi confirmado.`,
-    });
-
-    // Simulate sending notification to other group members
     if (group) {
-      const oldProgress = (group.current / group.goal) * 100;
-      const newProgress = ((group.current + amount) / group.goal) * 100;
+      const oldProgress = (group.current_amount / group.goal_amount) * 100;
       
+      // Add contribution to database
+      const { error } = await addContribution(group.id, amount);
+      
+      if (error) {
+        toast({
+          title: 'Error',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const newProgress = ((group.current_amount + amount) / group.goal_amount) * 100;
+      
+      toast({
+        title: '🚀 Contribution recorded!',
+        description: `Your contribution of ${formatCurrency(amount)} has been confirmed.`,
+      });
+
       // Check for milestone achievements
       checkMilestone(oldProgress, newProgress, group.name);
 
       addNotification({
         type: 'contribution',
         title: `${t('newContribution')} 💰`,
-        message: `${user?.name || 'Você'} ${t('contributedTo')} ${group.name}: ${formatCurrency(amount)}`,
+        message: `${profile?.name || 'You'} ${t('contributedTo')} ${group.name}: ${formatCurrency(amount)}`,
         groupId: group.id,
         groupName: group.name,
-        userName: user?.name,
+        userName: profile?.name,
         amount,
       });
     }
@@ -93,8 +110,18 @@ const AppContent: React.FC = () => {
     }, 1000);
   };
 
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show login if not authenticated
   if (!user) {
-    return <LoginPage onLogin={() => {}} />;
+    return <LoginPage />;
   }
 
   if (showScanner) {
@@ -158,7 +185,7 @@ const AppContent: React.FC = () => {
         >
           {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
           {activeTab === 'timeline' && <TimelinePage />}
-          {activeTab === 'profile' && <ProfilePage onLogout={() => setUser(null)} />}
+          {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
         </motion.div>
       </AnimatePresence>
 
@@ -191,9 +218,11 @@ const AppContent: React.FC = () => {
 const Index: React.FC = () => {
   return (
     <AppProvider>
-      <NotificationProvider>
-        <AppContent />
-      </NotificationProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
+      </AuthProvider>
     </AppProvider>
   );
 };
