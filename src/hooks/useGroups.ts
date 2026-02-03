@@ -8,9 +8,9 @@ export interface Group {
   name: string;
   image_url: string | null;
   goal_amount: number;
-  invite_code: string;
+  invite_code: string | null;
   created_by: string | null;
-  created_at: string;
+  created_at: string | null;
 }
 
 export interface GroupMembership {
@@ -73,15 +73,20 @@ export const useGroups = (userId: string | undefined) => {
       .select('*')
       .in('id', groupIds);
 
-    if (groupsError || !groupsData) {
+    if (groupsError || !groupsData || groupsData.length === 0) {
       setGroups([]);
       setLoading(false);
       return;
     }
 
+    // Filter out any groups with null ids (shouldn't happen but TypeScript needs this)
+    const validGroups = groupsData.filter((g): g is typeof g & { id: string; name: string; goal_amount: number; invite_code: string | null; created_by: string | null; created_at: string | null } => 
+      g.id !== null && g.name !== null && g.goal_amount !== null
+    );
+
     // For each group, fetch members with profiles and contributions
     const groupsWithDetails = await Promise.all(
-      groupsData.map(async (group) => {
+      validGroups.map(async (group) => {
         // Fetch memberships with profiles
         const { data: members } = await supabase
           .from('group_memberships')
