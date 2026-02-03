@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppProvider, useApp } from '@/contexts/AppContext';
 import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import TimelinePage from '@/pages/TimelinePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
 import { useToast } from '@/hooks/use-toast';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import { Loader2 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ const AppContent: React.FC = () => {
   const { user, profile, groups, loading, signOut, addContribution } = useAuthContext();
   const { addNotification } = useNotifications();
   const { toast } = useToast();
+  const { requestPermission, sendMilestoneNotification, permission, isSupported } = usePushNotifications();
   const [activeTab, setActiveTab] = useState('home');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
@@ -33,6 +35,17 @@ const AppContent: React.FC = () => {
     groupName: string;
     reward?: string;
   }>({ show: false, milestone: 0, groupName: '' });
+
+  // Request notification permission when user logs in
+  useEffect(() => {
+    if (user && isSupported && permission === 'default') {
+      // Delay the permission request slightly for better UX
+      const timer = setTimeout(() => {
+        requestPermission();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, isSupported, permission, requestPermission]);
 
   const handleTabChange = (tab: string) => {
     if (tab === 'scan') {
@@ -53,12 +66,16 @@ const AppContent: React.FC = () => {
     for (const milestone of milestones) {
       if (oldProgress < milestone && newProgress >= milestone) {
         setShowConfetti(true);
+        const reward = milestone === 100 ? '🎉 All partners unlocked!' : undefined;
         setMilestoneData({
           show: true,
           milestone,
           groupName,
-          reward: milestone === 100 ? '🎉 All partners unlocked!' : undefined,
+          reward,
         });
+        
+        // Send push notification for milestone
+        sendMilestoneNotification(milestone, groupName, reward);
         return;
       }
     }
