@@ -18,12 +18,12 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-  const { t, setUser, setLanguage, setCurrency, language } = useApp();
+  const { t, setUser, setLanguage, setCurrency, language, currency } = useApp();
   const [isSignup, setIsSignup] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    country: '',
+    country: 'CA',
     gender: '' as 'M' | 'F' | 'O' | '',
   });
 
@@ -31,14 +31,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     e.preventDefault();
     setUser({
       id: '1',
-      name: formData.name || 'Bilionário',
+      name: formData.name || 'Billionaire',
       email: formData.email,
       country: formData.country,
       gender: (formData.gender || 'O') as 'M' | 'F' | 'O',
       isPremium: false,
       consistencyDays: 45,
-      maxSaved: 2500,
-      totalBalance: 77500,
+      maxSaved: 750,
+      totalBalance: 2350,
     });
     onLogin();
   };
@@ -58,7 +58,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           />
           
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-4">
-            <span className="text-sm text-primary font-medium">Finanças Sociais Gamificadas</span>
+            <span className="text-sm text-primary font-medium">Gamified Social Finance</span>
           </div>
           
           <p className="text-muted-foreground text-lg">
@@ -74,7 +74,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 <Label htmlFor="name">{t('name')}</Label>
                 <Input
                   id="name"
-                  placeholder="Seu nome"
+                  placeholder="Your name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="bg-secondary border-border"
@@ -87,7 +87,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               <Input
                 id="email"
                 type="email"
-                placeholder="seu@email.com"
+                placeholder="your@email.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="bg-secondary border-border"
@@ -104,13 +104,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                       onValueChange={(value) => setFormData({ ...formData, country: value })}
                     >
                       <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue placeholder="País" />
+                        <SelectValue placeholder="Country" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="BR">🇧🇷 Brasil</SelectItem>
-                        <SelectItem value="US">🇺🇸 EUA</SelectItem>
-                        <SelectItem value="CA">🇨🇦 Canadá</SelectItem>
-                        <SelectItem value="FR">🇫🇷 França</SelectItem>
+                        <SelectItem value="CA">🇨🇦 Canada</SelectItem>
+                        <SelectItem value="US">🇺🇸 USA</SelectItem>
+                        <SelectItem value="BR">🇧🇷 Brazil</SelectItem>
+                        <SelectItem value="FR">🇫🇷 France</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -122,7 +122,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                       onValueChange={(value) => setFormData({ ...formData, gender: value as 'M' | 'F' | 'O' })}
                     >
                       <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue placeholder="Sexo" />
+                        <SelectValue placeholder="Gender" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="M">{t('male')}</SelectItem>
@@ -144,9 +144,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="en">🇨🇦 English</SelectItem>
+                        <SelectItem value="fr">🇨🇦 Français</SelectItem>
                         <SelectItem value="pt">🇧🇷 Português</SelectItem>
-                        <SelectItem value="en">🇺🇸 English</SelectItem>
-                        <SelectItem value="fr">🇫🇷 Français</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -154,17 +154,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   <div className="space-y-2">
                     <Label>{t('currency')}</Label>
                     <Select
-                      defaultValue="BRL"
+                      value={currency}
                       onValueChange={(value) => setCurrency(value as 'BRL' | 'USD' | 'EUR' | 'CAD')}
                     >
                       <SelectTrigger className="bg-secondary border-border">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="BRL">R$ BRL</SelectItem>
-                        <SelectItem value="USD">$ USD</SelectItem>
+                        <SelectItem value="CAD">$ CAD</SelectItem>
+                        <SelectItem value="USD">US$ USD</SelectItem>
                         <SelectItem value="EUR">€ EUR</SelectItem>
-                        <SelectItem value="CAD">C$ CAD</SelectItem>
+                        <SelectItem value="BRL">R$ BRL</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -186,7 +186,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             onClick={() => setIsSignup(!isSignup)}
             className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isSignup ? 'Já tem conta? Entre aqui' : 'Não tem conta? Cadastre-se'}
+            {isSignup ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
           </button>
         </form>
       </div>

@@ -322,97 +322,98 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
+// Base currency is CAD - all rates are relative to CAD
 const currencyRates: Record<Currency, number> = {
-  BRL: 1,
-  USD: 0.20,
-  EUR: 0.18,
-  CAD: 0.27,
+  CAD: 1,
+  USD: 0.74,
+  EUR: 0.68,
+  BRL: 3.70,
 };
 
 const currencySymbols: Record<Currency, string> = {
-  BRL: 'R$',
-  USD: '$',
+  CAD: '$',
+  USD: 'US$',
   EUR: '€',
-  CAD: 'C$',
+  BRL: 'R$',
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('pt');
-  const [currency, setCurrency] = useState<Currency>('BRL');
+  const [language, setLanguage] = useState<Language>('en');
+  const [currency, setCurrency] = useState<Currency>('CAD');
   const [user, setUser] = useState<User | null>(null);
   const [groups, setGroups] = useState<Group[]>([
     {
       id: '1',
-      name: 'Expedição Japão 🇯🇵',
-      description: 'Juntos para conhecer a Terra do Sol Nascente',
+      name: 'Japan Adventure 🇯🇵',
+      description: 'Together to explore the Land of the Rising Sun',
       image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800',
-      goal: 50000,
-      current: 32500,
+      goal: 12000,
+      current: 7800,
       members: [
-        { id: '1', name: 'Lucas Silva', contribution: 8500, lastContribution: new Date(), rank: 1 },
-        { id: '2', name: 'Maria Santos', contribution: 7200, lastContribution: new Date(Date.now() - 86400000), rank: 2 },
-        { id: '3', name: 'Pedro Oliveira', contribution: 6800, lastContribution: new Date(Date.now() - 172800000), rank: 3 },
-        { id: '4', name: 'Ana Costa', contribution: 5500, lastContribution: new Date(Date.now() - 604800000 * 2), rank: 4 },
-        { id: '5', name: 'João Mendes', contribution: 4500, lastContribution: new Date(Date.now() - 604800000 * 3), rank: 5 },
+        { id: '1', name: 'James Wilson', contribution: 2100, lastContribution: new Date(), rank: 1 },
+        { id: '2', name: 'Sophie Martin', contribution: 1800, lastContribution: new Date(Date.now() - 86400000), rank: 2 },
+        { id: '3', name: 'Michael Chen', contribution: 1650, lastContribution: new Date(Date.now() - 172800000), rank: 3 },
+        { id: '4', name: 'Emma Thompson', contribution: 1350, lastContribution: new Date(Date.now() - 604800000 * 2), rank: 4 },
+        { id: '5', name: 'Daniel Roy', contribution: 900, lastContribution: new Date(Date.now() - 604800000 * 3), rank: 5 },
       ],
       messages: [
-        { id: '1', userId: 'bot', userName: 'Bili Bot', content: 'Bilionário Lucas acabou de contribuir R$ 500!', timestamp: new Date(), isBot: true },
-        { id: '2', userId: '2', userName: 'Maria Santos', content: 'Vamos conseguir! 🚀', timestamp: new Date(Date.now() - 3600000) },
+        { id: '1', userId: 'bot', userName: 'Bili Bot', content: 'Billionaire James just contributed $150!', timestamp: new Date(), isBot: true },
+        { id: '2', userId: '2', userName: 'Sophie Martin', content: "We're gonna make it! 🚀", timestamp: new Date(Date.now() - 3600000) },
       ],
-      inviteCode: 'JAPAO1',
+      inviteCode: 'JAPAN1',
     },
     {
       id: '2',
-      name: 'Garagem BYD 🚗',
-      description: 'Nosso carro elétrico sustentável',
+      name: 'Tesla Dream 🚗',
+      description: 'Our sustainable electric vehicle fund',
       image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800',
-      goal: 150000,
-      current: 45000,
+      goal: 45000,
+      current: 13500,
       members: [
-        { id: '1', name: 'Carlos Ferreira', contribution: 15000, lastContribution: new Date(), rank: 1 },
-        { id: '2', name: 'Beatriz Lima', contribution: 12000, lastContribution: new Date(Date.now() - 86400000), rank: 2 },
-        { id: '3', name: 'Rafael Souza', contribution: 10000, lastContribution: new Date(Date.now() - 604800000 * 2), rank: 3 },
-        { id: '4', name: 'Juliana Alves', contribution: 8000, lastContribution: new Date(Date.now() - 604800000 * 3), rank: 4 },
+        { id: '1', name: 'Alex Tremblay', contribution: 4500, lastContribution: new Date(), rank: 1 },
+        { id: '2', name: 'Jessica Lee', contribution: 3600, lastContribution: new Date(Date.now() - 86400000), rank: 2 },
+        { id: '3', name: 'Ryan Côté', contribution: 3000, lastContribution: new Date(Date.now() - 604800000 * 2), rank: 3 },
+        { id: '4', name: 'Amanda Singh', contribution: 2400, lastContribution: new Date(Date.now() - 604800000 * 3), rank: 4 },
       ],
       messages: [],
-      inviteCode: 'BYDCAR',
+      inviteCode: 'TESLAEV',
     },
   ]);
 
   const [communities] = useState<Community[]>([
     {
       id: '1',
-      name: 'Expedição Japão',
-      description: 'Realize o sonho de conhecer o Japão',
+      name: 'Japan Adventure',
+      description: 'Make your dream trip to Japan a reality',
       image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800',
       members: 1247,
-      category: 'Viagem',
+      category: 'Travel',
     },
     {
       id: '2',
-      name: 'Garagem BYD',
-      description: 'Mobilidade elétrica sustentável',
+      name: 'Tesla Dream',
+      description: 'Sustainable electric mobility',
       image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800',
       members: 892,
-      category: 'Veículo',
+      category: 'Vehicle',
     },
     {
       id: '3',
-      name: 'Viver no Rio',
-      description: 'Seu apartamento na cidade maravilhosa',
-      image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800',
+      name: 'Downtown Condo',
+      description: 'Your apartment in the heart of the city',
+      image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800',
       members: 2134,
-      category: 'Imóvel',
+      category: 'Real Estate',
     },
     {
       id: '4',
-      name: 'MBA Harvard',
-      description: 'Educação de elite para sua carreira',
+      name: 'MBA Toronto',
+      description: 'Elite education for your career',
       image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800',
       members: 567,
-      category: 'Educação',
+      category: 'Education',
     },
   ]);
 
@@ -422,7 +423,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const formatCurrency = (value: number): string => {
     const converted = convertCurrency(value);
-    return `${currencySymbols[currency]} ${converted.toLocaleString(language === 'pt' ? 'pt-BR' : language === 'fr' ? 'fr-FR' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const locale = language === 'pt' ? 'pt-BR' : language === 'fr' ? 'fr-CA' : 'en-CA';
+    return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const t = (key: string): string => {

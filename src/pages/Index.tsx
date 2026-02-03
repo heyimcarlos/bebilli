@@ -54,7 +54,7 @@ const AppContent: React.FC = () => {
           show: true,
           milestone,
           groupName,
-          reward: milestone === 100 ? '🎉 Todos os parceiros desbloqueados!' : undefined,
+          reward: milestone === 100 ? '🎉 All partners unlocked!' : undefined,
         });
         return;
       }

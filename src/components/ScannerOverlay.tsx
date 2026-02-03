@@ -121,7 +121,7 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
                 >
                   <Scan className="w-16 h-16 mb-4" />
                 </motion.div>
-                <p className="text-sm">Posicione o comprovante</p>
+                <p className="text-sm">Position the receipt</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -152,7 +152,7 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                     />
-                    Escaneando...
+                    Scanning...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
