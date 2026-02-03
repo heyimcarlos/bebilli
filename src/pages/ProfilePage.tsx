@@ -148,14 +148,17 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <Globe className="w-5 h-5 text-muted-foreground" />
               <Label>{t('language')}</Label>
             </div>
-            <Select value={language} onValueChange={(v) => setLanguage(v as 'pt' | 'en' | 'fr')}>
-              <SelectTrigger className="w-32 bg-secondary">
+            <Select value={language} onValueChange={(v) => setLanguage(v as 'pt' | 'en' | 'fr' | 'es' | 'it' | 'de')}>
+              <SelectTrigger className="w-36 bg-secondary">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pt">🇧🇷 Português</SelectItem>
-                <SelectItem value="en">🇺🇸 English</SelectItem>
+                <SelectItem value="en">🇨🇦 English</SelectItem>
                 <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                <SelectItem value="pt">🇧🇷 Português</SelectItem>
+                <SelectItem value="es">🇪🇸 Español</SelectItem>
+                <SelectItem value="it">🇮🇹 Italiano</SelectItem>
+                <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -167,15 +170,18 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <DollarSign className="w-5 h-5 text-muted-foreground" />
               <Label>{t('currency')}</Label>
             </div>
-            <Select value={currency} onValueChange={(v) => setCurrency(v as 'BRL' | 'USD' | 'EUR' | 'CAD')}>
-              <SelectTrigger className="w-32 bg-secondary">
+            <Select value={currency} onValueChange={(v) => setCurrency(v as 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP')}>
+              <SelectTrigger className="w-36 bg-secondary">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="BRL">R$ BRL</SelectItem>
-                <SelectItem value="USD">$ USD</SelectItem>
+                <SelectItem value="CAD">$ CAD</SelectItem>
+                <SelectItem value="USD">US$ USD</SelectItem>
                 <SelectItem value="EUR">€ EUR</SelectItem>
-                <SelectItem value="CAD">C$ CAD</SelectItem>
+                <SelectItem value="GBP">£ GBP</SelectItem>
+                <SelectItem value="BRL">R$ BRL</SelectItem>
+                <SelectItem value="MXN">MX$ MXN</SelectItem>
+                <SelectItem value="CHF">CHF</SelectItem>
               </SelectContent>
             </Select>
           </div>
