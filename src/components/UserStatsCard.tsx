@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Trophy, Star, TrendingUp, Zap } from 'lucide-react';
+import { Flame, Trophy, Star, Zap } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 
 interface UserStatsCardProps {
@@ -18,15 +18,15 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({
   level,
   maxSaved,
 }) => {
-  const { formatCurrency } = useApp();
+  const { formatCurrency, t } = useApp();
 
   const getLevelTitle = (level: number) => {
-    if (level >= 10) return { title: 'Billionaire Legend', emoji: '👑' };
-    if (level >= 8) return { title: 'Money Master', emoji: '💎' };
-    if (level >= 6) return { title: 'Savings Pro', emoji: '🚀' };
-    if (level >= 4) return { title: 'Smart Saver', emoji: '⭐' };
-    if (level >= 2) return { title: 'Rising Star', emoji: '🌟' };
-    return { title: 'Beginner', emoji: '🌱' };
+    if (level >= 10) return { titleKey: 'billionaireLegend', emoji: '👑' };
+    if (level >= 8) return { titleKey: 'moneyMaster', emoji: '💎' };
+    if (level >= 6) return { titleKey: 'savingsPro', emoji: '🚀' };
+    if (level >= 4) return { titleKey: 'smartSaver', emoji: '⭐' };
+    if (level >= 2) return { titleKey: 'risingStar', emoji: '🌟' };
+    return { titleKey: 'beginner', emoji: '🌱' };
   };
 
   const levelInfo = getLevelTitle(level);
@@ -48,8 +48,8 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({
             {levelInfo.emoji}
           </motion.div>
           <div>
-            <p className="text-xs text-muted-foreground">Level {level}</p>
-            <p className="font-semibold text-foreground">{levelInfo.title}</p>
+            <p className="text-xs text-muted-foreground">{t('level')} {level}</p>
+            <p className="font-semibold text-foreground">{t(levelInfo.titleKey)}</p>
           </div>
         </div>
         
@@ -88,7 +88,7 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({
             <Zap className="w-4 h-4 text-primary" />
           </div>
           <p className="text-lg font-bold text-foreground">{totalContributions}</p>
-          <p className="text-xs text-muted-foreground">Deposits</p>
+          <p className="text-xs text-muted-foreground">{t('deposits')}</p>
         </motion.div>
 
         <motion.div 
@@ -99,7 +99,7 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({
             <Trophy className="w-4 h-4 text-accent" />
           </div>
           <p className="text-lg font-bold text-foreground">{bestStreak}</p>
-          <p className="text-xs text-muted-foreground">Best Streak</p>
+          <p className="text-xs text-muted-foreground">{t('bestStreak')}</p>
         </motion.div>
 
         <motion.div 
@@ -110,14 +110,14 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({
             <Star className="w-4 h-4 text-success" />
           </div>
           <p className="text-lg font-bold text-foreground">{formatCurrency(maxSaved)}</p>
-          <p className="text-xs text-muted-foreground">Max Saved</p>
+          <p className="text-xs text-muted-foreground">{t('maxSaved')}</p>
         </motion.div>
       </div>
 
       {/* Level Progress */}
       <div className="mt-4">
         <div className="flex justify-between text-xs mb-1">
-          <span className="text-muted-foreground">Progress to Level {level + 1}</span>
+          <span className="text-muted-foreground">{t('progressToLevel')} {level + 1}</span>
           <span className="text-primary">{Math.round(progressToNextLevel)}%</span>
         </div>
         <div className="h-2 rounded-full bg-secondary overflow-hidden">

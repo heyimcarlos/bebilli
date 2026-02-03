@@ -1,37 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Quote, ChevronRight } from 'lucide-react';
-
-const motivationalQuotes = [
-  { text: "Every dollar saved is a dollar earned!", emoji: "💰" },
-  { text: "Your future self will thank you!", emoji: "🙏" },
-  { text: "Small steps lead to big achievements!", emoji: "🚀" },
-  { text: "Consistency beats intensity!", emoji: "🔥" },
-  { text: "You're building wealth, one day at a time!", emoji: "🏗️" },
-  { text: "Champions save before they spend!", emoji: "🏆" },
-  { text: "Financial freedom is closer than you think!", emoji: "🌟" },
-  { text: "Keep the streak alive!", emoji: "⚡" },
-  { text: "Money saved is power stored!", emoji: "💪" },
-  { text: "Be a billionaire in habits!", emoji: "👑" },
-];
+import { Sparkles } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
 
 const MotivationalBanner: React.FC = () => {
+  const { t } = useApp();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+
+  // Quote definitions using translation keys
+  const getQuotes = () => [
+    { textKey: 'everyDollarSaved', emoji: '💰' },
+    { textKey: 'futureThankYouQuote', emoji: '🙏' },
+    { textKey: 'smallStepsQuote', emoji: '🚀' },
+    { textKey: 'consistencyQuote', emoji: '🔥' },
+    { textKey: 'buildingWealthQuote', emoji: '🏗️' },
+    { textKey: 'championsQuote', emoji: '🏆' },
+    { textKey: 'financialFreedomQuote', emoji: '🌟' },
+    { textKey: 'keepStreakQuote', emoji: '⚡' },
+    { textKey: 'moneyPowerQuote', emoji: '💪' },
+    { textKey: 'beABillionaireQuote', emoji: '👑' },
+  ];
+
+  const quotes = getQuotes();
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % motivationalQuotes.length);
+        setCurrentIndex((prev) => (prev + 1) % quotes.length);
         setIsVisible(true);
       }, 300);
     }, 8000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [quotes.length]);
 
-  const currentQuote = motivationalQuotes[currentIndex];
+  const currentQuote = quotes[currentIndex];
 
   return (
     <motion.div
@@ -83,7 +88,7 @@ const MotivationalBanner: React.FC = () => {
               exit={{ opacity: 0, x: -20 }}
               className="flex-1 text-sm font-medium text-foreground"
             >
-              {currentQuote.text}
+              {t(currentQuote.textKey)}
             </motion.p>
           )}
         </AnimatePresence>
