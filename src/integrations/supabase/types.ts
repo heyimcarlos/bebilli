@@ -154,6 +154,7 @@ export type Database = {
     Functions: {
       is_group_admin: { Args: { group_uuid: string }; Returns: boolean }
       is_group_member: { Args: { group_uuid: string }; Returns: boolean }
+      shares_group_with: { Args: { target_user_id: string }; Returns: boolean }
     }
     Enums: {
       group_role: "admin" | "member"
