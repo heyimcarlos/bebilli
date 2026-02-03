@@ -300,6 +300,23 @@ export const useGroups = (userId: string | undefined) => {
     return { error };
   };
 
+  const updateGroup = async (groupId: string, updates: { name?: string; description?: string; image_url?: string; goal_amount?: number }) => {
+    if (!userId) return { error: new Error('Not authenticated') };
+
+    const { data, error } = await supabase
+      .from('groups')
+      .update(updates)
+      .eq('id', groupId)
+      .select()
+      .single();
+
+    if (!error) {
+      await fetchGroups();
+    }
+
+    return { data, error };
+  };
+
   return {
     groups,
     loading,
@@ -308,5 +325,6 @@ export const useGroups = (userId: string | undefined) => {
     joinGroupByCode,
     addContribution,
     leaveGroup,
+    updateGroup,
   };
 };

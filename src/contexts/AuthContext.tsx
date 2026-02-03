@@ -17,6 +17,7 @@ interface AuthContextType {
   joinGroupByCode: (inviteCode: string) => Promise<any>;
   addContribution: (groupId: string, amount: number, note?: string) => Promise<any>;
   leaveGroup: (groupId: string) => Promise<any>;
+  updateGroup: (groupId: string, updates: { name?: string; description?: string; image_url?: string; goal_amount?: number }) => Promise<any>;
   refreshGroups: () => Promise<void>;
 }
 
@@ -42,6 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         joinGroupByCode: groupsHook.joinGroupByCode,
         addContribution: groupsHook.addContribution,
         leaveGroup: groupsHook.leaveGroup,
+        updateGroup: groupsHook.updateGroup,
         refreshGroups: groupsHook.fetchGroups,
       }}
     >

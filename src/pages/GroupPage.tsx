@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, DollarSign, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, DollarSign, Loader2, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteModal from '@/components/InviteModal';
 import QuickWinModal from '@/components/QuickWinModal';
+import EditGroupModal from '@/components/EditGroupModal';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter } from '@/components/animations';
 import {
   Dialog,
@@ -26,13 +27,14 @@ const QUICK_AMOUNTS = [5, 10, 20, 50, 100];
 
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const { t, formatCurrency } = useApp();
-  const { groups, profile, addContribution, refreshGroups } = useAuthContext();
+  const { groups, profile, addContribution, refreshGroups, updateGroup, user } = useAuthContext();
   const { toast } = useToast();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ id: string; name: string; content: string; isBot?: boolean }>>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showContributeModal, setShowContributeModal] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('');
   const [contributing, setContributing] = useState(false);
   const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
@@ -41,6 +43,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   if (!group) return null;
 
   const progress = group.goal_amount > 0 ? (group.current_amount / group.goal_amount) * 100 : 0;
+  
+  // Check if current user is admin
+  const isAdmin = group.members.some(m => m.user_id === profile?.id && m.role === 'admin');
 
   const partners = [
     { name: 'Expedia', logo: '✈️', discount: '15% OFF', unlockAt: 25 },
@@ -155,14 +160,26 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             >
               <ArrowLeft className="w-5 h-5" />
             </motion.button>
-            <motion.button
-              onClick={() => setShowInviteModal(true)}
-              className="w-10 h-10 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Share2 className="w-5 h-5 text-primary-foreground" />
-            </motion.button>
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <motion.button
+                  onClick={() => setShowEditModal(true)}
+                  className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Pencil className="w-5 h-5" />
+                </motion.button>
+              )}
+              <motion.button
+                onClick={() => setShowInviteModal(true)}
+                className="w-10 h-10 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Share2 className="w-5 h-5 text-primary-foreground" />
+              </motion.button>
+            </div>
           </div>
           
           <motion.h1 
@@ -552,6 +569,36 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         amount={lastContribution.amount}
         newStreak={lastContribution.streak}
       />
+
+      {/* Edit Group Modal (Admin only) */}
+      {isAdmin && user && (
+        <EditGroupModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          groupId={group.id}
+          currentName={group.name}
+          currentDescription={group.description}
+          currentImageUrl={group.image_url}
+          currentGoalAmount={group.goal_amount}
+          userId={user.id}
+          onSave={async (updates) => {
+            const { error } = await updateGroup(group.id, updates);
+            if (error) {
+              toast({
+                title: t('error'),
+                description: error.message,
+                variant: 'destructive',
+              });
+              return { error };
+            }
+            toast({
+              title: '✅ ' + t('groupUpdated'),
+              description: group.name,
+            });
+            return { error: null };
+          }}
+        />
+      )}
     </motion.div>
   );
 };
