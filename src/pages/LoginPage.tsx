@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import billiLogo from '@/assets/billi-logo.png';
 import {
   Select,
   SelectContent,
@@ -50,14 +51,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
         
         <div className="relative z-10 text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
-            <Sparkles className="w-4 h-4 text-primary" />
+          <img
+            src={billiLogo}
+            alt="Billi"
+            className="w-32 h-32 mx-auto mb-4 animate-float"
+          />
+          
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-4">
             <span className="text-sm text-primary font-medium">Finanças Sociais Gamificadas</span>
           </div>
           
-          <h1 className="text-5xl font-black mb-2">
-            <span className="gradient-text">Billi</span>
-          </h1>
           <p className="text-muted-foreground text-lg">
             {t('welcome')}, <span className="gradient-gold-text font-semibold">{t('billionaire')}</span>
           </p>

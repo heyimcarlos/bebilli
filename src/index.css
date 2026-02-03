@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
+    --background: 220 20% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 8%;
+    --card: 220 20% 9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 10%;
+    --popover: 220 20% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 174 72% 56%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 30 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 30% 14%;
+    --secondary: 220 15% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 222 30% 18%;
+    --muted: 220 15% 18%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 45 93% 58%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 35 100% 55%;
+    --accent-foreground: 220 20% 6%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -33,19 +33,19 @@
     --success: 142 76% 46%;
     --success-foreground: 210 40% 98%;
 
-    --border: 222 30% 16%;
-    --input: 222 30% 14%;
-    --ring: 174 72% 56%;
+    --border: 220 15% 16%;
+    --input: 220 15% 14%;
+    --ring: 30 100% 50%;
 
     --radius: 1rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(174 72% 56%) 0%, hsl(199 89% 48%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(45 93% 58%) 0%, hsl(36 100% 50%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(222 47% 10%) 0%, hsl(222 47% 6%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(30 100% 50%) 0%, hsl(25 100% 45%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(35 100% 55%) 0%, hsl(30 100% 50%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 20% 11%) 0%, hsl(220 20% 6%) 100%);
     --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
 
-    --glow-primary: 0 0 40px hsl(174 72% 56% / 0.3);
-    --glow-gold: 0 0 40px hsl(45 93% 58% / 0.3);
+    --glow-primary: 0 0 40px hsl(30 100% 50% / 0.3);
+    --glow-gold: 0 0 40px hsl(35 100% 55% / 0.3);
     --glow-success: 0 0 40px hsl(142 76% 46% / 0.3);
 
     --sidebar-background: 222 47% 6%;

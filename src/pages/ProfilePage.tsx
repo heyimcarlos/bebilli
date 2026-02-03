@@ -3,6 +3,7 @@ import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut } from 'lucid
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import billiLogo from '@/assets/billi-logo.png';
 import {
   Select,
   SelectContent,
@@ -22,13 +23,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="relative px-6 pt-12 pb-8">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent/10 rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[120px]" />
         
         <div className="relative z-10 text-center">
-          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-primary via-accent to-primary p-1 mb-4">
-            <div className="w-full h-full rounded-full bg-card flex items-center justify-center">
-              <Crown className="w-10 h-10 text-accent" />
-            </div>
+          <div className="w-24 h-24 mx-auto rounded-full bg-primary p-3 mb-4 glow-primary">
+            <img src={billiLogo} alt="Billi" className="w-full h-full object-contain" />
           </div>
           
           <h1 className="text-2xl font-bold mb-1">{user?.name || 'Bilionário'}</h1>

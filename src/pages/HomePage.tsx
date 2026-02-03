@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Plus, Hash, TrendingUp, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Plus, Hash, TrendingUp } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import GroupCard from '@/components/GroupCard';
 import { Button } from '@/components/ui/button';
+import billiLogo from '@/assets/billi-logo.png';
 import {
   Dialog,
   DialogContent,
@@ -37,9 +38,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
               <p className="text-muted-foreground text-sm">Olá, {t('billionaire')}</p>
               <h1 className="text-2xl font-bold">{user?.name || 'Bilionário'}</h1>
             </div>
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <img src={billiLogo} alt="Billi" className="w-12 h-12" />
           </div>
 
           {/* Balance Card */}
