@@ -82,6 +82,32 @@ export const useCommunities = (userId?: string) => {
     fetchCommunities();
   }, [fetchCommunities]);
 
+  const createCommunity = async (data: { name: string; description: string; category: string; image_url?: string }) => {
+    if (!userId) return { error: { message: 'User not authenticated' } };
+
+    const { data: newCommunity, error } = await supabase
+      .from('communities')
+      .insert({
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        image_url: data.image_url,
+        created_by: userId,
+      })
+      .select()
+      .single();
+
+    if (!error && newCommunity) {
+      // Auto-join the creator to the community
+      await supabase
+        .from('community_members')
+        .insert({ community_id: newCommunity.id, user_id: userId });
+      await fetchCommunities();
+    }
+
+    return { data: newCommunity, error };
+  };
+
   const joinCommunity = async (communityId: string) => {
     if (!userId) return { error: { message: 'User not authenticated' } };
 
@@ -115,6 +141,7 @@ export const useCommunities = (userId?: string) => {
   return {
     communities,
     loading,
+    createCommunity,
     joinCommunity,
     leaveCommunity,
     refreshCommunities: fetchCommunities,
