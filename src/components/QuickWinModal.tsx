@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Trophy, Flame, Star, PartyPopper } from 'lucide-react';
+import { Sparkles, Flame, PartyPopper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useApp } from '@/contexts/AppContext';
 
 interface QuickWinModalProps {
   isOpen: boolean;
@@ -11,14 +12,6 @@ interface QuickWinModalProps {
   message?: string;
 }
 
-const celebrationMessages = [
-  "You're crushing it! 💪",
-  "Another step to millions! 🚀",
-  "Billionaire moves! 👑",
-  "Your future self says thanks! 🙏",
-  "Keep that momentum going! ⚡",
-];
-
 const QuickWinModal: React.FC<QuickWinModalProps> = ({
   isOpen,
   onClose,
@@ -26,7 +19,17 @@ const QuickWinModal: React.FC<QuickWinModalProps> = ({
   newStreak,
   message,
 }) => {
+  const { t, formatCurrency } = useApp();
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
+
+  // Celebration messages using translation keys
+  const getCelebrationMessages = () => [
+    t('youreCrushingIt'),
+    t('anotherStepToMillions'),
+    t('billionaireMoves'),
+    t('futureThankYou'),
+    t('keepMomentum'),
+  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -42,6 +45,7 @@ const QuickWinModal: React.FC<QuickWinModalProps> = ({
     }
   }, [isOpen]);
 
+  const celebrationMessages = getCelebrationMessages();
   const randomMessage = message || celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
 
   return (
@@ -119,7 +123,7 @@ const QuickWinModal: React.FC<QuickWinModalProps> = ({
                 transition={{ delay: 0.3 }}
                 className="text-2xl font-bold gradient-text mb-2"
               >
-                +${amount.toFixed(2)}
+                +{formatCurrency(amount)}
               </motion.h2>
 
               <motion.p
@@ -140,7 +144,9 @@ const QuickWinModal: React.FC<QuickWinModalProps> = ({
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/20 border border-destructive/30 mb-4"
                 >
                   <Flame className="w-5 h-5 text-destructive" />
-                  <span className="font-bold text-destructive">{newStreak} day streak!</span>
+                  <span className="font-bold text-destructive">
+                    {newStreak} {newStreak === 1 ? t('dayStreakExclaim') : t('daysStreakExclaim')}
+                  </span>
                 </motion.div>
               )}
 
@@ -154,7 +160,7 @@ const QuickWinModal: React.FC<QuickWinModalProps> = ({
                   className="w-full btn-primary text-primary-foreground font-semibold"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Keep Going!
+                  {t('keepGoing')}
                 </Button>
               </motion.div>
             </div>

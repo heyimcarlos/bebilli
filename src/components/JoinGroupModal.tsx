@@ -100,7 +100,7 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">
-            Create a group to get an invite code to share with friends!
+            {t('createGroupToShare')}
           </p>
         </div>
       </DialogContent>

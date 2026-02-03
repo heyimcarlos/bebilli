@@ -14,12 +14,22 @@ interface InviteModalProps {
 }
 
 const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, groupName, inviteCode }) => {
-  const { t } = useApp();
+  const { t, language } = useApp();
   const [copied, setCopied] = useState(false);
 
   const inviteLink = `${window.location.origin}?code=${inviteCode}`;
   
-  const inviteMessage = `🚀 Junte-se ao grupo "${groupName}" no Billi e vamos conquistar nosso sonho juntos! Use o código: ${inviteCode} ou acesse: ${inviteLink}`;
+  // Dynamic invite message based on language
+  const getInviteMessage = () => {
+    if (language === 'pt') {
+      return `🚀 Junte-se ao grupo "${groupName}" no Billi e vamos conquistar nosso sonho juntos! Use o código: ${inviteCode} ou acesse: ${inviteLink}`;
+    } else if (language === 'fr') {
+      return `🚀 Rejoignez le groupe "${groupName}" sur Billi et réalisons notre rêve ensemble! Utilisez le code: ${inviteCode} ou accédez: ${inviteLink}`;
+    }
+    return `🚀 Join the group "${groupName}" on Billi and let's achieve our dream together! Use the code: ${inviteCode} or access: ${inviteLink}`;
+  };
+
+  const inviteMessage = getInviteMessage();
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(inviteCode);

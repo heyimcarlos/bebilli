@@ -9,21 +9,24 @@ interface DailyChallengeProps {
   onContribute: () => void;
 }
 
-const challenges = [
-  { id: 1, title: "Save $5 today", amount: 5, reward: "🌟 5 XP" },
-  { id: 2, title: "Save $10 today", amount: 10, reward: "⭐ 10 XP" },
-  { id: 3, title: "Make any contribution", amount: 1, reward: "💫 2 XP" },
-  { id: 4, title: "Save $20 today", amount: 20, reward: "🚀 20 XP" },
-  { id: 5, title: "Keep your streak alive", amount: 1, reward: "🔥 Streak Bonus" },
-];
-
 const DailyChallenge: React.FC<DailyChallengeProps> = ({ 
   hasContributedToday,
   onContribute 
 }) => {
-  const { formatCurrency } = useApp();
+  const { formatCurrency, t } = useApp();
   const [timeLeft, setTimeLeft] = useState('');
-  const [todayChallenge, setTodayChallenge] = useState(challenges[0]);
+  const [todayChallengeIndex, setTodayChallengeIndex] = useState(0);
+
+  // Challenge definitions using translation keys
+  const getChallenges = () => [
+    { id: 1, titleKey: 'save5Today', amount: 5, reward: '🌟 5 XP' },
+    { id: 2, titleKey: 'save10Today', amount: 10, reward: '⭐ 10 XP' },
+    { id: 3, titleKey: 'makeAnyContribution', amount: 1, reward: '💫 2 XP' },
+    { id: 4, titleKey: 'save20Today', amount: 20, reward: '🚀 20 XP' },
+    { id: 5, titleKey: 'keepStreakAlive', amount: 1, reward: '🔥 Streak Bonus' },
+  ];
+
+  const challenges = getChallenges();
 
   useEffect(() => {
     // Get consistent daily challenge based on date
@@ -31,7 +34,7 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
     const dayOfYear = Math.floor(
       (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
     );
-    setTodayChallenge(challenges[dayOfYear % challenges.length]);
+    setTodayChallengeIndex(dayOfYear % challenges.length);
 
     // Update countdown
     const updateCountdown = () => {
@@ -51,6 +54,8 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
     const interval = setInterval(updateCountdown, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const todayChallenge = challenges[todayChallengeIndex];
 
   return (
     <motion.div
@@ -79,8 +84,8 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
             <Target className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Daily Challenge</p>
-            <p className="font-semibold text-foreground text-sm">{todayChallenge.title}</p>
+            <p className="text-xs text-muted-foreground">{t('dailyChallenge')}</p>
+            <p className="font-semibold text-foreground text-sm">{t(todayChallenge.titleKey)}</p>
           </div>
         </div>
         
@@ -104,7 +109,7 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
             >
               <Check className="w-5 h-5 text-success" />
             </motion.div>
-            <span className="text-success font-medium text-sm">Challenge Complete!</span>
+            <span className="text-success font-medium text-sm">{t('challengeComplete')}</span>
           </div>
           <div className="flex items-center gap-1">
             <Gift className="w-4 h-4 text-success" />
@@ -118,7 +123,7 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
           size="sm"
         >
           <Gift className="w-4 h-4 mr-2" />
-          Complete Challenge • {todayChallenge.reward}
+          {t('completeChallenge')} • {todayChallenge.reward}
         </Button>
       )}
     </motion.div>
