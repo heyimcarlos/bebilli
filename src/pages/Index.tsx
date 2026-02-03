@@ -6,6 +6,7 @@ import BottomNav from '@/components/BottomNav';
 import ScannerOverlay from '@/components/ScannerOverlay';
 import NotificationBell from '@/components/NotificationBell';
 import NotificationPanel from '@/components/NotificationPanel';
+import InstallPWA from '@/components/InstallPWA';
 import LoginPage from '@/pages/LoginPage';
 import HomePage from '@/pages/HomePage';
 import TimelinePage from '@/pages/TimelinePage';
@@ -180,6 +181,9 @@ const AppContent: React.FC = () => {
         groupName={milestoneData.groupName}
         reward={milestoneData.reward}
       />
+
+      {/* PWA Install Banner */}
+      <InstallPWA />
     </>
   );
 };
