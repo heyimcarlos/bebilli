@@ -131,7 +131,9 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          city: string | null
           consistency_days: number | null
+          country: string | null
           created_at: string | null
           id: string
           is_premium: boolean | null
@@ -142,7 +144,9 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          city?: string | null
           consistency_days?: number | null
+          country?: string | null
           created_at?: string | null
           id: string
           is_premium?: boolean | null
@@ -153,7 +157,9 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          city?: string | null
           consistency_days?: number | null
+          country?: string | null
           created_at?: string | null
           id?: string
           is_premium?: boolean | null
