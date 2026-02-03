@@ -12,6 +12,11 @@ export interface UserProfile {
   is_premium: boolean;
   consistency_days: number;
   max_saved: number;
+  current_streak: number;
+  best_streak: number;
+  total_contributions: number;
+  level: number;
+  last_contribution_at: string | null;
 }
 
 export const useAuth = () => {

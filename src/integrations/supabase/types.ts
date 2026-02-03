@@ -131,41 +131,56 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          best_streak: number | null
           city: string | null
           consistency_days: number | null
           country: string | null
           created_at: string | null
+          current_streak: number | null
           id: string
           is_premium: boolean | null
+          last_contribution_at: string | null
+          level: number | null
           max_saved: number | null
           name: string
           phone: string | null
+          total_contributions: number | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          best_streak?: number | null
           city?: string | null
           consistency_days?: number | null
           country?: string | null
           created_at?: string | null
+          current_streak?: number | null
           id: string
           is_premium?: boolean | null
+          last_contribution_at?: string | null
+          level?: number | null
           max_saved?: number | null
           name: string
           phone?: string | null
+          total_contributions?: number | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          best_streak?: number | null
           city?: string | null
           consistency_days?: number | null
           country?: string | null
           created_at?: string | null
+          current_streak?: number | null
           id?: string
           is_premium?: boolean | null
+          last_contribution_at?: string | null
+          level?: number | null
           max_saved?: number | null
           name?: string
           phone?: string | null
+          total_contributions?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -201,6 +216,48 @@ export type Database = {
           image_url?: string | null
           invite_code?: never
           name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          consistency_days: number | null
+          country: string | null
+          created_at: string | null
+          id: string | null
+          is_premium: boolean | null
+          max_saved: number | null
+          name: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          consistency_days?: number | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_premium?: boolean | null
+          max_saved?: number | null
+          name?: string | null
+          phone?: never
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          consistency_days?: number | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_premium?: boolean | null
+          max_saved?: number | null
+          name?: string | null
+          phone?: never
           updated_at?: string | null
         }
         Relationships: []
