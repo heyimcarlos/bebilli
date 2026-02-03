@@ -8,6 +8,7 @@ import ScannerOverlay from '@/components/ScannerOverlay';
 import NotificationBell from '@/components/NotificationBell';
 import NotificationPanel from '@/components/NotificationPanel';
 import InstallPWA from '@/components/InstallPWA';
+import WeeklySummaryModal from '@/components/WeeklySummaryModal';
 import LoginPage from '@/pages/LoginPage';
 import HomePage from '@/pages/HomePage';
 import TimelinePage from '@/pages/TimelinePage';
@@ -15,6 +16,7 @@ import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import { Loader2 } from 'lucide-react';
 
@@ -24,6 +26,7 @@ const AppContent: React.FC = () => {
   const { addNotification } = useNotifications();
   const { toast } = useToast();
   const { requestPermission, sendMilestoneNotification, permission, isSupported } = usePushNotifications();
+  const { summary, shouldShow: showWeeklySummary, markSummaryShown } = useWeeklySummary(user?.id);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
@@ -224,6 +227,17 @@ const AppContent: React.FC = () => {
         milestone={milestoneData.milestone}
         groupName={milestoneData.groupName}
         reward={milestoneData.reward}
+      />
+      
+      {/* Weekly Summary Modal */}
+      <WeeklySummaryModal
+        isOpen={showWeeklySummary && !!summary}
+        onClose={markSummaryShown}
+        totalSaved={summary?.totalSavedThisWeek || 0}
+        contributionCount={summary?.contributionCount || 0}
+        topGroup={summary?.topGroup || null}
+        groupProgress={summary?.groupProgress || []}
+        formatCurrency={formatCurrency}
       />
 
       {/* PWA Install Banner */}
