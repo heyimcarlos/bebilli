@@ -20,9 +20,9 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt", "billi-icon-192.png", "billi-icon-512.png"],
       manifest: {
-        name: "Billi - Economize em Grupo",
+        name: "Billi - Save Together",
         short_name: "Billi",
-        description: "Economize dinheiro com seus amigos e família através de grupos de economia colaborativa",
+        description: "Save money with friends and family through collaborative savings groups",
         theme_color: "#10B981",
         background_color: "#0F172A",
         display: "standalone",

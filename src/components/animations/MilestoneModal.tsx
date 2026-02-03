@@ -12,10 +12,10 @@ interface MilestoneModalProps {
 }
 
 const milestoneConfig = {
-  25: { icon: Star, color: '#00D4AA', title: 'Primeiro Marco!' },
-  50: { icon: Target, color: '#FFD700', title: 'Metade do Caminho!' },
-  75: { icon: Rocket, color: '#FF6B35', title: 'Quase Lá!' },
-  100: { icon: Trophy, color: '#FF4081', title: 'Meta Conquistada!' },
+  25: { icon: Star, color: '#00D4AA', title: 'First Milestone!' },
+  50: { icon: Target, color: '#FFD700', title: 'Halfway There!' },
+  75: { icon: Rocket, color: '#FF6B35', title: 'Almost There!' },
+  100: { icon: Trophy, color: '#FF4081', title: 'Goal Achieved!' },
 };
 
 const MilestoneModal: React.FC<MilestoneModalProps> = ({
