@@ -25,6 +25,7 @@ const LoginPage: React.FC = () => {
     name: '',
     email: '',
     phone: '',
+    city: '',
     password: '',
     country: 'CA',
     gender: '' as 'M' | 'F' | 'O' | '',
@@ -36,7 +37,7 @@ const LoginPage: React.FC = () => {
 
     try {
       if (isSignup) {
-        const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone);
+        const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone, formData.country, formData.city);
         if (error) {
           toast({
             title: 'Error',
@@ -168,21 +169,32 @@ const LoginPage: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>{t('gender')}</Label>
-                    <Select
-                      value={formData.gender}
-                      onValueChange={(value) => setFormData({ ...formData, gender: value as 'M' | 'F' | 'O' })}
-                    >
-                      <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue placeholder="Gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="M">{t('male')}</SelectItem>
-                        <SelectItem value="F">{t('female')}</SelectItem>
-                        <SelectItem value="O">{t('other')}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>City</Label>
+                    <Input
+                      placeholder="Toronto"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="bg-secondary border-border"
+                      required
+                    />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('gender')}</Label>
+                  <Select
+                    value={formData.gender}
+                    onValueChange={(value) => setFormData({ ...formData, gender: value as 'M' | 'F' | 'O' })}
+                  >
+                    <SelectTrigger className="bg-secondary border-border">
+                      <SelectValue placeholder="Gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="M">{t('male')}</SelectItem>
+                      <SelectItem value="F">{t('female')}</SelectItem>
+                      <SelectItem value="O">{t('other')}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
