@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Compass, Search, Users, MessageCircle, Lightbulb, TrendingUp } from 'lucide-react';
+import { Compass, Search, Users, MessageCircle, Lightbulb, TrendingUp, Loader2, Check } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
-import CommunityCard from '@/components/CommunityCard';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useCommunities, Community } from '@/hooks/useCommunities';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import CommunityDetailPage from './CommunityDetailPage';
 
-interface ExplorePageProps {
-  onJoinCommunity?: (communityId: string) => void;
-}
-
-const ExplorePage: React.FC<ExplorePageProps> = ({ onJoinCommunity }) => {
-  const { t, communities } = useApp();
+const ExplorePage: React.FC = () => {
+  const { t } = useApp();
+  const { user } = useAuthContext();
+  const { communities, loading, joinCommunity, leaveCommunity, refreshCommunities } = useCommunities(user?.id);
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
+  const [joiningId, setJoiningId] = useState<string | null>(null);
 
   // Categories for filtering
   const categories = [
@@ -27,13 +32,55 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onJoinCommunity }) => {
   // Filter communities
   const filteredCommunities = communities.filter(community => {
     const matchesSearch = community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          community.description.toLowerCase().includes(searchQuery.toLowerCase());
+                          (community.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     const matchesCategory = !selectedCategory || selectedCategory === 'all' || community.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const handleJoin = (communityId: string) => {
-    onJoinCommunity?.(communityId);
+  const handleJoinOrEnter = async (community: Community) => {
+    if (community.is_member) {
+      setSelectedCommunity(community);
+    } else {
+      setJoiningId(community.id);
+      const { error } = await joinCommunity(community.id);
+      setJoiningId(null);
+
+      if (error) {
+        toast({
+          title: t('error'),
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: '🎉 ' + (t('joinedCommunity') || 'Joined!'),
+          description: `${t('welcomeTo') || 'Welcome to'} ${community.name}!`,
+        });
+        // Enter the community after joining
+        await refreshCommunities();
+        setSelectedCommunity({ ...community, is_member: true });
+      }
+    }
+  };
+
+  const handleLeaveCommunity = async () => {
+    if (!selectedCommunity) return;
+
+    const { error } = await leaveCommunity(selectedCommunity.id);
+
+    if (error) {
+      toast({
+        title: t('error'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: t('leftCommunity') || 'Left community',
+        description: `${t('youLeft') || 'You left'} ${selectedCommunity.name}`,
+      });
+      setSelectedCommunity(null);
+    }
   };
 
   const container = {
@@ -48,6 +95,20 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onJoinCommunity }) => {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
+
+  // Show community detail if selected
+  if (selectedCommunity) {
+    return (
+      <CommunityDetailPage
+        community={selectedCommunity}
+        onBack={() => {
+          setSelectedCommunity(null);
+          refreshCommunities();
+        }}
+        onLeave={handleLeaveCommunity}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -125,8 +186,12 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onJoinCommunity }) => {
           <Users className="w-5 h-5 text-primary" />
           {t('popularCommunities')}
         </h2>
-        
-        {filteredCommunities.length === 0 ? (
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredCommunities.length === 0 ? (
           <motion.div 
             className="glass-card p-8 text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -147,15 +212,62 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onJoinCommunity }) => {
           >
             {filteredCommunities.map((community) => (
               <motion.div key={community.id} variants={item}>
-                <CommunityCard
-                  id={community.id}
-                  name={community.name}
-                  description={community.description}
-                  image={community.image}
-                  members={community.members}
-                  category={community.category}
-                  onJoin={() => handleJoin(community.id)}
-                />
+                <div className="glass-card overflow-hidden group">
+                  <div className="relative h-40">
+                    <img
+                      src={community.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'}
+                      alt={community.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary backdrop-blur-sm border border-primary/30">
+                        {community.category}
+                      </span>
+                    </div>
+                    {community.is_member && (
+                      <div className="absolute top-3 right-3">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-success/20 text-success backdrop-blur-sm border border-success/30 flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          {t('member') || 'Member'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="p-4 -mt-8 relative">
+                    <h3 className="font-bold text-lg text-foreground mb-1">{community.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{community.description}</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Users className="w-4 h-4" />
+                        <span>{community.members_count.toLocaleString()} {t('members')}</span>
+                      </div>
+                      
+                      <Button
+                        onClick={() => handleJoinOrEnter(community)}
+                        size="sm"
+                        disabled={joiningId === community.id}
+                        className={community.is_member 
+                          ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold px-4"
+                          : "btn-primary text-primary-foreground font-semibold px-4"
+                        }
+                      >
+                        {joiningId === community.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : community.is_member ? (
+                          <>
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            {t('enter') || 'Enter'}
+                          </>
+                        ) : (
+                          t('join')
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </motion.div>
