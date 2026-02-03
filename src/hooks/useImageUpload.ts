@@ -4,7 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 export const useImageUpload = () => {
   const [uploading, setUploading] = useState(false);
 
-  const uploadGroupImage = async (file: File, userId: string): Promise<string | null> => {
+  const uploadImage = async (
+    file: File, 
+    userId: string, 
+    bucket: 'group-images' | 'avatars'
+  ): Promise<string | null> => {
     setUploading(true);
     
     try {
@@ -12,7 +16,7 @@ export const useImageUpload = () => {
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('group-images')
+        .from(bucket)
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false,
@@ -24,7 +28,7 @@ export const useImageUpload = () => {
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('group-images')
+        .from(bucket)
         .getPublicUrl(fileName);
 
       return publicUrl;
@@ -36,8 +40,17 @@ export const useImageUpload = () => {
     }
   };
 
+  const uploadGroupImage = async (file: File, userId: string) => {
+    return uploadImage(file, userId, 'group-images');
+  };
+
+  const uploadAvatar = async (file: File, userId: string) => {
+    return uploadImage(file, userId, 'avatars');
+  };
+
   return {
     uploadGroupImage,
+    uploadAvatar,
     uploading,
   };
 };
