@@ -170,7 +170,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
             <motion.img 
               src={billiLogo} 
               alt="Billi" 
-              className="w-12 h-12"
+              className="w-12 h-12 rounded-full"
               animate={{ 
                 rotate: [0, -5, 5, 0],
               }}
