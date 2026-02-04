@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2 } from 'lucide-react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -27,6 +28,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const { groups } = useGroups(user?.id);
   const { uploadAvatar, uploading } = useImageUpload();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showShareCard, setShowShareCard] = useState(false);
 
@@ -150,7 +152,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
         {/* Share Progress Button */}
         <Button
           onClick={() => setShowShareCard(true)}
-          className="w-full mt-4 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+          className="w-full mt-4 h-12 bg-success hover:bg-success/90 text-success-foreground"
         >
           <Share2 className="w-5 h-5 mr-2" />
           {t('shareProgress')}
@@ -204,6 +206,29 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
                 <SelectItem value="BRL">R$ BRL</SelectItem>
                 <SelectItem value="MXN">MX$ MXN</SelectItem>
                 <SelectItem value="CHF">CHF</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="h-px bg-border" />
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {theme === 'dark' ? (
+                <Moon className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <Sun className="w-5 h-5 text-muted-foreground" />
+              )}
+              <Label>{t('theme')}</Label>
+            </div>
+            <Select value={theme || 'light'} onValueChange={setTheme}>
+              <SelectTrigger className="w-36 bg-secondary">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">☀️ {t('lightMode')}</SelectItem>
+                <SelectItem value="dark">🌙 {t('darkMode')}</SelectItem>
+                <SelectItem value="system">💻 {t('systemMode')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
