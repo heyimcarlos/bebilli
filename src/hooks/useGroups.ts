@@ -66,7 +66,20 @@ export const useGroups = (userId: string | undefined) => {
       return;
     }
 
-    const groupIds = memberships.map(m => m.group_id);
+    // Fetch hidden groups to filter them out
+    const { data: hiddenGroups } = await supabase
+      .from('hidden_groups')
+      .select('group_id')
+      .eq('user_id', userId);
+    
+    const hiddenGroupIds = new Set((hiddenGroups || []).map(h => h.group_id));
+    const groupIds = memberships.map(m => m.group_id).filter(id => !hiddenGroupIds.has(id));
+
+    if (groupIds.length === 0) {
+      setGroups([]);
+      setLoading(false);
+      return;
+    }
 
     // Fetch groups using the secure view (hides invite_code for non-admins)
     const { data: groupsData, error: groupsError } = await supabase
@@ -321,6 +334,62 @@ export const useGroups = (userId: string | undefined) => {
     return { data, error };
   };
 
+  const deleteGroup = async (groupId: string) => {
+    if (!userId) return { error: new Error('Not authenticated') };
+
+    // First check if user is admin
+    const group = groups.find(g => g.id === groupId);
+    const isAdmin = group?.members.some(m => m.user_id === userId && m.role === 'admin');
+    
+    if (!isAdmin) {
+      return { error: new Error('Only admins can delete groups') };
+    }
+
+    const { error } = await supabase
+      .from('groups')
+      .delete()
+      .eq('id', groupId);
+
+    if (!error) {
+      await fetchGroups();
+    }
+
+    return { error };
+  };
+
+  const hideGroup = async (groupId: string) => {
+    if (!userId) return { error: new Error('Not authenticated') };
+
+    const { error } = await supabase
+      .from('hidden_groups')
+      .insert({
+        user_id: userId,
+        group_id: groupId,
+      });
+
+    if (!error) {
+      await fetchGroups();
+    }
+
+    return { error };
+  };
+
+  const unhideGroup = async (groupId: string) => {
+    if (!userId) return { error: new Error('Not authenticated') };
+
+    const { error } = await supabase
+      .from('hidden_groups')
+      .delete()
+      .eq('user_id', userId)
+      .eq('group_id', groupId);
+
+    if (!error) {
+      await fetchGroups();
+    }
+
+    return { error };
+  };
+
   return {
     groups,
     loading,
@@ -330,5 +399,8 @@ export const useGroups = (userId: string | undefined) => {
     addContribution,
     leaveGroup,
     updateGroup,
+    deleteGroup,
+    hideGroup,
+    unhideGroup,
   };
 };
