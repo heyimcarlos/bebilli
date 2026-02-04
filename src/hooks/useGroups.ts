@@ -89,19 +89,28 @@ export const useGroups = (userId: string | undefined) => {
     const groupsWithDetails = await Promise.all(
       validGroups.map(async (group) => {
         // Fetch memberships with profiles
-        const { data: members } = await supabase
+        // Fetch memberships
+        const { data: memberships } = await supabase
           .from('group_memberships')
-          .select(`
-            id,
-            user_id,
-            role,
-            profiles!inner (
-              id,
-              name,
-              avatar_url
-            )
-          `)
+          .select('id, user_id, role')
           .eq('group_id', group.id);
+        
+        // Fetch profiles from public view (excludes sensitive data like phone)
+        const memberUserIds = (memberships || []).map(m => m.user_id);
+        const { data: profiles } = await supabase
+          .from('profiles_public')
+          .select('id, name, avatar_url')
+          .in('id', memberUserIds);
+        
+        const profilesMap = (profiles || []).reduce((acc, p) => {
+          if (p.id) acc[p.id] = p;
+          return acc;
+        }, {} as Record<string, typeof profiles[0]>);
+        
+        const members = (memberships || []).map(m => ({
+          ...m,
+          profiles: profilesMap[m.user_id] || { id: m.user_id, name: 'Unknown', avatar_url: null }
+        }));
 
         // Fetch contributions totals
         const { data: contributions } = await supabase
@@ -159,9 +168,9 @@ export const useGroups = (userId: string | undefined) => {
             
             // Show toast only for other users' contributions
             if (newContribution.user_id !== userId) {
-              // Fetch the contributor's profile
+              // Fetch the contributor's profile from public view
               const { data: profile } = await supabase
-                .from('profiles')
+                .from('profiles_public')
                 .select('name')
                 .eq('id', newContribution.user_id)
                 .single();
