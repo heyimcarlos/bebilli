@@ -101,12 +101,23 @@ export const useGroups = (userId: string | undefined) => {
     // For each group, fetch members with profiles and contributions
     const groupsWithDetails = await Promise.all(
       validGroups.map(async (group) => {
-        // Fetch memberships with profiles
         // Fetch memberships
         const { data: memberships } = await supabase
           .from('group_memberships')
           .select('id, user_id, role')
           .eq('group_id', group.id);
+        
+        // Check if current user is admin of this group
+        const isGroupAdmin = (memberships || []).some(m => m.user_id === userId && m.role === 'admin');
+        
+        // Fetch invite code if user is admin (using secure RPC)
+        let inviteCode: string | null = null;
+        if (isGroupAdmin) {
+          const { data: codeData } = await supabase.rpc('get_group_invite_code', {
+            group_uuid: group.id
+          });
+          inviteCode = codeData || null;
+        }
         
         // Fetch profiles from public view (excludes sensitive data like phone)
         const memberUserIds = (memberships || []).map(m => m.user_id);
@@ -149,6 +160,7 @@ export const useGroups = (userId: string | undefined) => {
 
         return {
           ...group,
+          invite_code: inviteCode, // Use the fetched invite code for admins
           members: membersWithContributions.sort((a, b) => b.total_contribution - a.total_contribution),
           current_amount: totalAmount,
           user_contribution: userContribution,
