@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { formatCurrency, t } = useApp();
@@ -185,14 +185,22 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {/* Floating Notification Bell */}
+      {/* Floating Top Right Icons */}
       <motion.div 
-        className="fixed top-4 right-4 z-30"
+        className="fixed top-4 right-4 z-30 flex items-center gap-3"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', delay: 0.5 }}
       >
         <NotificationBell onClick={() => setShowNotifications(true)} />
+        <motion.button
+          onClick={() => setActiveTab('profile')}
+          className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <User className="w-5 h-5" />
+        </motion.button>
       </motion.div>
 
       <AnimatePresence mode="wait">

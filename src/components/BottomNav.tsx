@@ -14,9 +14,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
 
   const tabs = [
     { id: 'home', icon: Home, label: t('home') },
-    { id: 'explore', icon: Compass, label: t('explore') },
     { id: 'scan', icon: Scan, label: 'Scan', special: true },
-    { id: 'profile', icon: User, label: t('profile') },
+    { id: 'explore', icon: Compass, label: t('explore') },
   ];
 
   return (
