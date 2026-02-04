@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { MoreVertical, EyeOff, LogOut, Trash2, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { MoreVertical, EyeOff, LogOut, Trash2, Loader2, Lock } from 'lucide-react';
+import { motion } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface GroupActionsMenuProps {
   groupId: string;
@@ -40,15 +53,23 @@ const GroupActionsMenu: React.FC<GroupActionsMenuProps> = ({
   onBack,
 }) => {
   const { t } = useApp();
+  const { toast } = useToast();
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verifyingPassword, setVerifyingPassword] = useState(false);
 
   const handleHide = async () => {
     setLoading(true);
     const { error } = await onHide();
     setLoading(false);
     if (!error) {
+      toast({
+        title: '👁️ ' + (t('groupHidden') || 'Group hidden'),
+        description: t('groupHiddenDesc') || 'You can restore it from the hidden groups menu',
+      });
       onBack();
     }
   };
@@ -63,13 +84,70 @@ const GroupActionsMenu: React.FC<GroupActionsMenuProps> = ({
     }
   };
 
-  const handleDelete = async () => {
-    setLoading(true);
-    const { error } = await onDelete();
-    setLoading(false);
+  const handleDeleteRequest = () => {
     setShowDeleteDialog(false);
-    if (!error) {
-      onBack();
+    setShowPasswordDialog(true);
+    setPassword('');
+  };
+
+  const handlePasswordVerify = async () => {
+    if (!password) return;
+    
+    setVerifyingPassword(true);
+    
+    try {
+      // Get current user email
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.email) {
+        toast({
+          title: t('error'),
+          description: t('userNotFound') || 'User not found',
+          variant: 'destructive',
+        });
+        setVerifyingPassword(false);
+        return;
+      }
+
+      // Verify password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: password,
+      });
+
+      if (signInError) {
+        toast({
+          title: t('error'),
+          description: t('incorrectPassword') || 'Incorrect password',
+          variant: 'destructive',
+        });
+        setVerifyingPassword(false);
+        return;
+      }
+
+      // Password verified, proceed with deletion
+      setVerifyingPassword(false);
+      setShowPasswordDialog(false);
+      setPassword('');
+      
+      setLoading(true);
+      const { error } = await onDelete();
+      setLoading(false);
+      
+      if (!error) {
+        toast({
+          title: '🗑️ ' + (t('groupDeleted') || 'Group deleted'),
+          description: t('groupDeletedDesc') || 'The group has been permanently deleted',
+        });
+        onBack();
+      }
+    } catch (err) {
+      toast({
+        title: t('error'),
+        description: t('verificationFailed') || 'Password verification failed',
+        variant: 'destructive',
+      });
+      setVerifyingPassword(false);
     }
   };
 
@@ -88,7 +166,7 @@ const GroupActionsMenu: React.FC<GroupActionsMenuProps> = ({
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={handleHide} disabled={loading}>
             <EyeOff className="w-4 h-4 mr-2" />
-            {t('hideGroup') || 'Ocultar grupo'}
+            {t('hideGroup') || 'Hide group'}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 
@@ -97,7 +175,7 @@ const GroupActionsMenu: React.FC<GroupActionsMenuProps> = ({
             className="text-warning focus:text-warning"
           >
             <LogOut className="w-4 h-4 mr-2" />
-            {t('leaveGroup') || 'Sair do grupo'}
+            {t('leaveGroup') || 'Leave group'}
           </DropdownMenuItem>
           {isAdmin && (
             <>
@@ -108,7 +186,7 @@ const GroupActionsMenu: React.FC<GroupActionsMenuProps> = ({
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                {t('deleteGroup') || 'Apagar grupo'}
+                {t('deleteGroup') || 'Delete group'}
               </DropdownMenuItem>
             </>
           )}
@@ -119,49 +197,100 @@ const GroupActionsMenu: React.FC<GroupActionsMenuProps> = ({
       <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('leaveGroup') || 'Sair do grupo'}</AlertDialogTitle>
+            <AlertDialogTitle>{t('leaveGroup') || 'Leave group'}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('leaveGroupConfirm') || `Tem certeza que deseja sair de "${groupName}"? Você perderá acesso às contribuições e ao histórico do grupo.`}
+              {t('leaveGroupConfirm') || `Are you sure you want to leave "${groupName}"? You will lose access to contributions and group history.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>
-              {t('cancel') || 'Cancelar'}
+              {t('cancel') || 'Cancel'}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLeave}
               disabled={loading}
               className="bg-warning hover:bg-warning/90"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (t('leave') || 'Sair')}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (t('leave') || 'Leave')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete Group Dialog */}
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteGroup') || 'Apagar grupo'}</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteGroup') || 'Delete group'}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('deleteGroupConfirm') || `Tem certeza que deseja apagar "${groupName}"? Esta ação é irreversível e todos os dados do grupo serão perdidos permanentemente.`}
+              {t('deleteGroupConfirm') || `Are you sure you want to delete "${groupName}"? This action is irreversible and all group data will be permanently lost.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>
-              {t('cancel') || 'Cancelar'}
+              {t('cancel') || 'Cancel'}
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={handleDeleteRequest}
               disabled={loading}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (t('delete') || 'Apagar')}
+              {t('continue') || 'Continue'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Password Verification Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-destructive" />
+              {t('confirmWithPassword') || 'Confirm with password'}
+            </DialogTitle>
+            <DialogDescription>
+              {t('enterPasswordToDelete') || `Enter your password to confirm deletion of "${groupName}"`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="password">{t('password') || 'Password'}</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-2 bg-secondary"
+              placeholder="••••••••"
+              onKeyPress={(e) => e.key === 'Enter' && handlePasswordVerify()}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPasswordDialog(false);
+                setPassword('');
+              }}
+              disabled={verifyingPassword}
+            >
+              {t('cancel') || 'Cancel'}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handlePasswordVerify}
+              disabled={!password || verifyingPassword}
+            >
+              {verifyingPassword ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                t('deleteGroup') || 'Delete group'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

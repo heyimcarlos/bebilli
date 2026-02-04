@@ -7,6 +7,7 @@ import BottomNav from '@/components/BottomNav';
 import ScannerOverlay from '@/components/ScannerOverlay';
 import NotificationBell from '@/components/NotificationBell';
 import NotificationPanel from '@/components/NotificationPanel';
+import HiddenGroupsDrawer from '@/components/HiddenGroupsDrawer';
 import InstallPWA from '@/components/InstallPWA';
 import WeeklySummaryModal from '@/components/WeeklySummaryModal';
 import LoginPage from '@/pages/LoginPage';
@@ -31,6 +32,7 @@ const AppContent: React.FC = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showHiddenGroups, setShowHiddenGroups] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [milestoneData, setMilestoneData] = useState<{
     show: boolean;
@@ -162,11 +164,19 @@ const AppContent: React.FC = () => {
           groupId={selectedGroupId}
           onBack={() => setSelectedGroupId(null)}
         />
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        <BottomNav 
+          activeTab={activeTab} 
+          onTabChange={handleTabChange} 
+          onOpenHiddenGroups={() => setShowHiddenGroups(true)}
+        />
         <NotificationPanel
           isOpen={showNotifications}
           onClose={() => setShowNotifications(false)}
           onGroupClick={handleGroupClick}
+        />
+        <HiddenGroupsDrawer
+          isOpen={showHiddenGroups}
+          onClose={() => setShowHiddenGroups(false)}
         />
         <ConfettiCelebration 
           isActive={showConfetti} 
@@ -217,12 +227,21 @@ const AppContent: React.FC = () => {
         </motion.div>
       </AnimatePresence>
 
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+        onOpenHiddenGroups={() => setShowHiddenGroups(true)}
+      />
       
       <NotificationPanel
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
         onGroupClick={handleGroupClick}
+      />
+
+      <HiddenGroupsDrawer
+        isOpen={showHiddenGroups}
+        onClose={() => setShowHiddenGroups(false)}
       />
 
       <ConfettiCelebration 
