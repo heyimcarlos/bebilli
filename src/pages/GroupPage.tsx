@@ -3,6 +3,7 @@ import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, DollarSign, Load
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { validateContributionAmount } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -55,8 +56,15 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   ];
 
   const handleContribute = async () => {
-    const amount = Number(contributionAmount);
-    if (!amount || amount <= 0) return;
+    const amount = validateContributionAmount(contributionAmount);
+    if (amount === null) {
+      toast({
+        title: t('error'),
+        description: 'Please enter a valid amount between $0.01 and $10,000,000',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setContributing(true);
     const { error } = await addContribution(groupId, amount);

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2, ImagePlus, X } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { validateGoalAmount } from '@/lib/validation';
 import EnhancedGroupCard from '@/components/EnhancedGroupCard';
 import UserStatsCard from '@/components/UserStatsCard';
 import MotivationalBanner from '@/components/MotivationalBanner';
@@ -83,6 +84,16 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const handleCreateGroup = async () => {
     if (!newGroup.name || !newGroup.goal || !user) return;
     
+    const goalAmount = validateGoalAmount(newGroup.goal);
+    if (goalAmount === null) {
+      toast({
+        title: t('error'),
+        description: 'Please enter a valid goal amount between $1 and $1,000,000,000',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setCreating(true);
     
     let imageUrl: string | undefined;
@@ -94,7 +105,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
       }
     }
     
-    const { error } = await createGroup(newGroup.name, Number(newGroup.goal), imageUrl, newGroup.description || undefined);
+    const { error } = await createGroup(newGroup.name, goalAmount, imageUrl, newGroup.description || undefined);
     setCreating(false);
 
     if (error) {

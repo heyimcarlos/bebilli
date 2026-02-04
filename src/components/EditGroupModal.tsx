@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, ImagePlus, X, Pencil } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { validateGoalAmount } from '@/lib/validation';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,7 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
   userId,
 }) => {
   const { t } = useApp();
+  const { toast } = useToast();
   const { uploadGroupImage, uploading } = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -79,6 +82,19 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
   };
 
   const handleSave = async () => {
+    // Validate goal amount if it changed
+    if (goalAmount !== currentGoalAmount.toString()) {
+      const validatedGoal = validateGoalAmount(goalAmount);
+      if (validatedGoal === null) {
+        toast({
+          title: t('error'),
+          description: 'Please enter a valid goal amount between $1 and $1,000,000,000',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    
     setSaving(true);
     
     let imageUrl: string | undefined;
@@ -95,7 +111,13 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
     if (name !== currentName) updates.name = name;
     if (description !== (currentDescription || '')) updates.description = description;
     if (imageUrl) updates.image_url = imageUrl;
-    if (Number(goalAmount) !== currentGoalAmount) updates.goal_amount = Number(goalAmount);
+    
+    if (goalAmount !== currentGoalAmount.toString()) {
+      const validatedGoal = validateGoalAmount(goalAmount);
+      if (validatedGoal !== null) {
+        updates.goal_amount = validatedGoal;
+      }
+    }
     
     const { error } = await onSave(updates);
     setSaving(false);
