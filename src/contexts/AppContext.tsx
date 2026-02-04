@@ -69,7 +69,7 @@ interface AppContextType {
   setGroups: (groups: Group[]) => void;
   communities: Community[];
   formatCurrency: (value: number) => string;
-  convertCurrency: (value: number) => number;
+  formatPremiumPrice: (cadValue: number) => string;
   t: (key: string) => string;
 }
 
@@ -1642,12 +1642,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     },
   ]);
 
-  const convertCurrency = (value: number): number => {
-    return value * currencyRates[currency];
-  };
-
-  const formatCurrency = (value: number): string => {
-    const converted = convertCurrency(value);
+  const getLocale = (): string => {
     const localeMap: Record<Language, string> = {
       pt: 'pt-BR',
       en: 'en-CA',
@@ -1656,7 +1651,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       it: 'it-IT',
       de: 'de-DE',
     };
-    const locale = localeMap[language];
+    return localeMap[language];
+  };
+
+  // Format currency WITHOUT conversion - for all app values (groups, contributions)
+  const formatCurrency = (value: number): string => {
+    const locale = getLocale();
+    const decimals = currencyDecimals[currency];
+    return `${currencySymbols[currency]} ${value.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+  };
+
+  // Format Premium price WITH conversion from CAD base
+  const formatPremiumPrice = (cadValue: number): string => {
+    const converted = cadValue * currencyRates[currency];
+    const locale = getLocale();
     const decimals = currencyDecimals[currency];
     return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
   };
@@ -1678,7 +1686,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setGroups,
         communities,
         formatCurrency,
-        convertCurrency,
+        formatPremiumPrice,
         t,
       }}
     >

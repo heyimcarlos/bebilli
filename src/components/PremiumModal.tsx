@@ -11,7 +11,8 @@ interface PremiumModalProps {
 }
 
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = 'group_limit' }) => {
-  const { t, formatCurrency } = useApp();
+  const { t, formatPremiumPrice } = useApp();
+  const PREMIUM_PRICE_CAD = 5.90;
 
   const features = [
     { icon: Infinity, text: t('unlimitedGroups') || 'Unlimited groups', highlight: reason === 'group_limit' },
@@ -113,7 +114,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
             {/* Price */}
             <div className="text-center mb-6">
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-bold text-primary">{formatCurrency(5.90)}</span>
+                <span className="text-4xl font-bold text-primary">{formatPremiumPrice(PREMIUM_PRICE_CAD)}</span>
                 <span className="text-muted-foreground">/{t('month') || 'month'}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
