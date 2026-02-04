@@ -25,7 +25,7 @@ interface ProfilePageProps {
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
-  const { t, language, setLanguage, currency, setCurrency, formatCurrency } = useApp();
+  const { t, language, setLanguage, currency, setCurrency, formatCurrency, formatPremiumPrice } = useApp();
   const { profile, user, updateProfile } = useAuthContext();
   const { groups } = useGroups(user?.id);
   const { uploadAvatar, uploading } = useImageUpload();
@@ -125,7 +125,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               className="mt-3 border-accent text-accent hover:bg-accent/10"
             >
               <Crown className="w-4 h-4 mr-2" />
-              Subscribe Premium - {formatCurrency(5.90)}/month
+              Subscribe Premium - {formatPremiumPrice(5.90)}/month
             </Button>
           )}
         </div>
