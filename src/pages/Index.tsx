@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
-import { Loader2, User } from 'lucide-react';
+import { Loader2, User, EyeOff } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { formatCurrency, t } = useApp();
@@ -167,7 +167,6 @@ const AppContent: React.FC = () => {
         <BottomNav 
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
-          onOpenHiddenGroups={() => setShowHiddenGroups(true)}
         />
         <NotificationPanel
           isOpen={showNotifications}
@@ -202,6 +201,15 @@ const AppContent: React.FC = () => {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 0.3 }}
       >
+        <motion.button
+          onClick={() => setShowHiddenGroups(true)}
+          className="w-10 h-10 rounded-full bg-card shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card/90 transition-all"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          title={t('hiddenGroups') || 'Hidden Groups'}
+        >
+          <EyeOff className="w-5 h-5" />
+        </motion.button>
         <NotificationBell onClick={() => setShowNotifications(true)} />
         <motion.button
           onClick={() => setActiveTab('profile')}
@@ -230,7 +238,6 @@ const AppContent: React.FC = () => {
       <BottomNav 
         activeTab={activeTab} 
         onTabChange={handleTabChange} 
-        onOpenHiddenGroups={() => setShowHiddenGroups(true)}
       />
       
       <NotificationPanel
