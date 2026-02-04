@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Compass, Search, Users, MessageCircle, Lightbulb, TrendingUp, Loader2, Check, Plus } from 'lucide-react';
+import { Compass, Search, Users, MessageCircle, Lightbulb, TrendingUp, Loader2, Check, Plus, Car, Home, GraduationCap, Laptop, Heart, Shield, Sunset, Sparkles } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useCommunities, Community } from '@/hooks/useCommunities';
@@ -22,13 +22,21 @@ const ExplorePage: React.FC = () => {
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Categories for filtering
+  // Categories for filtering - expanded list
   const categories = [
     { id: 'all', label: t('all'), icon: Compass },
     { id: 'Travel', label: t('travel'), icon: Compass },
-    { id: 'Vehicle', label: t('vehicle'), icon: TrendingUp },
-    { id: 'Real Estate', label: t('realEstate'), icon: Users },
-    { id: 'Education', label: t('education'), icon: Lightbulb },
+    { id: 'Vehicle', label: t('vehicle'), icon: Car },
+    { id: 'Real Estate', label: t('realEstate'), icon: Home },
+    { id: 'Education', label: t('education'), icon: GraduationCap },
+    { id: 'Technology', label: t('technology') || 'Technology', icon: Laptop },
+    { id: 'Health', label: t('health') || 'Health', icon: Heart },
+    { id: 'Investment', label: t('investment') || 'Investment', icon: TrendingUp },
+    { id: 'Emergency', label: t('emergency') || 'Emergency', icon: Shield },
+    { id: 'Wedding', label: t('wedding') || 'Wedding', icon: Heart },
+    { id: 'Retirement', label: t('retirement') || 'Retirement', icon: Sunset },
+    { id: 'Family', label: t('family') || 'Family', icon: Users },
+    { id: 'Hobby', label: t('hobby') || 'Hobby', icon: Sparkles },
   ];
 
   // Filter communities
