@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Send, Users, MessageCircle, LogOut, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Send, Users, MessageCircle, LogOut, Loader2, Trash2, Image, X } from 'lucide-react';
 import { useCommunityPosts, Community } from '@/hooks/useCommunities';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useApp } from '@/contexts/AppContext';
@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import billiLogo from '@/assets/billi-logo.png';
 import PostReactions from '@/components/PostReactions';
+import PostReplies from '@/components/PostReplies';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CommunityDetailPageProps {
   community: Community;
@@ -26,7 +28,11 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
   const { posts, loading, addPost, deletePost } = useCommunityPosts(community.id, user?.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,14 +42,59 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
     scrollToBottom();
   }, [posts]);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
+    
+    const { error } = await supabase.storage
+      .from('community-images')
+      .upload(fileName, file);
+
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from('community-images')
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  };
+
   const handleSend = async () => {
-    if (!newMessage.trim() || sending) return;
+    if ((!newMessage.trim() && !selectedImage) || sending) return;
 
     setSending(true);
-    const { error } = await addPost(newMessage.trim());
+    let imageUrl: string | null = null;
+
+    if (selectedImage) {
+      setUploadingImage(true);
+      imageUrl = await uploadImage(selectedImage);
+      setUploadingImage(false);
+    }
+
+    const { error } = await addPost(newMessage.trim(), imageUrl || undefined);
     
     if (!error) {
       setNewMessage('');
+      clearImage();
     }
     setSending(false);
   };
@@ -179,15 +230,26 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                       )}
                     </div>
                     <div
-                      className={`inline-block px-4 py-2 rounded-2xl ${
+                      className={`inline-block max-w-full overflow-hidden rounded-2xl ${
                         isOwn
                           ? 'bg-primary text-primary-foreground rounded-tr-sm'
                           : 'bg-secondary rounded-tl-sm'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{post.content}</p>
+                      {post.image_url && (
+                        <img
+                          src={post.image_url}
+                          alt="Post image"
+                          className="w-full max-w-xs rounded-t-2xl cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(post.image_url!, '_blank')}
+                        />
+                      )}
+                      {post.content && (
+                        <p className="text-sm whitespace-pre-wrap px-4 py-2">{post.content}</p>
+                      )}
                     </div>
                     <PostReactions postId={post.id} userId={user?.id} isOwn={isOwn} postOwnerId={post.user_id} postOwnerName={post.profile.name} />
+                    <PostReplies postId={post.id} userId={user?.id} />
                   </div>
                 </motion.div>
               );
@@ -199,22 +261,51 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
 
       {/* Input */}
       <div className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
+        {/* Image preview */}
+        {imagePreview && (
+          <div className="relative inline-block mb-2">
+            <img src={imagePreview} alt="Preview" className="h-20 rounded-lg" />
+            <button
+              onClick={clearImage}
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+        
         <div className="flex items-center gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageSelect}
+            accept="image/*"
+            className="hidden"
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={sending}
+            className="shrink-0"
+          >
+            <Image className="w-5 h-5 text-muted-foreground" />
+          </Button>
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={t('shareATip') || 'Share a tip...'}
+            placeholder={t('shareATip') || 'Share a tip, photo or story...'}
             className="flex-1 bg-secondary"
             disabled={sending}
           />
           <Button
             onClick={handleSend}
-            disabled={!newMessage.trim() || sending}
+            disabled={(!newMessage.trim() && !selectedImage) || sending}
             size="icon"
             className="btn-primary"
           >
-            {sending ? (
+            {sending || uploadingImage ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Send className="w-4 h-4" />

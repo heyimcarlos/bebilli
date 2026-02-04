@@ -37,6 +37,14 @@ const ExplorePage: React.FC = () => {
     { id: 'Retirement', label: t('retirement') || 'Retirement', icon: Sunset },
     { id: 'Family', label: t('family') || 'Family', icon: Users },
     { id: 'Hobby', label: t('hobby') || 'Hobby', icon: Sparkles },
+    { id: 'Business', label: t('business') || 'Business', icon: TrendingUp },
+    { id: 'Fashion', label: t('fashion') || 'Fashion', icon: Sparkles },
+    { id: 'Sports', label: t('sports') || 'Sports', icon: Heart },
+    { id: 'Entertainment', label: t('entertainment') || 'Entertainment', icon: Sparkles },
+    { id: 'Pets', label: t('pets') || 'Pets', icon: Heart },
+    { id: 'Food', label: t('food') || 'Food', icon: Sparkles },
+    { id: 'Art', label: t('art') || 'Art', icon: Sparkles },
+    { id: 'Music', label: t('music') || 'Music', icon: Sparkles },
   ];
 
   // Filter communities

@@ -17,6 +17,7 @@ export interface CommunityPost {
   community_id: string;
   user_id: string;
   content: string;
+  image_url: string | null;
   created_at: string;
   profile: {
     name: string;
@@ -216,7 +217,7 @@ export const useCommunityPosts = (communityId: string, userId?: string) => {
     };
   }, [communityId, fetchPosts]);
 
-  const addPost = async (content: string) => {
+  const addPost = async (content: string, imageUrl?: string) => {
     if (!userId || !communityId) return { error: { message: 'Not authenticated' } };
 
     const { error } = await supabase
@@ -225,6 +226,7 @@ export const useCommunityPosts = (communityId: string, userId?: string) => {
         community_id: communityId,
         user_id: userId,
         content,
+        image_url: imageUrl || null,
       });
 
     return { error };

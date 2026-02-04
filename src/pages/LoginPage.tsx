@@ -69,12 +69,30 @@ const LoginPage: React.FC = () => {
     { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
   ];
 
+  // Validate full name (at least 2 words)
+  const validateFullName = (name: string): boolean => {
+    const trimmed = name.trim();
+    const words = trimmed.split(/\s+/).filter(word => word.length > 0);
+    return words.length >= 2;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isSignup) {
+        // Validate full name
+        if (!validateFullName(formData.name)) {
+          toast({
+            title: t('error'),
+            description: t('fullNameRequired') || 'Please enter your full name (first and last name)',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+
         const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone, formData.country, formData.city);
         if (error) {
           toast({
@@ -133,15 +151,18 @@ const LoginPage: React.FC = () => {
           <div className="glass-card p-6 space-y-4">
             {isSignup && (
               <div className="space-y-2">
-                <Label htmlFor="name">{t('name')}</Label>
+                <Label htmlFor="name">{t('fullName') || 'Full Name'}</Label>
                 <Input
                   id="name"
-                  placeholder={t('enterName')}
+                  placeholder={t('enterFullName') || 'Enter your full name'}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="bg-secondary border-border"
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  {t('fullNameHint') || 'Please enter first and last name'}
+                </p>
               </div>
             )}
 
