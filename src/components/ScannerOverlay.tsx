@@ -1,35 +1,147 @@
-import React, { useState } from 'react';
-import { X, Scan } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Scan, Camera, Upload, ChevronDown, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
+import { useGroups, GroupWithDetails } from '@/hooks/useGroups';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ContributionSuccess } from '@/components/animations';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ScannerOverlayProps {
   onClose: () => void;
-  onSuccess: (amount: number) => void;
+  onSuccess: (amount: number, groupId?: string) => void;
 }
 
 const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) => {
-  const { t } = useApp();
+  const { t, formatCurrency } = useApp();
+  const { user } = useAuthContext();
+  const { groups } = useGroups(user?.id);
+  const [mode, setMode] = useState<'camera' | 'upload' | null>(null);
   const [scanning, setScanning] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [detectedAmount, setDetectedAmount] = useState(0);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
+  const [manualAmount, setManualAmount] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const handleScan = () => {
+  // Set default group
+  useEffect(() => {
+    if (groups.length > 0 && !selectedGroupId) {
+      setSelectedGroupId(groups[0].id);
+    }
+  }, [groups, selectedGroupId]);
+
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setMode('camera');
+    } catch (error) {
+      console.error('Camera access denied:', error);
+      // Fallback to file upload
+      setMode('upload');
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0);
+        const imageData = canvas.toDataURL('image/jpeg');
+        setImagePreview(imageData);
+        stopCamera();
+        processImage(imageData);
+      }
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageData = event.target?.result as string;
+        setImagePreview(imageData);
+        setMode('upload');
+        processImage(imageData);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const processImage = async (imageData: string) => {
     setScanning(true);
     
-    // Simulate scanning
-    setTimeout(() => {
-      const amount = Math.floor(Math.random() * 900) + 100;
-      setDetectedAmount(amount);
-      setScanning(false);
+    // Simulate OCR processing with Lovable AI
+    // In production, this would call an edge function with the Lovable AI gateway
+    await new Promise(resolve => setTimeout(resolve, 2500));
+    
+    // Simulated detection (in production, this would be real OCR)
+    const amount = Math.floor(Math.random() * 900) + 100;
+    setDetectedAmount(amount);
+    setManualAmount(amount.toString());
+    setScanning(false);
+  };
+
+  const handleConfirm = () => {
+    const finalAmount = manualAmount ? parseFloat(manualAmount) : detectedAmount;
+    if (finalAmount > 0) {
       setShowSuccess(true);
-    }, 3000);
+    }
   };
 
   const handleSuccessComplete = () => {
-    onSuccess(detectedAmount);
+    const finalAmount = manualAmount ? parseFloat(manualAmount) : detectedAmount;
+    onSuccess(finalAmount, selectedGroupId);
+  };
+
+  const resetScanner = () => {
+    setMode(null);
+    setImagePreview(null);
+    setDetectedAmount(0);
+    setManualAmount('');
+    setScanning(false);
   };
 
   return (
@@ -39,7 +151,8 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col"
     >
-      <div className="flex items-center justify-between p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <motion.h2 
           className="text-lg font-semibold"
           initial={{ x: -20, opacity: 0 }}
@@ -48,7 +161,10 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
           {t('scanReceipt')}
         </motion.h2>
         <motion.button
-          onClick={onClose}
+          onClick={() => {
+            stopCamera();
+            onClose();
+          }}
           className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -56,120 +172,201 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
           <X className="w-5 h-5" />
         </motion.button>
       </div>
-      
-      <div className="flex-1 flex items-center justify-center p-8">
-        <motion.div 
-          className="relative w-full max-w-xs aspect-[3/4] rounded-3xl border-2 border-primary/50 overflow-hidden bg-card"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', damping: 20 }}
-        >
-          {/* Scanner frame corners with animation */}
-          {[
-            { pos: 'top-0 left-0', border: 'border-t-4 border-l-4', rounded: 'rounded-tl-3xl' },
-            { pos: 'top-0 right-0', border: 'border-t-4 border-r-4', rounded: 'rounded-tr-3xl' },
-            { pos: 'bottom-0 left-0', border: 'border-b-4 border-l-4', rounded: 'rounded-bl-3xl' },
-            { pos: 'bottom-0 right-0', border: 'border-b-4 border-r-4', rounded: 'rounded-br-3xl' },
-          ].map((corner, i) => (
-            <motion.div
-              key={i}
-              className={`absolute ${corner.pos} w-12 h-12 ${corner.border} border-primary ${corner.rounded}`}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 + i * 0.1 }}
-            />
-          ))}
-          
-          {/* Scanning animation */}
-          <AnimatePresence>
-            {scanning && (
-              <motion.div
-                className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"
-                initial={{ top: 0, opacity: 0 }}
-                animate={{ 
-                  top: ['0%', '100%', '0%'],
-                  opacity: [0, 1, 1, 1, 0],
-                }}
-                exit={{ opacity: 0 }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'linear',
-                }}
-              >
-                {/* Glow effect */}
-                <div className="absolute inset-0 blur-md bg-primary" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
-          {/* Placeholder content */}
-          <AnimatePresence>
-            {!scanning && !showSuccess && (
-              <motion.div 
-                className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    opacity: [0.3, 0.5, 0.3],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Scan className="w-16 h-16 mb-4" />
-                </motion.div>
-                <p className="text-sm">Position the receipt</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+
+      {/* Group Selection */}
+      <div className="p-4 border-b border-border">
+        <Label className="mb-2 block text-sm text-muted-foreground">
+          {t('selectGroup') || 'Select Group'}
+        </Label>
+        <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+          <SelectTrigger className="bg-secondary">
+            <SelectValue placeholder={t('selectGroup') || 'Select a group'} />
+          </SelectTrigger>
+          <SelectContent>
+            {groups.map((group) => (
+              <SelectItem key={group.id} value={group.id}>
+                <div className="flex items-center gap-2">
+                  {group.image_url && (
+                    <img src={group.image_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+                  )}
+                  <span>{group.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
-      <AnimatePresence>
-        {!showSuccess && (
-          <motion.div 
-            className="p-6"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 50, opacity: 0 }}
-          >
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 overflow-auto">
+        <AnimatePresence mode="wait">
+          {/* Initial mode selection */}
+          {!mode && !imagePreview && (
             <motion.div
-              whileHover={!scanning ? { scale: 1.02 } : undefined}
-              whileTap={!scanning ? { scale: 0.98 } : undefined}
+              key="mode-select"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full max-w-sm space-y-4"
             >
               <Button
-                onClick={handleScan}
-                disabled={scanning}
-                className="w-full h-14 btn-primary text-primary-foreground font-semibold text-lg rounded-2xl"
+                onClick={startCamera}
+                className="w-full h-20 btn-primary text-primary-foreground flex flex-col gap-1"
               >
-                {scanning ? (
-                  <span className="flex items-center gap-2">
-                    <motion.div 
-                      className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                <Camera className="w-8 h-8" />
+                <span>{t('useCamera') || 'Use Camera'}</span>
+              </Button>
+              
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="w-full h-20 flex flex-col gap-1"
+              >
+                <Upload className="w-8 h-8" />
+                <span>{t('uploadFile') || 'Upload File'}</span>
+              </Button>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </motion.div>
+          )}
+
+          {/* Camera View */}
+          {mode === 'camera' && !imagePreview && (
+            <motion.div
+              key="camera"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="w-full max-w-sm"
+            >
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-black">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+                {/* Scanner frame */}
+                <div className="absolute inset-4 border-2 border-primary/50 rounded-xl pointer-events-none">
+                  {[
+                    'top-0 left-0 border-t-4 border-l-4 rounded-tl-xl',
+                    'top-0 right-0 border-t-4 border-r-4 rounded-tr-xl',
+                    'bottom-0 left-0 border-b-4 border-l-4 rounded-bl-xl',
+                    'bottom-0 right-0 border-b-4 border-r-4 rounded-br-xl',
+                  ].map((corner, i) => (
+                    <div
+                      key={i}
+                      className={`absolute w-8 h-8 border-primary ${corner}`}
                     />
-                    Scanning...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <Scan className="w-5 h-5" />
-                    {t('scanReceipt')}
-                  </span>
-                )}
+                  ))}
+                </div>
+              </div>
+              <Button
+                onClick={capturePhoto}
+                className="w-full mt-4 h-14 btn-primary text-primary-foreground"
+              >
+                <Camera className="w-5 h-5 mr-2" />
+                {t('capture') || 'Capture'}
+              </Button>
+              <Button
+                onClick={() => {
+                  stopCamera();
+                  setMode(null);
+                }}
+                variant="ghost"
+                className="w-full mt-2"
+              >
+                {t('cancel') || 'Cancel'}
               </Button>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+
+          {/* Image Preview & Processing */}
+          {imagePreview && (
+            <motion.div
+              key="preview"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="w-full max-w-sm space-y-4"
+            >
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
+                <img
+                  src={imagePreview}
+                  alt="Receipt"
+                  className="w-full h-full object-cover"
+                />
+                {scanning && (
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
+                    <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                    <p className="text-white font-medium">{t('analyzing') || 'Analyzing receipt...'}</p>
+                  </div>
+                )}
+              </div>
+
+              {!scanning && detectedAmount > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="glass-card p-4 space-y-4"
+                >
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {t('detectedAmount') || 'Detected Amount'}
+                    </p>
+                    <p className="text-3xl font-bold gradient-text">
+                      {formatCurrency(detectedAmount)}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>{t('adjustAmount') || 'Adjust amount if needed'}</Label>
+                    <Input
+                      type="number"
+                      value={manualAmount}
+                      onChange={(e) => setManualAmount(e.target.value)}
+                      className="text-center text-lg font-semibold"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleConfirm}
+                    disabled={!selectedGroupId}
+                    className="w-full h-14 btn-primary text-primary-foreground"
+                  >
+                    {t('confirmContribution')}
+                  </Button>
+                  
+                  <Button
+                    onClick={resetScanner}
+                    variant="ghost"
+                    className="w-full"
+                  >
+                    {t('scanAgain') || 'Scan Again'}
+                  </Button>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Hidden canvas for photo capture */}
+      <canvas ref={canvasRef} className="hidden" />
 
       {/* Success celebration */}
       <ContributionSuccess
         isVisible={showSuccess}
-        amount={detectedAmount}
+        amount={manualAmount ? parseFloat(manualAmount) : detectedAmount}
         onComplete={handleSuccessComplete}
       />
     </motion.div>

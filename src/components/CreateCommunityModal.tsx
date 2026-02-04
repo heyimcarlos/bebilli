@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera, Loader2, Compass, TrendingUp, Users, Lightbulb, Upload } from 'lucide-react';
+import { X, Camera, Loader2, Compass, TrendingUp, Users, Lightbulb, Upload, Car, Home, GraduationCap, Laptop, Heart, Shield, Sunset, Sparkles } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -17,10 +17,18 @@ interface CreateCommunityModalProps {
 }
 
 const categories = [
-  { id: 'Travel', icon: Compass },
-  { id: 'Vehicle', icon: TrendingUp },
-  { id: 'Real Estate', icon: Users },
-  { id: 'Education', icon: Lightbulb },
+  { id: 'Travel', icon: Compass, labelKey: 'travel' },
+  { id: 'Vehicle', icon: Car, labelKey: 'vehicle' },
+  { id: 'Real Estate', icon: Home, labelKey: 'realEstate' },
+  { id: 'Education', icon: GraduationCap, labelKey: 'education' },
+  { id: 'Technology', icon: Laptop, labelKey: 'technology' },
+  { id: 'Health', icon: Heart, labelKey: 'health' },
+  { id: 'Investment', icon: TrendingUp, labelKey: 'investment' },
+  { id: 'Emergency', icon: Shield, labelKey: 'emergency' },
+  { id: 'Wedding', icon: Heart, labelKey: 'wedding' },
+  { id: 'Retirement', icon: Sunset, labelKey: 'retirement' },
+  { id: 'Family', icon: Users, labelKey: 'family' },
+  { id: 'Hobby', icon: Sparkles, labelKey: 'hobby' },
 ];
 
 const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onClose, onSubmit }) => {
@@ -79,13 +87,8 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
   };
 
   const getCategoryLabel = (id: string) => {
-    switch (id) {
-      case 'Travel': return t('travel');
-      case 'Vehicle': return t('vehicle');
-      case 'Real Estate': return t('realEstate');
-      case 'Education': return t('education');
-      default: return id;
-    }
+    const key = categories.find(c => c.id === id)?.labelKey || id.toLowerCase();
+    return t(key) || id;
   };
 
   const displayImage = imagePreview || imageUrl;
@@ -191,12 +194,12 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
               {/* Category */}
               <div className="space-y-2">
                 <Label>{t('category')}</Label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
                   {categories.map((cat) => (
                     <Badge
                       key={cat.id}
                       variant={category === cat.id ? 'default' : 'outline'}
-                      className={`cursor-pointer px-4 py-2 ${
+                      className={`cursor-pointer px-3 py-1.5 ${
                         category === cat.id
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-secondary hover:bg-secondary/80'

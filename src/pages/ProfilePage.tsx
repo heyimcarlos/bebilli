@@ -5,11 +5,13 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useGroups } from '@/hooks/useGroups';
+import { useContributions } from '@/hooks/useContributions';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import billiLogo from '@/assets/billi-logo.png';
 import ShareProgressCard from '@/components/ShareProgressCard';
+import ProfileBadges from '@/components/ProfileBadges';
 import {
   Select,
   SelectContent,
@@ -159,6 +161,17 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
         </Button>
       </div>
 
+      {/* Badges Section */}
+      <div className="px-6 mb-6">
+        <ProfileBadges
+          streak={profile?.current_streak || 0}
+          totalContributions={profile?.total_contributions || 0}
+          totalAmount={profile?.max_saved || 0}
+          groupsCount={groups.length}
+          level={profile?.level || 1}
+        />
+      </div>
+
       {/* Settings */}
       <div className="px-6">
         <div className="flex items-center gap-2 mb-4">
@@ -194,18 +207,25 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <DollarSign className="w-5 h-5 text-muted-foreground" />
               <Label>{t('currency')}</Label>
             </div>
-            <Select value={currency} onValueChange={(v) => setCurrency(v as 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP')}>
+            <Select value={currency} onValueChange={(v) => setCurrency(v as any)}>
               <SelectTrigger className="w-36 bg-secondary">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CAD">$ CAD</SelectItem>
+              <SelectContent className="max-h-60">
+                <SelectItem value="CAD">CA$ CAD</SelectItem>
                 <SelectItem value="USD">US$ USD</SelectItem>
                 <SelectItem value="EUR">€ EUR</SelectItem>
                 <SelectItem value="GBP">£ GBP</SelectItem>
                 <SelectItem value="BRL">R$ BRL</SelectItem>
                 <SelectItem value="MXN">MX$ MXN</SelectItem>
                 <SelectItem value="CHF">CHF</SelectItem>
+                <SelectItem value="AUD">A$ AUD</SelectItem>
+                <SelectItem value="JPY">¥ JPY</SelectItem>
+                <SelectItem value="CNY">¥ CNY</SelectItem>
+                <SelectItem value="INR">₹ INR</SelectItem>
+                <SelectItem value="KRW">₩ KRW</SelectItem>
+                <SelectItem value="SGD">S$ SGD</SelectItem>
+                <SelectItem value="NZD">NZ$ NZD</SelectItem>
               </SelectContent>
             </Select>
           </div>

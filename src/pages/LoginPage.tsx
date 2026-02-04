@@ -31,6 +31,44 @@ const LoginPage: React.FC = () => {
     gender: '' as 'M' | 'F' | 'O' | '',
   });
 
+  // Extended countries list
+  const countriesList = [
+    { code: 'CA', name: 'Canada', flag: '🇨🇦' },
+    { code: 'US', name: 'United States', flag: '🇺🇸' },
+    { code: 'MX', name: 'Mexico', flag: '🇲🇽' },
+    { code: 'BR', name: 'Brazil', flag: '🇧🇷' },
+    { code: 'AR', name: 'Argentina', flag: '🇦🇷' },
+    { code: 'CO', name: 'Colombia', flag: '🇨🇴' },
+    { code: 'CL', name: 'Chile', flag: '🇨🇱' },
+    { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+    { code: 'FR', name: 'France', flag: '🇫🇷' },
+    { code: 'DE', name: 'Germany', flag: '🇩🇪' },
+    { code: 'IT', name: 'Italy', flag: '🇮🇹' },
+    { code: 'ES', name: 'Spain', flag: '🇪🇸' },
+    { code: 'PT', name: 'Portugal', flag: '🇵🇹' },
+    { code: 'NL', name: 'Netherlands', flag: '🇳🇱' },
+    { code: 'BE', name: 'Belgium', flag: '🇧🇪' },
+    { code: 'CH', name: 'Switzerland', flag: '🇨🇭' },
+    { code: 'SE', name: 'Sweden', flag: '🇸🇪' },
+    { code: 'NO', name: 'Norway', flag: '🇳🇴' },
+    { code: 'DK', name: 'Denmark', flag: '🇩🇰' },
+    { code: 'PL', name: 'Poland', flag: '🇵🇱' },
+    { code: 'JP', name: 'Japan', flag: '🇯🇵' },
+    { code: 'CN', name: 'China', flag: '🇨🇳' },
+    { code: 'KR', name: 'South Korea', flag: '🇰🇷' },
+    { code: 'IN', name: 'India', flag: '🇮🇳' },
+    { code: 'SG', name: 'Singapore', flag: '🇸🇬' },
+    { code: 'HK', name: 'Hong Kong', flag: '🇭🇰' },
+    { code: 'TH', name: 'Thailand', flag: '🇹🇭' },
+    { code: 'MY', name: 'Malaysia', flag: '🇲🇾' },
+    { code: 'PH', name: 'Philippines', flag: '🇵🇭' },
+    { code: 'AE', name: 'UAE', flag: '🇦🇪' },
+    { code: 'SA', name: 'Saudi Arabia', flag: '🇸🇦' },
+    { code: 'AU', name: 'Australia', flag: '🇦🇺' },
+    { code: 'NZ', name: 'New Zealand', flag: '🇳🇿' },
+    { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -66,25 +104,27 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(145deg, hsl(30 100% 50%) 0%, hsl(25 100% 45%) 50%, hsl(20 100% 40%) 100%)' }}>
       {/* Hero Section */}
       <div className="relative flex-1 flex flex-col items-center justify-center px-6 py-12">
         {/* Glow effect */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-[120px]" />
         
         <div className="relative z-10 text-center mb-8">
-          <img
-            src={billiLogo}
-            alt="Billi"
-            className="w-32 h-32 mx-auto mb-4 animate-float"
-          />
-          
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-4">
-            <span className="text-sm text-primary font-medium">Gamified Social Finance</span>
+          <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-white/20 backdrop-blur-xl p-2 shadow-2xl">
+            <img
+              src={billiLogo}
+              alt="Billi"
+              className="w-full h-full object-contain animate-float drop-shadow-xl"
+            />
           </div>
           
-          <p className="text-muted-foreground text-lg">
-            {t('welcome')}, <span className="gradient-gold-text font-semibold">{t('billionaire')}</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-4">
+            <span className="text-sm text-white font-medium">Gamified Social Finance</span>
+          </div>
+          
+          <p className="text-white/90 text-lg">
+            {t('welcome')}, <span className="text-white font-bold">{t('billionaire')}</span>
           </p>
         </div>
 
@@ -159,11 +199,12 @@ const LoginPage: React.FC = () => {
                       <SelectTrigger className="bg-secondary border-border">
                         <SelectValue placeholder={t('selectCountry')} />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CA">🇨🇦 Canada</SelectItem>
-                        <SelectItem value="US">🇺🇸 USA</SelectItem>
-                        <SelectItem value="BR">🇧🇷 Brazil</SelectItem>
-                        <SelectItem value="FR">🇫🇷 France</SelectItem>
+                      <SelectContent className="max-h-60">
+                        {countriesList.map((country) => (
+                          <SelectItem key={country.code} value={country.code}>
+                            {country.flag} {country.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -222,19 +263,36 @@ const LoginPage: React.FC = () => {
                     <Label>{t('currency')}</Label>
                     <Select
                       value={currency}
-                      onValueChange={(value) => setCurrency(value as 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP')}
+                      onValueChange={(value) => setCurrency(value as any)}
                     >
                       <SelectTrigger className="bg-secondary border-border">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CAD">$ CAD</SelectItem>
+                      <SelectContent className="max-h-60">
+                        <SelectItem value="CAD">CA$ CAD</SelectItem>
                         <SelectItem value="USD">US$ USD</SelectItem>
                         <SelectItem value="EUR">€ EUR</SelectItem>
                         <SelectItem value="GBP">£ GBP</SelectItem>
                         <SelectItem value="BRL">R$ BRL</SelectItem>
                         <SelectItem value="MXN">MX$ MXN</SelectItem>
                         <SelectItem value="CHF">CHF</SelectItem>
+                        <SelectItem value="AUD">A$ AUD</SelectItem>
+                        <SelectItem value="JPY">¥ JPY</SelectItem>
+                        <SelectItem value="CNY">¥ CNY</SelectItem>
+                        <SelectItem value="INR">₹ INR</SelectItem>
+                        <SelectItem value="KRW">₩ KRW</SelectItem>
+                        <SelectItem value="SGD">S$ SGD</SelectItem>
+                        <SelectItem value="HKD">HK$ HKD</SelectItem>
+                        <SelectItem value="NZD">NZ$ NZD</SelectItem>
+                        <SelectItem value="SEK">kr SEK</SelectItem>
+                        <SelectItem value="NOK">kr NOK</SelectItem>
+                        <SelectItem value="DKK">kr DKK</SelectItem>
+                        <SelectItem value="PLN">zł PLN</SelectItem>
+                        <SelectItem value="ZAR">R ZAR</SelectItem>
+                        <SelectItem value="AED">د.إ AED</SelectItem>
+                        <SelectItem value="THB">฿ THB</SelectItem>
+                        <SelectItem value="MYR">RM MYR</SelectItem>
+                        <SelectItem value="PHP">₱ PHP</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteModal from '@/components/InviteModal';
 import QuickWinModal from '@/components/QuickWinModal';
 import EditGroupModal from '@/components/EditGroupModal';
+import PartnerCoupons from '@/components/PartnerCoupons';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter } from '@/components/animations';
 import {
   Dialog,
@@ -376,103 +377,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </TabsContent>
 
           <TabsContent value="dream" className="space-y-4">
-            {/* Thermometer */}
-            <motion.div 
-              className="glass-card p-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Gift className="w-5 h-5 text-primary" />
-                {t('partners')}
-              </h3>
-              
-              <div className="relative h-64 mb-6">
-                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-full bg-secondary rounded-full overflow-hidden">
-                  <motion.div
-                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-accent"
-                    initial={{ height: 0 }}
-                    animate={{ height: `${Math.min(progress, 100)}%` }}
-                    transition={{ duration: 1.5, ease: [0.34, 1.56, 0.64, 1] }}
-                  />
-                </div>
-                
-                {/* Milestones */}
-                {[25, 50, 75, 100].map((milestone, i) => (
-                  <motion.div
-                    key={milestone}
-                    className="absolute left-1/2 -translate-x-1/2 flex items-center"
-                    style={{ bottom: `${milestone - 5}%` }}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + i * 0.1 }}
-                  >
-                    <motion.div 
-                      className={`w-4 h-4 rounded-full ${progress >= milestone ? 'bg-success' : 'bg-muted'} flex items-center justify-center`}
-                      animate={progress >= milestone ? {
-                        scale: [1, 1.3, 1],
-                        boxShadow: [
-                          '0 0 0 0 rgba(34, 197, 94, 0)',
-                          '0 0 0 8px rgba(34, 197, 94, 0.3)',
-                          '0 0 0 0 rgba(34, 197, 94, 0)',
-                        ],
-                      } : undefined}
-                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
-                    >
-                      {progress >= milestone && <Check className="w-3 h-3 text-success-foreground" />}
-                    </motion.div>
-                    <span className="ml-8 text-xs text-muted-foreground whitespace-nowrap">{milestone}%</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Partner Cards */}
-            <motion.div 
-              className="grid grid-cols-2 gap-3"
-              variants={container}
-              initial="hidden"
-              animate="show"
-            >
-              {partners.map((partner, i) => {
-                const isUnlocked = progress >= partner.unlockAt;
-                return (
-                  <motion.button
-                    key={partner.name}
-                    variants={item}
-                    disabled={!isUnlocked}
-                    className={`glass-card p-4 text-center transition-all ${
-                      isUnlocked
-                        ? 'hover:border-primary/50 cursor-pointer'
-                        : 'grayscale opacity-50 cursor-not-allowed'
-                    }`}
-                    whileHover={isUnlocked ? { scale: 1.05, y: -5 } : undefined}
-                    whileTap={isUnlocked ? { scale: 0.95 } : undefined}
-                  >
-                    <motion.div 
-                      className="text-3xl mb-2"
-                      animate={isUnlocked ? { 
-                        rotate: [0, -10, 10, 0],
-                        scale: [1, 1.1, 1],
-                      } : undefined}
-                      transition={{ duration: 0.5, delay: i * 0.2 }}
-                    >
-                      {partner.logo}
-                    </motion.div>
-                    <p className="font-medium text-sm">{partner.name}</p>
-                    <p className={`text-xs ${isUnlocked ? 'text-success' : 'text-muted-foreground'}`}>
-                      {partner.discount}
-                    </p>
-                    {!isUnlocked && (
-                      <div className="flex items-center justify-center gap-1 mt-2 text-xs text-muted-foreground">
-                        <Lock className="w-3 h-3" />
-                        <span>{t('unlockAt')} {partner.unlockAt}%</span>
-                      </div>
-                    )}
-                  </motion.button>
-                );
-              })}
-            </motion.div>
+            {/* Partner Coupons Component */}
+            <PartnerCoupons 
+              userLevel={profile?.level || 1} 
+              groupProgress={progress}
+            />
           </TabsContent>
         </Tabs>
       </div>

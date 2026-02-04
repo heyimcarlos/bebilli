@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Language = 'pt' | 'en' | 'fr' | 'es' | 'it' | 'de';
-export type Currency = 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP';
+export type Currency = 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP' | 'AUD' | 'JPY' | 'CNY' | 'INR' | 'KRW' | 'SGD' | 'HKD' | 'NZD' | 'SEK' | 'NOK' | 'DKK' | 'PLN' | 'ZAR' | 'AED' | 'THB' | 'MYR' | 'PHP';
 
 const STORAGE_KEY_LANGUAGE = 'billi-language';
 const STORAGE_KEY_CURRENCY = 'billi-currency';
@@ -296,6 +296,32 @@ const translations: Record<Language, Record<string, string>> = {
     changeImage: 'Alterar imagem',
     communityCreated: 'Comunidade criada!',
     isNowAvailable: 'está disponível',
+    // New categories
+    technology: 'Tecnologia',
+    health: 'Saúde',
+    investment: 'Investimento',
+    emergency: 'Emergência',
+    wedding: 'Casamento',
+    retirement: 'Aposentadoria',
+    family: 'Família',
+    hobby: 'Hobby',
+    // Scanner
+    selectGroup: 'Selecionar Grupo',
+    useCamera: 'Usar Câmera',
+    uploadFile: 'Enviar Arquivo',
+    capture: 'Capturar',
+    analyzing: 'Analisando comprovante...',
+    detectedAmount: 'Valor Detectado',
+    adjustAmount: 'Ajuste o valor se necessário',
+    scanAgain: 'Escanear Novamente',
+    // Badges
+    achievements: 'Conquistas',
+    nextBadges: 'Próximas conquistas',
+    // Coupons
+    unlockByProgress: 'Desbloqueie pelo progresso do grupo',
+    couponCode: 'Código do Cupom',
+    copyCode: 'Copiar Código',
+    visitPartner: 'Visitar Parceiro',
   },
   en: {
     welcome: 'Welcome',
@@ -519,6 +545,32 @@ const translations: Record<Language, Record<string, string>> = {
     changeImage: 'Change image',
     communityCreated: 'Community created!',
     isNowAvailable: 'is now available',
+    // New categories
+    technology: 'Technology',
+    health: 'Health',
+    investment: 'Investment',
+    emergency: 'Emergency',
+    wedding: 'Wedding',
+    retirement: 'Retirement',
+    family: 'Family',
+    hobby: 'Hobby',
+    // Scanner
+    selectGroup: 'Select Group',
+    useCamera: 'Use Camera',
+    uploadFile: 'Upload File',
+    capture: 'Capture',
+    analyzing: 'Analyzing receipt...',
+    detectedAmount: 'Detected Amount',
+    adjustAmount: 'Adjust amount if needed',
+    scanAgain: 'Scan Again',
+    // Badges
+    achievements: 'Achievements',
+    nextBadges: 'Next badges',
+    // Coupons
+    unlockByProgress: 'Unlock by group progress',
+    couponCode: 'Coupon Code',
+    copyCode: 'Copy Code',
+    visitPartner: 'Visit Partner',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -1327,16 +1379,58 @@ const currencyRates: Record<Currency, number> = {
   MXN: 12.50,
   CHF: 0.65,
   GBP: 0.58,
+  AUD: 1.12,
+  JPY: 110.50,
+  CNY: 5.35,
+  INR: 61.50,
+  KRW: 980.00,
+  SGD: 1.00,
+  HKD: 5.78,
+  NZD: 1.22,
+  SEK: 7.85,
+  NOK: 7.95,
+  DKK: 5.08,
+  PLN: 2.95,
+  ZAR: 13.80,
+  AED: 2.72,
+  THB: 26.50,
+  MYR: 3.45,
+  PHP: 41.20,
 };
 
 const currencySymbols: Record<Currency, string> = {
-  CAD: '$',
+  CAD: 'CA$',
   USD: 'US$',
   EUR: '€',
   BRL: 'R$',
   MXN: 'MX$',
   CHF: 'CHF',
   GBP: '£',
+  AUD: 'A$',
+  JPY: '¥',
+  CNY: '¥',
+  INR: '₹',
+  KRW: '₩',
+  SGD: 'S$',
+  HKD: 'HK$',
+  NZD: 'NZ$',
+  SEK: 'kr',
+  NOK: 'kr',
+  DKK: 'kr',
+  PLN: 'zł',
+  ZAR: 'R',
+  AED: 'د.إ',
+  THB: '฿',
+  MYR: 'RM',
+  PHP: '₱',
+};
+
+const currencyDecimals: Record<Currency, number> = {
+  CAD: 2, USD: 2, EUR: 2, BRL: 2, MXN: 2, CHF: 2, GBP: 2,
+  AUD: 2, NZD: 2, SGD: 2, HKD: 2, ZAR: 2, AED: 2,
+  THB: 2, MYR: 2, PHP: 2, PLN: 2, SEK: 2, NOK: 2, DKK: 2,
+  INR: 2, CNY: 2, 
+  JPY: 0, KRW: 0,
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -1469,7 +1563,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       de: 'de-DE',
     };
     const locale = localeMap[language];
-    return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const decimals = currencyDecimals[currency];
+    return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
   };
 
   const t = (key: string): string => {
