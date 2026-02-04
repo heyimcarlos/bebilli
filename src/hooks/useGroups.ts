@@ -110,14 +110,10 @@ export const useGroups = (userId: string | undefined) => {
         // Check if current user is admin of this group
         const isGroupAdmin = (memberships || []).some(m => m.user_id === userId && m.role === 'admin');
         
-        // Fetch invite code if user is admin (using secure RPC)
-        let inviteCode: string | null = null;
-        if (isGroupAdmin) {
-          const { data: codeData } = await supabase.rpc('get_group_invite_code', {
-            group_uuid: group.id
-          });
-          inviteCode = codeData || null;
-        }
+        // Fetch invite code for all group members (using secure RPC)
+        const { data: inviteCode } = await supabase.rpc('get_group_invite_code', {
+          group_uuid: group.id
+        });
         
         // Fetch profiles from public view (excludes sensitive data like phone)
         const memberUserIds = (memberships || []).map(m => m.user_id);
