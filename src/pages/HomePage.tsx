@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2, ImagePlus, X } from 'lucide-react';
+import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2, ImagePlus, X, Crown } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { validateGoalAmount } from '@/lib/validation';
@@ -8,10 +8,12 @@ import EnhancedGroupCard from '@/components/EnhancedGroupCard';
 import UserStatsCard from '@/components/UserStatsCard';
 import MotivationalBanner from '@/components/MotivationalBanner';
 import DailyChallenge from '@/components/DailyChallenge';
+import PremiumModal from '@/components/PremiumModal';
 import { Button } from '@/components/ui/button';
 import billiLogo from '@/assets/billi-logo.png';
 import JoinGroupModal from '@/components/JoinGroupModal';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import {
   Dialog,
   DialogContent,
@@ -33,10 +35,12 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const { user, profile, groups, groupsLoading, createGroup, joinGroupByCode } = useAuthContext();
   const { toast } = useToast();
   const { uploadGroupImage, uploading } = useImageUpload();
+  const { isPremium, canCreateOrJoinGroup, getRemainingFreeSlots, freeLimit, refresh: refreshPremium } = usePremiumCheck(user?.id);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showBalance, setShowBalance] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [initialCode, setInitialCode] = useState('');
   const [creating, setCreating] = useState(false);
   const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '' });
@@ -84,6 +88,13 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const handleCreateGroup = async () => {
     if (!newGroup.name || !newGroup.goal || !user) return;
     
+    // Check premium limit
+    if (!canCreateOrJoinGroup()) {
+      setCreateModalOpen(false);
+      setPremiumModalOpen(true);
+      return;
+    }
+    
     const goalAmount = validateGoalAmount(newGroup.goal);
     if (goalAmount === null) {
       toast({
@@ -122,10 +133,18 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
       setCreateModalOpen(false);
       setNewGroup({ name: '', goal: '', description: '' });
       clearImage();
+      refreshPremium();
     }
   };
 
   const handleJoinGroup = async (code: string) => {
+    // Check premium limit
+    if (!canCreateOrJoinGroup()) {
+      setJoinModalOpen(false);
+      setPremiumModalOpen(true);
+      return false;
+    }
+    
     const { data, error } = await joinGroupByCode(code);
     
     if (error) {
@@ -143,6 +162,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     });
     setJoinModalOpen(false);
     setInitialCode('');
+    refreshPremium();
     if (data) {
       onGroupClick(data.id);
     }
@@ -259,6 +279,24 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
 
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3 mb-6">
+          {/* Premium indicator */}
+          {!isPremium && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => setPremiumModalOpen(true)}
+              className="col-span-2 flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 mb-2"
+            >
+              <div className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500" />
+                <span className="text-sm font-medium">
+                  {getRemainingFreeSlots()} {t('freeGroupsRemaining') || 'free groups remaining'}
+                </span>
+              </div>
+              <span className="text-xs text-amber-500 font-semibold">{t('goPremium') || 'Go Premium'} →</span>
+            </motion.button>
+          )}
+          
           <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
             <DialogTrigger asChild>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -406,6 +444,13 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
         }}
         onJoinSuccess={handleJoinGroup}
         initialCode={initialCode}
+      />
+
+      {/* Premium Modal */}
+      <PremiumModal
+        isOpen={premiumModalOpen}
+        onClose={() => setPremiumModalOpen(false)}
+        reason="group_limit"
       />
     </div>
   );

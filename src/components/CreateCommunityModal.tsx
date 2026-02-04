@@ -29,6 +29,14 @@ const categories = [
   { id: 'Retirement', icon: Sunset, labelKey: 'retirement' },
   { id: 'Family', icon: Users, labelKey: 'family' },
   { id: 'Hobby', icon: Sparkles, labelKey: 'hobby' },
+  { id: 'Business', icon: TrendingUp, labelKey: 'business' },
+  { id: 'Fashion', icon: Sparkles, labelKey: 'fashion' },
+  { id: 'Sports', icon: Heart, labelKey: 'sports' },
+  { id: 'Entertainment', icon: Sparkles, labelKey: 'entertainment' },
+  { id: 'Pets', icon: Heart, labelKey: 'pets' },
+  { id: 'Food', icon: Sparkles, labelKey: 'food' },
+  { id: 'Art', icon: Sparkles, labelKey: 'art' },
+  { id: 'Music', icon: Sparkles, labelKey: 'music' },
 ];
 
 const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onClose, onSubmit }) => {
