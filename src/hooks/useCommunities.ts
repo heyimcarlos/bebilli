@@ -167,8 +167,9 @@ export const useCommunityPosts = (communityId: string, userId?: string) => {
 
       // Fetch profiles for the posts
       const userIds = [...new Set(data?.map(p => p.user_id) || [])];
+      // Use profiles_public view to exclude sensitive PII (phone, country, city)
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_public')
         .select('id, name, avatar_url')
         .in('id', userIds);
 
