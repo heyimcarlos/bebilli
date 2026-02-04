@@ -50,18 +50,18 @@ const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, groupName, i
   };
 
   const shareToWhatsApp = () => {
-    const url = `https://wa.me/?text=${encodeURIComponent(inviteMessage)}`;
-    window.open(url, '_blank');
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(inviteMessage)}`;
+    window.location.href = url;
   };
 
   const shareToTelegram = () => {
     const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(inviteMessage)}`;
-    window.open(url, '_blank');
+    window.location.href = url;
   };
 
   const shareToTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(inviteMessage)}`;
-    window.open(url, '_blank');
+    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(inviteMessage)}`;
+    window.location.href = url;
   };
 
   const handleNativeShare = async () => {
