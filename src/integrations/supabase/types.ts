@@ -587,6 +587,10 @@ export type Database = {
       }
       is_group_admin: { Args: { group_uuid: string }; Returns: boolean }
       is_group_member: { Args: { group_uuid: string }; Returns: boolean }
+      shares_community_with: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       shares_group_with: { Args: { target_user_id: string }; Returns: boolean }
     }
     Enums: {
