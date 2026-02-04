@@ -1,40 +1,109 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Check, Gift, Clock } from 'lucide-react';
+import { Target, Check, Gift, Clock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
 
 interface DailyChallengeProps {
   hasContributedToday: boolean;
   onContribute: () => void;
+  totalGoal?: number; // Sum of all user's group goals
+  userName?: string;
 }
 
 const DailyChallenge: React.FC<DailyChallengeProps> = ({ 
   hasContributedToday,
-  onContribute 
+  onContribute,
+  totalGoal = 0,
+  userName = ''
 }) => {
   const { formatCurrency, t } = useApp();
   const [timeLeft, setTimeLeft] = useState('');
-  const [todayChallengeIndex, setTodayChallengeIndex] = useState(0);
-
-  // Challenge definitions using translation keys
-  const getChallenges = () => [
-    { id: 1, titleKey: 'save5Today', amount: 5, reward: '🌟 5 XP' },
-    { id: 2, titleKey: 'save10Today', amount: 10, reward: '⭐ 10 XP' },
-    { id: 3, titleKey: 'makeAnyContribution', amount: 1, reward: '💫 2 XP' },
-    { id: 4, titleKey: 'save20Today', amount: 20, reward: '🚀 20 XP' },
-    { id: 5, titleKey: 'keepStreakAlive', amount: 1, reward: '🔥 Streak Bonus' },
-  ];
-
-  const challenges = getChallenges();
+  const [todayChallenge, setTodayChallenge] = useState<{
+    title: string;
+    amount: number;
+    reward: string;
+    description: string;
+  } | null>(null);
 
   useEffect(() => {
-    // Get consistent daily challenge based on date
-    const today = new Date();
-    const dayOfYear = Math.floor(
-      (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
-    );
-    setTodayChallengeIndex(dayOfYear % challenges.length);
+    // Calculate dynamic challenge based on user's goals
+    const generateDynamicChallenge = () => {
+      const today = new Date();
+      const dayOfYear = Math.floor(
+        (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
+      );
+      
+      // Base challenge on 0.5% of total goal (minimum $1, maximum $100)
+      const baseAmount = totalGoal > 0 ? Math.max(1, Math.min(100, totalGoal * 0.005)) : 5;
+      
+      // Variation factors based on day
+      const variations = [
+        { multiplier: 1.0, type: 'standard' },
+        { multiplier: 0.5, type: 'easy' },
+        { multiplier: 1.5, type: 'ambitious' },
+        { multiplier: 0.75, type: 'balanced' },
+        { multiplier: 2.0, type: 'challenge' },
+        { multiplier: 0.25, type: 'micro' },
+        { multiplier: 1.25, type: 'growth' },
+      ];
+      
+      const variationIndex = dayOfYear % variations.length;
+      const variation = variations[variationIndex];
+      const finalAmount = Math.round(baseAmount * variation.multiplier * 100) / 100;
+      
+      // Dynamic challenge titles based on type
+      const challengeTemplates = {
+        standard: {
+          title: t('dailySaveChallenge') || `Save ${formatCurrency(finalAmount)} today`,
+          description: t('standardChallengeDesc') || 'A balanced step towards your dreams',
+          reward: '⭐ 10 XP'
+        },
+        easy: {
+          title: t('easyDayChallenge') || `Quick save: ${formatCurrency(finalAmount)}`,
+          description: t('easyChallengeDesc') || 'Small steps lead to big achievements',
+          reward: '💫 5 XP'
+        },
+        ambitious: {
+          title: t('ambitiousChallenge') || `Big push: ${formatCurrency(finalAmount)}`,
+          description: t('ambitiousChallengeDesc') || 'Challenge yourself to reach higher',
+          reward: '🚀 15 XP'
+        },
+        balanced: {
+          title: t('balancedChallenge') || `Steady save: ${formatCurrency(finalAmount)}`,
+          description: t('balancedChallengeDesc') || 'Consistency is the key to success',
+          reward: '🌟 8 XP'
+        },
+        challenge: {
+          title: t('doubleChallenge') || `Power day: ${formatCurrency(finalAmount)}`,
+          description: t('doubleChallengeDesc') || 'Push your limits today!',
+          reward: '🔥 20 XP + Streak Bonus'
+        },
+        micro: {
+          title: t('microChallenge') || `Micro save: ${formatCurrency(finalAmount)}`,
+          description: t('microChallengeDesc') || 'Every cent counts on your journey',
+          reward: '✨ 3 XP'
+        },
+        growth: {
+          title: t('growthChallenge') || `Growth step: ${formatCurrency(finalAmount)}`,
+          description: t('growthChallengeDesc') || 'Invest in your future self',
+          reward: '📈 12 XP'
+        }
+      };
+      
+      const template = challengeTemplates[variation.type as keyof typeof challengeTemplates];
+      
+      setTodayChallenge({
+        title: totalGoal > 0 
+          ? `${t('save') || 'Save'} ${formatCurrency(finalAmount)} ${t('today') || 'today'}`
+          : template.title,
+        amount: finalAmount,
+        reward: template.reward,
+        description: template.description
+      });
+    };
+
+    generateDynamicChallenge();
 
     // Update countdown
     const updateCountdown = () => {
@@ -53,9 +122,14 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
     updateCountdown();
     const interval = setInterval(updateCountdown, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [totalGoal, formatCurrency, t]);
 
-  const todayChallenge = challenges[todayChallengeIndex];
+  if (!todayChallenge) return null;
+
+  // Calculate progress percentage towards today's challenge
+  const progressPercentage = totalGoal > 0 
+    ? Math.min(100, (todayChallenge.amount / totalGoal) * 100 * 200) 
+    : 0;
 
   return (
     <motion.div
@@ -84,8 +158,13 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
             <Target className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">{t('dailyChallenge')}</p>
-            <p className="font-semibold text-foreground text-sm">{t(todayChallenge.titleKey)}</p>
+            <div className="flex items-center gap-1">
+              <p className="text-xs text-muted-foreground">{t('dailyChallenge')}</p>
+              {totalGoal > 0 && (
+                <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+              )}
+            </div>
+            <p className="font-semibold text-foreground text-sm">{todayChallenge.title}</p>
           </div>
         </div>
         
@@ -94,6 +173,16 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
           <span>{timeLeft}</span>
         </div>
       </div>
+
+      {/* Progress indicator for personalized challenges */}
+      {totalGoal > 0 && !hasContributedToday && (
+        <div className="mb-3">
+          <p className="text-xs text-muted-foreground mb-1">{todayChallenge.description}</p>
+          <div className="text-xs text-muted-foreground">
+            <span className="text-primary font-medium">0.5%</span> {t('ofYourGoal') || 'of your total goal'}
+          </div>
+        </div>
+      )}
 
       {hasContributedToday ? (
         <motion.div

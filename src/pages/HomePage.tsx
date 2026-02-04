@@ -59,6 +59,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   }, []);
 
   const totalBalance = groups.reduce((sum, g) => sum + g.current_amount, 0);
+  const totalGoal = groups.reduce((sum, g) => sum + g.goal_amount, 0);
 
   // Check if user contributed today
   const hasContributedToday = profile?.last_contribution_at 
@@ -275,6 +276,8 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
         <DailyChallenge 
           hasContributedToday={hasContributedToday}
           onContribute={handleDailyChallengeContribute}
+          totalGoal={totalGoal}
+          userName={profile?.name}
         />
 
         {/* Actions */}

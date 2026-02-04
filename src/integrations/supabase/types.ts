@@ -145,6 +145,13 @@ export type Database = {
             foreignKeyName: "contributions_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
+            referencedRelation: "groups_member_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contributions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
             referencedRelation: "groups_public"
             referencedColumns: ["id"]
           },
@@ -178,6 +185,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_memberships_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups_member_view"
             referencedColumns: ["id"]
           },
           {
@@ -458,6 +472,39 @@ export type Database = {
       }
     }
     Views: {
+      groups_member_view: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          goal_amount: number | null
+          id: string | null
+          image_url: string | null
+          name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          goal_amount?: number | null
+          id?: string | null
+          image_url?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          goal_amount?: number | null
+          id?: string | null
+          image_url?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       groups_public: {
         Row: {
           created_at: string | null
@@ -526,6 +573,7 @@ export type Database = {
       }
     }
     Functions: {
+      get_group_invite_code: { Args: { group_uuid: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
