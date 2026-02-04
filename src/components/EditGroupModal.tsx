@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, ImagePlus, X, Pencil } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
-import { validateGoalAmount } from '@/lib/validation';
-import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +21,7 @@ interface EditGroupModalProps {
   currentDescription: string | null;
   currentImageUrl: string | null;
   currentGoalAmount: number;
-  onSave: (updates: { name?: string; description?: string; image_url?: string; goal_amount?: number }) => Promise<{ error: Error | null }>;
+  onSave: (updates: { name?: string; description?: string; image_url?: string }) => Promise<{ error: Error | null }>;
   userId: string;
 }
 
@@ -39,13 +37,11 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
   userId,
 }) => {
   const { t } = useApp();
-  const { toast } = useToast();
   const { uploadGroupImage, uploading } = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [name, setName] = useState(currentName);
   const [description, setDescription] = useState(currentDescription || '');
-  const [goalAmount, setGoalAmount] = useState(currentGoalAmount.toString());
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(currentImageUrl);
   const [saving, setSaving] = useState(false);
@@ -55,11 +51,10 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
     if (isOpen) {
       setName(currentName);
       setDescription(currentDescription || '');
-      setGoalAmount(currentGoalAmount.toString());
       setImagePreview(currentImageUrl);
       setSelectedImage(null);
     }
-  }, [isOpen, currentName, currentDescription, currentGoalAmount, currentImageUrl]);
+  }, [isOpen, currentName, currentDescription, currentImageUrl]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,19 +77,6 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
   };
 
   const handleSave = async () => {
-    // Validate goal amount if it changed
-    if (goalAmount !== currentGoalAmount.toString()) {
-      const validatedGoal = validateGoalAmount(goalAmount);
-      if (validatedGoal === null) {
-        toast({
-          title: t('error'),
-          description: 'Please enter a valid goal amount between $1 and $1,000,000,000',
-          variant: 'destructive',
-        });
-        return;
-      }
-    }
-    
     setSaving(true);
     
     let imageUrl: string | undefined;
@@ -106,18 +88,11 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
       }
     }
     
-    const updates: { name?: string; description?: string; image_url?: string; goal_amount?: number } = {};
+    const updates: { name?: string; description?: string; image_url?: string } = {};
     
     if (name !== currentName) updates.name = name;
     if (description !== (currentDescription || '')) updates.description = description;
     if (imageUrl) updates.image_url = imageUrl;
-    
-    if (goalAmount !== currentGoalAmount.toString()) {
-      const validatedGoal = validateGoalAmount(goalAmount);
-      if (validatedGoal !== null) {
-        updates.goal_amount = validatedGoal;
-      }
-    }
     
     const { error } = await onSave(updates);
     setSaving(false);
@@ -190,15 +165,13 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
             />
           </div>
           
+          {/* Goal amount is fixed and cannot be changed */}
           <div className="space-y-2">
             <Label>{t('goalAmount')} ($)</Label>
-            <Input 
-              type="number" 
-              placeholder="50000" 
-              className="bg-secondary"
-              value={goalAmount}
-              onChange={(e) => setGoalAmount(e.target.value)}
-            />
+            <div className="px-3 py-2 bg-secondary/50 rounded-md text-muted-foreground border border-border">
+              {currentGoalAmount.toLocaleString()}
+              <span className="text-xs ml-2 text-muted-foreground/70">({t('cannotBeChanged') || 'Cannot be changed'})</span>
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -214,7 +187,7 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
           
           <Button
             onClick={handleSave}
-            disabled={saving || uploading || !name || !goalAmount}
+            disabled={saving || uploading || !name}
             className="w-full btn-primary text-primary-foreground"
           >
             {saving || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('saveChanges')}

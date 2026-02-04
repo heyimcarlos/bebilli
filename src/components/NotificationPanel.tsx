@@ -73,8 +73,13 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose, 
             )}
           </div>
           <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-secondary flex items-center justify-center transition-colors"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="w-10 h-10 rounded-full bg-secondary hover:bg-secondary/80 flex items-center justify-center transition-colors cursor-pointer z-10"
+            aria-label="Close notifications"
           >
             <X className="w-5 h-5" />
           </button>
