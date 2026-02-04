@@ -46,8 +46,33 @@ const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [showPartnerForm, setShowPartnerForm] = useState(false);
   const [showCouponForm, setShowCouponForm] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   const categories = ['travel', 'food', 'shopping', 'entertainment', 'health', 'education', 'finance', 'technology'];
+
+  // Check admin authorization before rendering
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setIsAuthorized(false);
+        return;
+      }
+
+      // Check if user has admin role in user_roles table
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      setIsAuthorized(!!roleData);
+    };
+
+    checkAdminAccess();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -64,8 +89,30 @@ const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthorized) {
+      fetchData();
+    }
+  }, [isAuthorized]);
+
+  // Show loading while checking authorization
+  if (isAuthorized === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Redirect unauthorized users (show generic page to avoid feature enumeration)
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <h1 className="text-2xl font-bold mb-2">Page Not Found</h1>
+        <p className="text-muted-foreground mb-4">The page you're looking for doesn't exist.</p>
+        <Button onClick={onBack}>Go Back</Button>
+      </div>
+    );
+  }
 
   const handleSavePartner = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
