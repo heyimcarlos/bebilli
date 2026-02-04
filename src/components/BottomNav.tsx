@@ -1,16 +1,15 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Scan, Compass, EyeOff } from 'lucide-react';
+import { Home, Scan, Compass } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import billiLogo from '@/assets/billi-logo.png';
 
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  onOpenHiddenGroups?: () => void;
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, onOpenHiddenGroups }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   const { t } = useApp();
 
   const tabs = [
@@ -27,18 +26,6 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, onOpenHid
       transition={{ type: 'spring', damping: 20 }}
     >
       <div className="flex items-center justify-around px-4 py-2 max-w-md mx-auto relative">
-        {/* Hidden Groups Button */}
-        {onOpenHiddenGroups && (
-          <motion.button
-            onClick={onOpenHiddenGroups}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            title={t('hiddenGroups') || 'Hidden Groups'}
-          >
-            <EyeOff className="w-4 h-4" />
-          </motion.button>
-        )}
 
         {tabs.map((tab, index) => (
           <motion.button
