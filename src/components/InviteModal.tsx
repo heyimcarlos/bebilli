@@ -128,7 +128,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, groupName, i
             ) : (
               <div className="bg-secondary px-6 py-3 rounded-xl">
                 <p className="text-sm text-muted-foreground">
-                  {language === 'pt' ? 'Apenas administradores podem ver o código' : 'Only admins can view the code'}
+                  {language === 'pt' ? 'Código não disponível' : 'Code not available'}
                 </p>
               </div>
             )}
