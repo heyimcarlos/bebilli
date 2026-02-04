@@ -11,6 +11,7 @@ import InviteModal from '@/components/InviteModal';
 import QuickWinModal from '@/components/QuickWinModal';
 import EditGroupModal from '@/components/EditGroupModal';
 import PartnerCoupons from '@/components/PartnerCoupons';
+import GroupActionsMenu from '@/components/GroupActionsMenu';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter } from '@/components/animations';
 import {
   Dialog,
@@ -29,7 +30,7 @@ const QUICK_AMOUNTS = [5, 10, 20, 50, 100];
 
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const { t, formatCurrency } = useApp();
-  const { groups, profile, addContribution, refreshGroups, updateGroup, user } = useAuthContext();
+  const { groups, profile, addContribution, refreshGroups, updateGroup, leaveGroup, deleteGroup, hideGroup, user } = useAuthContext();
   const { toast } = useToast();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ id: string; name: string; content: string; isBot?: boolean }>>([]);
@@ -188,6 +189,15 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               >
                 <Share2 className="w-5 h-5 text-primary-foreground" />
               </motion.button>
+              <GroupActionsMenu
+                groupId={group.id}
+                groupName={group.name}
+                isAdmin={isAdmin}
+                onHide={() => hideGroup(group.id)}
+                onLeave={() => leaveGroup(group.id)}
+                onDelete={() => deleteGroup(group.id)}
+                onBack={onBack}
+              />
             </div>
           </div>
           
