@@ -289,12 +289,27 @@ export const useGroups = (userId: string | undefined) => {
     return { error };
   };
 
-  const updateGroup = async (groupId: string, updates: { name?: string; description?: string; image_url?: string; goal_amount?: number }) => {
+  // Note: goal_amount cannot be changed after group creation
+  const updateGroup = async (groupId: string, updates: { name?: string; description?: string; image_url?: string }) => {
     if (!userId) return { error: new Error('Not authenticated') };
+
+    // Ensure goal_amount is never included in updates
+    const safeUpdates = {
+      name: updates.name,
+      description: updates.description,
+      image_url: updates.image_url,
+    };
+
+    // Remove undefined values
+    Object.keys(safeUpdates).forEach(key => {
+      if (safeUpdates[key as keyof typeof safeUpdates] === undefined) {
+        delete safeUpdates[key as keyof typeof safeUpdates];
+      }
+    });
 
     const { data, error } = await supabase
       .from('groups')
-      .update(updates)
+      .update(safeUpdates)
       .eq('id', groupId)
       .select()
       .single();
