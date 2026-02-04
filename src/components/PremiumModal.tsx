@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, X, Check, Sparkles, Zap, Shield, Infinity } from 'lucide-react';
+import { Crown, X, Check, Sparkles, Zap, Shield, Infinity, Tag, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useApp } from '@/contexts/AppContext';
+import { useSubscriptionCoupon } from '@/hooks/useSubscriptionCoupon';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -13,6 +15,9 @@ interface PremiumModalProps {
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = 'group_limit' }) => {
   const { t, formatPremiumPrice } = useApp();
   const PREMIUM_PRICE_CAD = 5.90;
+  const [couponCode, setCouponCode] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const { loading, appliedCoupon, validateCoupon, clearCoupon, calculateDiscount, getDiscountLabel } = useSubscriptionCoupon();
 
   const features = [
     { icon: Infinity, text: t('unlimitedGroups') || 'Unlimited groups', highlight: reason === 'group_limit' },
@@ -21,6 +26,23 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
     { icon: Shield, text: t('advancedAnalytics') || 'Advanced analytics' },
     { icon: Crown, text: t('earlyAccess') || 'Early access to features' },
   ];
+
+  const handleApplyCoupon = async () => {
+    setCouponError('');
+    const result = await validateCoupon(couponCode);
+    if (!result.valid) {
+      setCouponError(result.error || 'Invalid coupon');
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    clearCoupon();
+    setCouponCode('');
+    setCouponError('');
+  };
+
+  const finalPrice = calculateDiscount(PREMIUM_PRICE_CAD);
+  const hasDiscount = appliedCoupon?.valid && finalPrice < PREMIUM_PRICE_CAD;
 
   if (!isOpen) return null;
 
@@ -38,7 +60,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-md bg-card border border-border rounded-3xl overflow-hidden"
+          className="relative w-full max-w-md bg-card border border-border rounded-3xl overflow-hidden max-h-[90vh] overflow-y-auto"
         >
           {/* Premium gradient header */}
           <div className="relative h-32 bg-gradient-to-br from-amber-500 via-orange-500 to-red-500">
@@ -106,17 +128,101 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
                   <span className={`text-sm ${feature.highlight ? 'font-semibold' : ''}`}>
                     {feature.text}
                   </span>
-                  <Check className={`w-4 h-4 ml-auto ${feature.highlight ? 'text-primary' : 'text-success'}`} />
+                  <Check className={`w-4 h-4 ml-auto ${feature.highlight ? 'text-primary' : 'text-green-500'}`} />
                 </motion.div>
               ))}
             </div>
 
+            {/* Coupon Section */}
+            <div className="mb-6 p-4 rounded-xl bg-secondary/30 border border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <Tag className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">{t('haveCoupon') || 'Have a coupon code?'}</span>
+              </div>
+              
+              {appliedCoupon?.valid ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/30"
+                >
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <div>
+                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                        {appliedCoupon.code} - {getDiscountLabel()}
+                      </p>
+                      {appliedCoupon.description && (
+                        <p className="text-xs text-muted-foreground">{appliedCoupon.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemoveCoupon}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </motion.div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder={t('enterCouponCode') || 'Enter coupon code'}
+                    className="uppercase"
+                    maxLength={20}
+                  />
+                  <Button
+                    onClick={handleApplyCoupon}
+                    disabled={loading || !couponCode.trim()}
+                    variant="outline"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      t('apply') || 'Apply'
+                    )}
+                  </Button>
+                </div>
+              )}
+              
+              {couponError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 mt-2 text-destructive"
+                >
+                  <XCircle className="w-4 h-4" />
+                  <span className="text-xs">{couponError}</span>
+                </motion.div>
+              )}
+            </div>
+
             {/* Price */}
             <div className="text-center mb-6">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-bold text-primary">{formatPremiumPrice(PREMIUM_PRICE_CAD)}</span>
+              <div className="flex items-baseline justify-center gap-2">
+                {hasDiscount && (
+                  <span className="text-xl text-muted-foreground line-through">
+                    {formatPremiumPrice(PREMIUM_PRICE_CAD)}
+                  </span>
+                )}
+                <span className={`text-4xl font-bold ${hasDiscount ? 'text-green-500' : 'text-primary'}`}>
+                  {formatPremiumPrice(finalPrice)}
+                </span>
                 <span className="text-muted-foreground">/{t('month') || 'month'}</span>
               </div>
+              {hasDiscount && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-green-500 font-medium mt-1"
+                >
+                  🎉 {t('youSave') || 'You save'} {formatPremiumPrice(PREMIUM_PRICE_CAD - finalPrice)}!
+                </motion.p>
+              )}
               <p className="text-xs text-muted-foreground mt-1">
                 {t('cancelAnytime') || 'Cancel anytime'}
               </p>
