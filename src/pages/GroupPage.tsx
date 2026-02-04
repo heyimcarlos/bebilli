@@ -12,7 +12,7 @@ import QuickWinModal from '@/components/QuickWinModal';
 import EditGroupModal from '@/components/EditGroupModal';
 import PartnerCoupons from '@/components/PartnerCoupons';
 import GroupActionsMenu from '@/components/GroupActionsMenu';
-import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter } from '@/components/animations';
+import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
 import {
   Dialog,
   DialogContent,
@@ -275,62 +275,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </TabsList>
 
           <TabsContent value="ranking">
-            <motion.div
-              variants={container}
-              initial="hidden"
-              animate="show"
-              className="space-y-3"
-            >
-              {group.members.length === 0 ? (
-                <div className="glass-card p-8 text-center">
-                  <p className="text-muted-foreground">{t('noMembersYet')}</p>
-                </div>
-              ) : (
-                group.members.map((member, index) => (
-                  <motion.div
-                    key={member.id}
-                    variants={item}
-                    className={`glass-card p-4 flex items-center gap-4 ${member.user_id === profile?.id ? 'border-primary/50' : ''}`}
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                  >
-                    {index === 0 ? (
-                      <AnimatedBadge type="rocket" size="md" />
-                    ) : (
-                      <motion.div 
-                        className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center font-bold text-muted-foreground"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                      >
-                        {index + 1}
-                      </motion.div>
-                    )}
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        {member.profile.name}
-                        {member.user_id === profile?.id && (
-                          <span className="text-xs text-primary ml-2">{t('youUser')}</span>
-                        )}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {t('yourContribution')}: {formatCurrency(member.total_contribution)}
-                      </p>
-                    </div>
-                    
-                    <motion.span 
-                      className={`text-sm font-semibold ${index === 0 ? 'gradient-gold-text' : 'text-primary'}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                    >
-                      {formatCurrency(member.total_contribution)}
-                    </motion.span>
-                  </motion.div>
-                ))
-              )}
-            </motion.div>
+            <AnimatedLeaderboard
+              members={group.members}
+              currentUserId={profile?.id}
+              formatCurrency={formatCurrency}
+            />
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-4">

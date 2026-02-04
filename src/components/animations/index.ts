@@ -4,3 +4,5 @@ export { default as ContributionSuccess } from './ContributionSuccess';
 export { default as AnimatedBadge } from './AnimatedBadge';
 export { default as AnimatedProgressBar } from './AnimatedProgressBar';
 export { default as AnimatedCounter } from './AnimatedCounter';
+export { default as AnimatedLeaderboard } from './AnimatedLeaderboard';
+export { default as StreakDisplay } from './StreakDisplay';
