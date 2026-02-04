@@ -201,75 +201,55 @@ export const useGroups = (userId: string | undefined) => {
   const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string) => {
     if (!userId) return { error: new Error('Not authenticated') };
 
-    // Create the group
-    const { data: group, error: groupError } = await supabase
-      .from('groups')
-      .insert({
-        name,
-        description: description || null,
-        goal_amount: goalAmount,
-        image_url: imageUrl || null,
-        created_by: userId,
-      })
-      .select()
-      .single();
+    // Use the secure database function to create group atomically
+    const { data, error } = await supabase.rpc('create_group_with_admin', {
+      group_name: name,
+      group_goal_amount: goalAmount,
+      group_image_url: imageUrl || null,
+      group_description: description || null,
+    });
 
-    if (groupError || !group) return { error: groupError };
+    if (error) {
+      console.error('Error creating group:', error);
+      return { error: new Error(error.message) };
+    }
 
-    // Add creator as admin
-    const { error: membershipError } = await supabase
-      .from('group_memberships')
-      .insert({
-        group_id: group.id,
-        user_id: userId,
-        role: 'admin',
-      });
+    const result = data as { success: boolean; error?: string; group_id?: string; group_name?: string; invite_code?: string };
 
-    if (membershipError) return { error: membershipError };
+    if (!result.success) {
+      return { error: new Error(result.error || 'Failed to create group') };
+    }
 
     await fetchGroups();
-    return { data: group, error: null };
+    return { 
+      data: { id: result.group_id, name: result.group_name, invite_code: result.invite_code }, 
+      error: null 
+    };
   };
 
   const joinGroupByCode = async (inviteCode: string) => {
     if (!userId) return { error: new Error('Not authenticated') };
 
-    // Find group by invite code
-    const { data: group, error: groupError } = await supabase
-      .from('groups')
-      .select('*')
-      .eq('invite_code', inviteCode.toUpperCase())
-      .maybeSingle();
+    // Use the secure database function to join by code
+    const { data, error } = await supabase.rpc('join_group_by_invite_code', {
+      invite_code_input: inviteCode.toUpperCase()
+    });
 
-    if (groupError || !group) {
-      return { error: new Error('Invalid invite code') };
+    if (error) {
+      return { error: new Error(error.message) };
     }
 
-    // Check if already a member
-    const { data: existing } = await supabase
-      .from('group_memberships')
-      .select('id')
-      .eq('group_id', group.id)
-      .eq('user_id', userId)
-      .maybeSingle();
+    const result = data as { success: boolean; error?: string; group_id?: string; group_name?: string };
 
-    if (existing) {
-      return { error: new Error('Already a member of this group') };
+    if (!result.success) {
+      return { error: new Error(result.error || 'Failed to join group') };
     }
-
-    // Join the group
-    const { error: joinError } = await supabase
-      .from('group_memberships')
-      .insert({
-        group_id: group.id,
-        user_id: userId,
-        role: 'member',
-      });
-
-    if (joinError) return { error: joinError };
 
     await fetchGroups();
-    return { data: group, error: null };
+    return { 
+      data: { id: result.group_id, name: result.group_name }, 
+      error: null 
+    };
   };
 
   const addContribution = async (groupId: string, amount: number, note?: string) => {

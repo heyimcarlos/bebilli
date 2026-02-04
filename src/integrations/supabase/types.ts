@@ -573,6 +573,15 @@ export type Database = {
       }
     }
     Functions: {
+      create_group_with_admin: {
+        Args: {
+          group_description?: string
+          group_goal_amount: number
+          group_image_url?: string
+          group_name: string
+        }
+        Returns: Json
+      }
       get_group_invite_code: { Args: { group_uuid: string }; Returns: string }
       has_role: {
         Args: {
@@ -587,6 +596,10 @@ export type Database = {
       }
       is_group_admin: { Args: { group_uuid: string }; Returns: boolean }
       is_group_member: { Args: { group_uuid: string }; Returns: boolean }
+      join_group_by_invite_code: {
+        Args: { invite_code_input: string }
+        Returns: Json
+      }
       shares_community_with: {
         Args: { target_user_id: string }
         Returns: boolean
