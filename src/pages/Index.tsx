@@ -20,6 +20,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import { Loader2, User, EyeOff } from 'lucide-react';
+import VIPCard from '@/components/VIPCard';
 
 const AppContent: React.FC = () => {
   const { formatCurrency, t } = useApp();
@@ -201,6 +202,7 @@ const AppContent: React.FC = () => {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 0.3 }}
       >
+        <VIPCard />
         <motion.button
           onClick={() => setShowHiddenGroups(true)}
           className="w-10 h-10 rounded-full bg-card shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card/90 transition-all"
