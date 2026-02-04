@@ -1,12 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2 } from 'lucide-react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { useGroups } from '@/hooks/useGroups';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import billiLogo from '@/assets/billi-logo.png';
+import ShareProgressCard from '@/components/ShareProgressCard';
 import {
   Select,
   SelectContent,
@@ -22,9 +24,20 @@ interface ProfilePageProps {
 const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const { t, language, setLanguage, currency, setCurrency, formatCurrency } = useApp();
   const { profile, user, updateProfile } = useAuthContext();
+  const { groups } = useGroups(user?.id);
   const { uploadAvatar, uploading } = useImageUpload();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showShareCard, setShowShareCard] = useState(false);
+
+  // Calculate stats for sharing
+  const shareStats = {
+    totalSaved: profile?.max_saved || 0,
+    level: profile?.level || 1,
+    streak: profile?.current_streak || 0,
+    groupsCount: groups.length,
+    contributionsCount: profile?.total_contributions || 0,
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -133,6 +146,15 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
             <p className="text-xs text-muted-foreground">{t('maxSaved')}</p>
           </div>
         </div>
+
+        {/* Share Progress Button */}
+        <Button
+          onClick={() => setShowShareCard(true)}
+          className="w-full mt-4 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+        >
+          <Share2 className="w-5 h-5 mr-2" />
+          {t('shareProgress')}
+        </Button>
       </div>
 
       {/* Settings */}
@@ -196,6 +218,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
           {t('signOut')}
         </Button>
       </div>
+
+      {/* Share Progress Modal */}
+      <ShareProgressCard
+        isOpen={showShareCard}
+        onClose={() => setShowShareCard(false)}
+        stats={shareStats}
+      />
     </div>
   );
 };
