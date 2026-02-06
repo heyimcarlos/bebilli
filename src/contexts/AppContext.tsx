@@ -374,6 +374,7 @@ const translations: Record<Language, Record<string, string>> = {
     music: 'Música',
     gamifiedSocialFinance: 'Finanças Sociais Gamificadas',
     saveTogether: 'Billi - Economize Junto',
+    saveTogetherShort: 'Economize Junto',
   },
   en: {
     welcome: 'Welcome',
@@ -675,6 +676,7 @@ const translations: Record<Language, Record<string, string>> = {
     music: 'Music',
     gamifiedSocialFinance: 'Gamified Social Finance',
     saveTogether: 'Billi - Save Together',
+    saveTogetherShort: 'Save Together',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -903,6 +905,7 @@ const translations: Record<Language, Record<string, string>> = {
     isNowAvailable: 'est maintenant disponible',
     gamifiedSocialFinance: 'Finance Sociale Gamifiée',
     saveTogether: 'Billi - Épargnez Ensemble',
+    saveTogetherShort: 'Épargnez Ensemble',
   },
   es: {
     welcome: 'Bienvenido',
@@ -1099,6 +1102,7 @@ const translations: Record<Language, Record<string, string>> = {
     isNowAvailable: 'ya está disponible',
     gamifiedSocialFinance: 'Finanzas Sociales Gamificadas',
     saveTogether: 'Billi - Ahorra Junto',
+    saveTogetherShort: 'Ahorra Junto',
   },
   it: {
     welcome: 'Benvenuto',
@@ -1295,6 +1299,7 @@ const translations: Record<Language, Record<string, string>> = {
     isNowAvailable: 'è ora disponibile',
     gamifiedSocialFinance: 'Finanza Sociale Gamificata',
     saveTogether: 'Billi - Risparmia Insieme',
+    saveTogetherShort: 'Risparmia Insieme',
   },
   de: {
     welcome: 'Willkommen',
@@ -1491,6 +1496,7 @@ const translations: Record<Language, Record<string, string>> = {
     isNowAvailable: 'ist jetzt verfügbar',
     gamifiedSocialFinance: 'Gamifizierte Soziale Finanzen',
     saveTogether: 'Billi - Gemeinsam Sparen',
+    saveTogetherShort: 'Gemeinsam Sparen',
   },
 };
 
@@ -1702,6 +1708,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const t = (key: string): string => {
     return translations[language][key] || key;
   };
+
+  // Update document title when language changes
+  useEffect(() => {
+    document.title = translations[language]['saveTogether'] || 'Billi - Save Together';
+  }, [language]);
 
   return (
     <AppContext.Provider
