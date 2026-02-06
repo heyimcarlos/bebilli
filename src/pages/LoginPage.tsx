@@ -570,7 +570,7 @@ const LoginPage: React.FC = () => {
           </div>
           
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-3">
-            <span className="text-xs text-white font-medium">{t('gamifiedSocialFinance')}</span>
+            <span className="text-xs text-white font-medium">{t('saveTogetherShort')}</span>
           </div>
           
           <p className="text-white/90 text-base">
