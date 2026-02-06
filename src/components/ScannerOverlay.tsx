@@ -149,10 +149,10 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col"
+      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col pt-safe"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      {/* Header - with safe area padding for mobile */}
+      <div className="flex items-center justify-between p-4 pt-12 border-b border-border">
         <motion.h2 
           className="text-lg font-semibold"
           initial={{ x: -20, opacity: 0 }}
