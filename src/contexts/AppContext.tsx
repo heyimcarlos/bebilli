@@ -372,6 +372,8 @@ const translations: Record<Language, Record<string, string>> = {
     food: 'Comida',
     art: 'Arte',
     music: 'Música',
+    gamifiedSocialFinance: 'Finanças Sociais Gamificadas',
+    saveTogether: 'Billi - Economize Junto',
   },
   en: {
     welcome: 'Welcome',
@@ -671,6 +673,8 @@ const translations: Record<Language, Record<string, string>> = {
     food: 'Food',
     art: 'Art',
     music: 'Music',
+    gamifiedSocialFinance: 'Gamified Social Finance',
+    saveTogether: 'Billi - Save Together',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -897,6 +901,8 @@ const translations: Record<Language, Record<string, string>> = {
     changeImage: 'Changer l\'image',
     communityCreated: 'Communauté créée!',
     isNowAvailable: 'est maintenant disponible',
+    gamifiedSocialFinance: 'Finance Sociale Gamifiée',
+    saveTogether: 'Billi - Épargnez Ensemble',
   },
   es: {
     welcome: 'Bienvenido',
@@ -1091,6 +1097,8 @@ const translations: Record<Language, Record<string, string>> = {
     changeImage: 'Cambiar imagen',
     communityCreated: '¡Comunidad creada!',
     isNowAvailable: 'ya está disponible',
+    gamifiedSocialFinance: 'Finanzas Sociales Gamificadas',
+    saveTogether: 'Billi - Ahorra Junto',
   },
   it: {
     welcome: 'Benvenuto',
@@ -1285,6 +1293,8 @@ const translations: Record<Language, Record<string, string>> = {
     changeImage: 'Cambia immagine',
     communityCreated: 'Comunità creata!',
     isNowAvailable: 'è ora disponibile',
+    gamifiedSocialFinance: 'Finanza Sociale Gamificata',
+    saveTogether: 'Billi - Risparmia Insieme',
   },
   de: {
     welcome: 'Willkommen',
@@ -1479,6 +1489,8 @@ const translations: Record<Language, Record<string, string>> = {
     changeImage: 'Bild ändern',
     communityCreated: 'Gemeinschaft erstellt!',
     isNowAvailable: 'ist jetzt verfügbar',
+    gamifiedSocialFinance: 'Gamifizierte Soziale Finanzen',
+    saveTogether: 'Billi - Gemeinsam Sparen',
   },
 };
 
