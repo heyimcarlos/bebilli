@@ -561,16 +561,16 @@ const LoginPage: React.FC = () => {
         
         {/* Logo Section */}
         <div className="relative z-10 text-center mb-6">
-          <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-white/20 backdrop-blur-xl p-2 shadow-2xl">
+          <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-primary shadow-2xl shadow-primary/30 overflow-hidden">
             <img
               src={billiLogo}
               alt="Billi"
-              className="w-full h-full object-contain animate-float drop-shadow-xl"
+              className="w-full h-full object-cover"
             />
           </div>
           
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-3">
-            <span className="text-xs text-white font-medium">Gamified Social Finance</span>
+            <span className="text-xs text-white font-medium">{t('gamifiedSocialFinance')}</span>
           </div>
           
           <p className="text-white/90 text-base">
