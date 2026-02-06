@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, DollarSign, Loader2, Pencil } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -30,16 +30,19 @@ const QUICK_AMOUNTS = [5, 10, 20, 50, 100];
 
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const { t, formatCurrency } = useApp();
-  const { groups, profile, addContribution, refreshGroups, updateGroup, leaveGroup, deleteGroup, hideGroup, user } = useAuthContext();
+  const { groups, profile, addContribution, addWithdrawal, refreshGroups, updateGroup, leaveGroup, deleteGroup, hideGroup, user } = useAuthContext();
   const { toast } = useToast();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ id: string; name: string; content: string; isBot?: boolean }>>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showContributeModal, setShowContributeModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('');
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [contributing, setContributing] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
   const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
 
   const group = groups.find((g) => g.id === groupId);
@@ -90,6 +93,81 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       setShowWinModal(true);
       
       // Refresh groups to update progress
+      await refreshGroups();
+    }
+  };
+
+  const handleWithdraw = async () => {
+    const amount = validateContributionAmount(withdrawalAmount);
+    if (amount === null) {
+      toast({
+        title: t('error'),
+        description: t('invalidAmountError') || 'Please enter a valid amount between $0.01 and $10,000,000',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (amount > group.user_contribution) {
+      toast({
+        title: t('error'),
+        description: t('insufficientBalance') || 'Insufficient balance for withdrawal',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setWithdrawing(true);
+    const { error } = await addWithdrawal(groupId, amount);
+    setWithdrawing(false);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      setShowWithdrawModal(false);
+      setWithdrawalAmount('');
+      
+      toast({
+        title: '💸 ' + (t('withdrawalSuccess') || 'Withdrawal successful!'),
+        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup') || 'withdrawn from group'}`,
+      });
+      
+      await refreshGroups();
+    }
+  };
+
+  const handleQuickWithdraw = async (amount: number) => {
+    if (amount > group.user_contribution) {
+      toast({
+        title: t('error'),
+        description: t('insufficientBalance') || 'Insufficient balance for withdrawal',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setWithdrawing(true);
+    const { error } = await addWithdrawal(groupId, amount);
+    setWithdrawing(false);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      setShowWithdrawModal(false);
+      
+      toast({
+        title: '💸 ' + (t('withdrawalSuccess') || 'Withdrawal successful!'),
+        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup') || 'withdrawn from group'}`,
+      });
+      
       await refreshGroups();
     }
   };
@@ -345,32 +423,44 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         </Tabs>
       </div>
 
-      {/* Floating Contribute Button */}
+      {/* Floating Contribute/Withdraw Buttons */}
       <motion.div
         className="fixed bottom-24 left-0 right-0 px-6 z-40"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <motion.button
-          onClick={() => setShowContributeModal(true)}
-          className="w-full h-14 btn-primary text-primary-foreground font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          animate={{
-            boxShadow: [
-              '0 0 20px hsl(var(--primary) / 0.3)',
-              '0 0 40px hsl(var(--primary) / 0.5)',
-              '0 0 20px hsl(var(--primary) / 0.3)',
-            ],
-          }}
-          transition={{
-            boxShadow: { duration: 2, repeat: Infinity },
-          }}
-        >
-          <Plus className="w-5 h-5" />
-          Add Contribution
-        </motion.button>
+        <div className="flex gap-3">
+          <motion.button
+            onClick={() => setShowWithdrawModal(true)}
+            disabled={group.user_contribution <= 0}
+            className="flex-1 h-14 bg-secondary text-foreground font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: group.user_contribution > 0 ? 1.02 : 1 }}
+            whileTap={{ scale: group.user_contribution > 0 ? 0.98 : 1 }}
+          >
+            <Minus className="w-5 h-5" />
+            {t('withdraw') || 'Withdraw'}
+          </motion.button>
+          <motion.button
+            onClick={() => setShowContributeModal(true)}
+            className="flex-[2] h-14 btn-primary text-primary-foreground font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            animate={{
+              boxShadow: [
+                '0 0 20px hsl(var(--primary) / 0.3)',
+                '0 0 40px hsl(var(--primary) / 0.5)',
+                '0 0 20px hsl(var(--primary) / 0.3)',
+              ],
+            }}
+            transition={{
+              boxShadow: { duration: 2, repeat: Infinity },
+            }}
+          >
+            <Plus className="w-5 h-5" />
+            {t('addContribution') || 'Add Contribution'}
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Contribute Modal */}
@@ -378,14 +468,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-primary" />
-              Add Contribution
+              <Plus className="w-5 h-5 text-success" />
+              {t('addContribution') || 'Add Contribution'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {/* Quick amounts */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Quick amounts</p>
+              <p className="text-sm text-muted-foreground">{t('quickAmounts') || 'Quick amounts'}</p>
               <div className="flex flex-wrap gap-2">
                 {QUICK_AMOUNTS.map((amount) => (
                   <motion.button
@@ -404,11 +494,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
             {/* Custom amount */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Or enter custom amount</p>
+              <p className="text-sm text-muted-foreground">{t('customAmount') || 'Or enter custom amount'}</p>
               <div className="flex gap-2">
                 <Input
                   type="number"
-                  placeholder="Enter amount"
+                  placeholder={t('enterAmount') || 'Enter amount'}
                   value={contributionAmount}
                   onChange={(e) => setContributionAmount(e.target.value)}
                   className="bg-secondary"
@@ -421,11 +511,90 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                   {contributing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    'Add'
+                    t('add') || 'Add'
                   )}
                 </Button>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Withdraw Modal */}
+      <Dialog open={showWithdrawModal} onOpenChange={setShowWithdrawModal}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Minus className="w-5 h-5 text-warning" />
+              {t('withdraw') || 'Withdraw'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Available balance */}
+            <div className="p-4 rounded-xl bg-secondary/50 border border-border">
+              <p className="text-sm text-muted-foreground mb-1">{t('availableBalance') || 'Available balance'}</p>
+              <p className="text-2xl font-bold text-success">{formatCurrency(group.user_contribution)}</p>
+            </div>
+
+            {/* Quick amounts */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{t('quickAmounts') || 'Quick amounts'}</p>
+              <div className="flex flex-wrap gap-2">
+                {QUICK_AMOUNTS.filter(amount => amount <= group.user_contribution).map((amount) => (
+                  <motion.button
+                    key={amount}
+                    onClick={() => handleQuickWithdraw(amount)}
+                    disabled={withdrawing}
+                    className="flex-1 min-w-[60px] h-12 rounded-xl bg-secondary hover:bg-secondary/80 font-semibold transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    ${amount}
+                  </motion.button>
+                ))}
+                {group.user_contribution > 0 && (
+                  <motion.button
+                    onClick={() => handleQuickWithdraw(group.user_contribution)}
+                    disabled={withdrawing}
+                    className="flex-1 min-w-[60px] h-12 rounded-xl bg-warning/20 hover:bg-warning/30 text-warning font-semibold transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {t('withdrawAll') || 'All'}
+                  </motion.button>
+                )}
+              </div>
+            </div>
+
+            {/* Custom amount */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{t('customAmount') || 'Or enter custom amount'}</p>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder={t('enterAmount') || 'Enter amount'}
+                  value={withdrawalAmount}
+                  onChange={(e) => setWithdrawalAmount(e.target.value)}
+                  max={group.user_contribution}
+                  className="bg-secondary"
+                />
+                <Button
+                  onClick={handleWithdraw}
+                  disabled={withdrawing || !withdrawalAmount || parseFloat(withdrawalAmount) > group.user_contribution}
+                  className="bg-warning hover:bg-warning/90 text-warning-foreground px-6"
+                >
+                  {withdrawing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    t('withdraw') || 'Withdraw'
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center">
+              {t('withdrawWarning') || 'Withdrawals reduce your contribution to the group goal'}
+            </p>
           </div>
         </DialogContent>
       </Dialog>
