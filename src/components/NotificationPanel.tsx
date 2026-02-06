@@ -61,8 +61,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose, 
       
       {/* Panel */}
       <div className="fixed top-0 right-0 h-full w-full max-w-md bg-card border-l border-border z-50 flex flex-col animate-in slide-in-from-right duration-300">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        {/* Header - with safe area padding for mobile */}
+        <div className="flex items-center justify-between p-4 pt-12 border-b border-border">
           <div className="flex items-center gap-3">
             <Bell className="w-5 h-5 text-primary" />
             <h2 className="text-lg font-semibold">{t('notifications')}</h2>

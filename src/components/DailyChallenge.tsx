@@ -34,8 +34,9 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
         (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
       );
       
-      // Base challenge on 0.5% of total goal (minimum $1, maximum $100)
-      const baseAmount = totalGoal > 0 ? Math.max(1, Math.min(100, totalGoal * 0.005)) : 5;
+      // Base challenge on 0.05% to 0.1% of total goal (minimum $1, maximum $100)
+      // Using average of 0.075% (0.00075) as base rate
+      const baseAmount = totalGoal > 0 ? Math.max(1, Math.min(100, totalGoal * 0.00075)) : 5;
       
       // Variation factors based on day
       const variations = [
@@ -179,7 +180,7 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
         <div className="mb-3">
           <p className="text-xs text-muted-foreground mb-1">{todayChallenge.description}</p>
           <div className="text-xs text-muted-foreground">
-            <span className="text-primary font-medium">0.5%</span> {t('ofYourGoal') || 'of your total goal'}
+            <span className="text-primary font-medium">0.05-0.1%</span> {t('ofYourGoal') || 'of your total goal'}
           </div>
         </div>
       )}
