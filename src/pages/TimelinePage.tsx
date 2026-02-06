@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Users, Loader2 } from 'lucide-react';
+import { Clock, Users, Loader2, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useContributions } from '@/hooks/useContributions';
@@ -94,7 +94,9 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ onGroupClick }) => {
                 </div>
 
                 <div className="space-y-3">
-                  {dayContributions.map((contribution) => (
+                  {dayContributions.map((contribution) => {
+                    const isWithdrawal = contribution.type === 'withdrawal';
+                    return (
                     <motion.div
                       key={contribution.id}
                       variants={item}
@@ -104,7 +106,7 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ onGroupClick }) => {
                     >
                       <div className="flex items-start gap-3">
                         {/* Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-primary overflow-hidden flex-shrink-0">
+                        <div className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 ${isWithdrawal ? 'bg-warning/20' : 'bg-primary'}`}>
                           {contribution.profile.avatar_url ? (
                             <img 
                               src={contribution.profile.avatar_url} 
@@ -128,13 +130,28 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ onGroupClick }) => {
                           </div>
                           
                           <p className="text-sm text-muted-foreground mb-2">
-                            contributed to <span className="text-foreground font-medium">{contribution.group.name}</span>
+                            {isWithdrawal ? (
+                              <>
+                                {t('withdrawal') || 'withdrew from'} <span className="text-foreground font-medium">{contribution.group.name}</span>
+                              </>
+                            ) : (
+                              <>
+                                {t('contributedTo') || 'contributed to'} <span className="text-foreground font-medium">{contribution.group.name}</span>
+                              </>
+                            )}
                           </p>
 
                           <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold gradient-text">
-                              +{formatCurrency(contribution.amount)}
-                            </span>
+                            <div className="flex items-center gap-1">
+                              {isWithdrawal ? (
+                                <ArrowDownLeft className="w-4 h-4 text-warning" />
+                              ) : (
+                                <ArrowUpRight className="w-4 h-4 text-success" />
+                              )}
+                              <span className={`text-lg font-bold ${isWithdrawal ? 'text-warning' : 'gradient-text'}`}>
+                                {isWithdrawal ? '-' : '+'}{formatCurrency(contribution.amount)}
+                              </span>
+                            </div>
                             
                             {contribution.note && (
                               <span className="text-xs text-muted-foreground italic truncate max-w-[150px]">
@@ -145,7 +162,8 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ onGroupClick }) => {
                         </div>
                       </div>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}

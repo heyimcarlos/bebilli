@@ -40,6 +40,8 @@ export interface GroupWithDetails extends Group {
   user_contribution: number;
 }
 
+export type ContributionType = 'deposit' | 'withdrawal';
+
 export const useGroups = (userId: string | undefined) => {
   const [groups, setGroups] = useState<GroupWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,18 +134,20 @@ export const useGroups = (userId: string | undefined) => {
           profiles: profilesMap[m.user_id] || { id: m.user_id, name: 'Unknown', avatar_url: null }
         }));
 
-        // Fetch contributions totals
+        // Fetch contributions totals (accounting for deposits and withdrawals)
         const { data: contributions } = await supabase
           .from('contributions')
-          .select('user_id, amount')
+          .select('user_id, amount, type')
           .eq('group_id', group.id);
 
         const contributionsByUser = (contributions || []).reduce((acc, c) => {
-          acc[c.user_id] = (acc[c.user_id] || 0) + Number(c.amount);
+          const amount = Number(c.amount);
+          const adjustedAmount = c.type === 'withdrawal' ? -amount : amount;
+          acc[c.user_id] = (acc[c.user_id] || 0) + adjustedAmount;
           return acc;
         }, {} as Record<string, number>);
 
-        const totalAmount = Object.values(contributionsByUser).reduce((sum, val) => sum + val, 0);
+        const totalAmount = Math.max(0, Object.values(contributionsByUser).reduce((sum, val) => sum + val, 0));
         const userContribution = contributionsByUser[userId] || 0;
 
         const membersWithContributions: GroupMemberWithProfile[] = (members || []).map((m: any) => ({
@@ -185,7 +189,7 @@ export const useGroups = (userId: string | undefined) => {
           },
           async (payload) => {
             console.log('Realtime contribution update:', payload);
-            const newContribution = payload.new as { user_id: string; amount: number; group_id: string };
+            const newContribution = payload.new as { user_id: string; amount: number; group_id: string; type?: string };
             
             // Show toast only for other users' contributions
             if (newContribution.user_id !== userId) {
@@ -199,9 +203,13 @@ export const useGroups = (userId: string | undefined) => {
               // Find the group name
               const group = groups.find(g => g.id === newContribution.group_id);
               
+              const isWithdrawal = newContribution.type === 'withdrawal';
+              
               toast({
-                title: '💰 New contribution!',
-                description: `${profile?.name || 'A member'} added $${newContribution.amount.toFixed(2)} to ${group?.name || 'a group'}`,
+                title: isWithdrawal ? '💸 Withdrawal' : '💰 New contribution!',
+                description: isWithdrawal 
+                  ? `${profile?.name || 'A member'} withdrew $${newContribution.amount.toFixed(2)} from ${group?.name || 'a group'}`
+                  : `${profile?.name || 'A member'} added $${newContribution.amount.toFixed(2)} to ${group?.name || 'a group'}`,
               });
             }
             
@@ -273,8 +281,16 @@ export const useGroups = (userId: string | undefined) => {
     };
   };
 
-  const addContribution = async (groupId: string, amount: number, note?: string) => {
+  const addContribution = async (groupId: string, amount: number, note?: string, type: ContributionType = 'deposit') => {
     if (!userId) return { error: new Error('Not authenticated') };
+
+    // For withdrawals, check if user has enough balance
+    if (type === 'withdrawal') {
+      const group = groups.find(g => g.id === groupId);
+      if (group && group.user_contribution < amount) {
+        return { error: new Error('Insufficient balance for withdrawal') };
+      }
+    }
 
     const { data, error } = await supabase
       .from('contributions')
@@ -283,6 +299,7 @@ export const useGroups = (userId: string | undefined) => {
         user_id: userId,
         amount,
         note,
+        type,
       })
       .select()
       .single();
@@ -292,6 +309,10 @@ export const useGroups = (userId: string | undefined) => {
     }
 
     return { data, error };
+  };
+
+  const addWithdrawal = async (groupId: string, amount: number, note?: string) => {
+    return addContribution(groupId, amount, note, 'withdrawal');
   };
 
   const leaveGroup = async (groupId: string) => {
@@ -405,6 +426,7 @@ export const useGroups = (userId: string | undefined) => {
     createGroup,
     joinGroupByCode,
     addContribution,
+    addWithdrawal,
     leaveGroup,
     updateGroup,
     deleteGroup,

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+export type ContributionType = 'deposit' | 'withdrawal';
+
 export interface ContributionWithDetails {
   id: string;
   amount: number;
@@ -8,6 +10,7 @@ export interface ContributionWithDetails {
   created_at: string;
   user_id: string;
   group_id: string;
+  type: ContributionType;
   profile: {
     id: string;
     name: string;
@@ -86,6 +89,7 @@ export const useContributions = (userId: string | undefined) => {
       created_at: c.created_at || new Date().toISOString(),
       user_id: c.user_id,
       group_id: c.group_id,
+      type: (c as any).type || 'deposit',
       profile: profilesMap[c.user_id] || { id: c.user_id, name: 'Unknown', avatar_url: null },
       group: groupsMap[c.group_id] || { id: c.group_id, name: 'Unknown', image_url: null },
     }));
