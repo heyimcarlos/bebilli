@@ -30,12 +30,9 @@ const OAuthCallback: React.FC = () => {
       
       if (code) {
         try {
-          // Use lovable.auth to complete the OAuth flow
-          // The library will detect the code in the URL and exchange it for tokens
-          // Then it automatically calls supabase.auth.setSession with those tokens
-          const result = await lovable.auth.signInWithOAuth('google', {
-            redirect_uri: window.location.origin + '/callback',
-          });
+          // Let Lovable Cloud library handle the token exchange automatically
+          // Don't pass redirect_uri - let the library use its defaults
+          const result = await lovable.auth.signInWithOAuth('google');
 
           if (result.error) {
             setError(result.error.message || 'Authentication failed');
