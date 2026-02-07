@@ -102,9 +102,8 @@ const LoginPage: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + '/callback',
-      });
+      // Let the Lovable Cloud library handle the redirect_uri automatically
+      const result = await lovable.auth.signInWithOAuth("google");
       
       if (result.error) {
         toast({
