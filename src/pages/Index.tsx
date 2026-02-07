@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AppProvider, useApp } from '@/contexts/AppContext';
-import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
+import { useApp } from '@/contexts/AppContext';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import BottomNav from '@/components/BottomNav';
 import ScannerOverlay from '@/components/ScannerOverlay';
@@ -282,15 +282,13 @@ const AppContent: React.FC = () => {
   );
 };
 
+// Index component - NO duplicate providers here!
+// AppProvider and AuthProvider are already in App.tsx
 const Index: React.FC = () => {
   return (
-    <AppProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <AppContent />
-        </NotificationProvider>
-      </AuthProvider>
-    </AppProvider>
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
   );
 };
 

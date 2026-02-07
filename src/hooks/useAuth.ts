@@ -25,9 +25,12 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('[Auth] Setting up auth state listener');
+    
     // Set up auth state listener BEFORE getting session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('[Auth] State change event:', event, 'user:', session?.user?.email);
         setUser(session?.user ?? null);
         
         if (session?.user) {
@@ -39,6 +42,7 @@ export const useAuth = () => {
               .eq('id', session.user.id)
               .maybeSingle();
             
+            console.log('[Auth] Profile fetched:', data?.name);
             if (data) {
               setProfile(data as UserProfile);
             }
@@ -52,6 +56,7 @@ export const useAuth = () => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[Auth] Initial session check:', session?.user?.email || 'no session');
       setUser(session?.user ?? null);
       if (session?.user) {
         supabase
