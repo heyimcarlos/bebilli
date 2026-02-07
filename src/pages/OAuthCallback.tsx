@@ -20,17 +20,13 @@ const OAuthCallback: React.FC = () => {
       const errorDescription = url.searchParams.get('error_description');
       
       if (errorParam) {
-        console.error('[OAuth] Error from provider:', errorParam, errorDescription);
         setError(errorDescription || errorParam);
         setTimeout(() => navigate('/login', { replace: true }), 3000);
         return;
       }
 
-      // Check if we have OAuth params (code or tokens)
+      // Check if we have OAuth code
       const code = url.searchParams.get('code');
-      const state = url.searchParams.get('state');
-      
-      console.log('[OAuth] Callback received - code:', !!code, 'state:', !!state);
       
       if (code) {
         try {
@@ -41,13 +37,7 @@ const OAuthCallback: React.FC = () => {
             redirect_uri: window.location.origin + '/callback',
           });
 
-          console.log('[OAuth] signInWithOAuth result:', { 
-            redirected: (result as any).redirected,
-            error: result.error?.message 
-          });
-
           if (result.error) {
-            console.error('[OAuth] Exchange error:', result.error);
             setError(result.error.message || 'Authentication failed');
             setTimeout(() => navigate('/login', { replace: true }), 3000);
             return;
@@ -55,22 +45,18 @@ const OAuthCallback: React.FC = () => {
 
           // If we got redirected, something went wrong (shouldn't happen on callback)
           if ((result as any).redirected) {
-            console.log('[OAuth] Unexpected redirect on callback');
             return;
           }
 
           // Success - session should be set, navigate to home
-          console.log('[OAuth] Success! Navigating to home');
           navigate('/', { replace: true });
           
         } catch (err) {
-          console.error('[OAuth] Callback processing error:', err);
           setError(err instanceof Error ? err.message : 'Authentication failed');
           setTimeout(() => navigate('/login', { replace: true }), 3000);
         }
       } else {
-        // No code - shouldn't happen, redirect to login
-        console.log('[OAuth] No code found, redirecting to login');
+        // No code - redirect to login
         navigate('/login', { replace: true });
       }
     };
