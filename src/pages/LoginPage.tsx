@@ -101,19 +101,27 @@ const LoginPage: React.FC = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    console.log('[Login] Starting Google Sign In, redirect_uri:', window.location.origin + '/callback');
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin + '/callback',
       });
       
-      if (error) {
+      console.log('[Login] signInWithOAuth result:', { 
+        redirected: (result as any).redirected, 
+        error: result.error?.message 
+      });
+      
+      if (result.error) {
         toast({
           title: t('error'),
-          description: error.message,
+          description: result.error.message,
           variant: 'destructive',
         });
       }
+      // If redirected is true, the browser will navigate to Google
     } catch (err) {
+      console.error('[Login] Google sign in error:', err);
       toast({
         title: t('error'),
         description: err instanceof Error ? err.message : 'Google sign in failed',

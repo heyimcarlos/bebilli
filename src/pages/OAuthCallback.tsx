@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable';
 
 /**
  * OAuth callback handler page
- * Handles the redirect from OAuth providers and exchanges code for session
+ * Handles the redirect from OAuth providers using Lovable Cloud auth
  */
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -13,72 +13,65 @@ const OAuthCallback: React.FC = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      try {
-        // Get the URL hash and search params
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const searchParams = new URLSearchParams(window.location.search);
-        
-        // Check for errors first
-        const errorParam = searchParams.get('error') || hashParams.get('error');
-        const errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
-        
-        if (errorParam) {
-          console.error('OAuth error:', errorParam, errorDescription);
-          setError(errorDescription || errorParam);
-          setTimeout(() => navigate('/login', { replace: true }), 3000);
-          return;
-        }
+      const url = new URL(window.location.href);
+      
+      // Check for OAuth errors first
+      const errorParam = url.searchParams.get('error');
+      const errorDescription = url.searchParams.get('error_description');
+      
+      if (errorParam) {
+        console.error('[OAuth] Error from provider:', errorParam, errorDescription);
+        setError(errorDescription || errorParam);
+        setTimeout(() => navigate('/login', { replace: true }), 3000);
+        return;
+      }
 
-        // Check for code (authorization code flow)
-        const code = searchParams.get('code');
-        
-        if (code) {
-          // Exchange the code for a session
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          
-          if (exchangeError) {
-            console.error('Code exchange error:', exchangeError);
-            setError(exchangeError.message);
+      // Check if we have OAuth params (code or tokens)
+      const code = url.searchParams.get('code');
+      const state = url.searchParams.get('state');
+      
+      console.log('[OAuth] Callback received - code:', !!code, 'state:', !!state);
+      
+      if (code) {
+        try {
+          // Use lovable.auth to complete the OAuth flow
+          // The library will detect the code in the URL and exchange it for tokens
+          // Then it automatically calls supabase.auth.setSession with those tokens
+          const result = await lovable.auth.signInWithOAuth('google', {
+            redirect_uri: window.location.origin + '/callback',
+          });
+
+          console.log('[OAuth] signInWithOAuth result:', { 
+            redirected: (result as any).redirected,
+            error: result.error?.message 
+          });
+
+          if (result.error) {
+            console.error('[OAuth] Exchange error:', result.error);
+            setError(result.error.message || 'Authentication failed');
             setTimeout(() => navigate('/login', { replace: true }), 3000);
             return;
           }
-          
-          if (data.session) {
-            // Success - navigate to home
-            navigate('/', { replace: true });
+
+          // If we got redirected, something went wrong (shouldn't happen on callback)
+          if ((result as any).redirected) {
+            console.log('[OAuth] Unexpected redirect on callback');
             return;
           }
-        }
 
-        // Check for access_token in hash (implicit flow)
-        const accessToken = hashParams.get('access_token');
-        
-        if (accessToken) {
-          // The session should already be set by Supabase
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (session) {
-            navigate('/', { replace: true });
-            return;
-          }
-        }
-
-        // If we reach here without tokens, check if there's already a session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session) {
+          // Success - session should be set, navigate to home
+          console.log('[OAuth] Success! Navigating to home');
           navigate('/', { replace: true });
-          return;
+          
+        } catch (err) {
+          console.error('[OAuth] Callback processing error:', err);
+          setError(err instanceof Error ? err.message : 'Authentication failed');
+          setTimeout(() => navigate('/login', { replace: true }), 3000);
         }
-
-        // No valid auth params and no session - redirect to login
-        console.log('No auth params found, redirecting to login');
+      } else {
+        // No code - shouldn't happen, redirect to login
+        console.log('[OAuth] No code found, redirecting to login');
         navigate('/login', { replace: true });
-        
-      } catch (err) {
-        console.error('OAuth callback error:', err);
-        setError(err instanceof Error ? err.message : 'Authentication failed');
-        setTimeout(() => navigate('/login', { replace: true }), 3000);
       }
     };
 
