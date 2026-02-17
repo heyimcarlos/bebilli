@@ -5,7 +5,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useContributions } from '@/hooks/useContributions';
 import { formatDistanceToNow } from 'date-fns';
-import billiLogo from '@/assets/billi-logo.png';
+import DefaultAvatar from '@/components/DefaultAvatar';
 
 interface TimelinePageProps {
   onGroupClick?: (groupId: string) => void;
@@ -114,9 +114,7 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ onGroupClick }) => {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full p-2">
-                              <img src={billiLogo} alt="Billi" className="w-full h-full object-contain" />
-                            </div>
+                            <DefaultAvatar name={contribution.profile.name} size={40} className="w-full h-full" />
                           )}
                         </div>
 

@@ -9,7 +9,8 @@ import { useContributions } from '@/hooks/useContributions';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import billiLogo from '@/assets/billi-logo.png';
+import BilliLogo from '@/components/BilliLogo';
+import DefaultAvatar from '@/components/DefaultAvatar';
 import ShareProgressCard from '@/components/ShareProgressCard';
 import ProfileBadges from '@/components/ProfileBadges';
 import {
@@ -92,9 +93,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full p-3">
-                  <img src={billiLogo} alt="Billi" className="w-full h-full object-contain" />
-                </div>
+                <DefaultAvatar name={profile?.name || 'User'} size={96} />
               )}
             </div>
             <button

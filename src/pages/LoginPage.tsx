@@ -5,7 +5,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import billiLogo from '@/assets/billi-logo.png';
+import BilliLogo from '@/components/BilliLogo';
 import { useToast } from '@/hooks/use-toast';
 import { lovable } from '@/integrations/lovable';
 import {
@@ -560,21 +560,16 @@ const LoginPage: React.FC = () => {
         
         {/* Logo Section */}
         <div className="relative z-10 text-center mb-6">
-          <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-primary shadow-2xl shadow-primary/30 overflow-hidden">
-            <img
-              src={billiLogo}
-              alt="Billi"
-              className="w-full h-full object-cover"
-            />
+          <div className="mx-auto mb-3 flex items-center justify-center">
+            <BilliLogo size={100} />
           </div>
           
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-3">
+          <h1 className="text-3xl font-black text-white mb-1">Billi</h1>
+          <p className="text-white/80 text-sm font-medium tracking-wide">bilionaire</p>
+          
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mt-3">
             <span className="text-xs text-white font-medium">{t('saveTogetherShort')}</span>
           </div>
-          
-          <p className="text-white/90 text-base">
-            {t('welcome')}, <span className="text-white font-bold">{t('billionaire')}</span>
-          </p>
         </div>
 
         {/* Dynamic Content */}
