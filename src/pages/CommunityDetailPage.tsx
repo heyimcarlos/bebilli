@@ -7,7 +7,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import billiLogo from '@/assets/billi-logo.png';
+import DefaultAvatar from '@/components/DefaultAvatar';
 import PostReactions from '@/components/PostReactions';
 import PostReplies from '@/components/PostReplies';
 import { supabase } from '@/integrations/supabase/client';
@@ -207,8 +207,8 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                 >
                   <Avatar className="w-8 h-8 flex-shrink-0">
                     <AvatarImage src={post.profile.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary p-1">
-                      <img src={billiLogo} alt="Avatar" className="w-full h-full object-contain" />
+                    <AvatarFallback className="bg-primary p-0">
+                      <DefaultAvatar name={post.profile.name} size={32} />
                     </AvatarFallback>
                   </Avatar>
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Scan, Compass } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
-import billiLogo from '@/assets/billi-logo.png';
+import BilliLogo from '@/components/BilliLogo';
 
 interface BottomNavProps {
   activeTab: string;
@@ -60,10 +60,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
                   boxShadow: { duration: 2, repeat: Infinity },
                 }}
               >
-                <motion.img 
-                  src={billiLogo} 
-                  alt="Scan" 
-                  className="w-full h-full object-contain"
+                <motion.div
                   animate={{ 
                     rotate: [0, -5, 5, 0],
                   }}
@@ -72,7 +69,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
                     repeat: Infinity,
                     repeatDelay: 3
                   }}
-                />
+                >
+                  <BilliLogo size={36} />
+                </motion.div>
               </motion.div>
             ) : (
               <>

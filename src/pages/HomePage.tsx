@@ -10,7 +10,7 @@ import MotivationalBanner from '@/components/MotivationalBanner';
 import DailyChallenge from '@/components/DailyChallenge';
 import PremiumModal from '@/components/PremiumModal';
 import { Button } from '@/components/ui/button';
-import billiLogo from '@/assets/billi-logo.png';
+import BilliLogo from '@/components/BilliLogo';
 import JoinGroupModal from '@/components/JoinGroupModal';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
@@ -199,10 +199,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
               <p className="text-muted-foreground text-sm">{t('hello')}, {t('billionaire')}</p>
               <h1 className="text-2xl font-bold">{profile?.name || t('billionaire')}</h1>
             </div>
-            <motion.img 
-              src={billiLogo} 
-              alt="Billi" 
-              className="w-12 h-12 rounded-full"
+            <motion.div
               animate={{ 
                 rotate: [0, -5, 5, 0],
               }}
@@ -211,7 +208,9 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                 repeat: Infinity,
                 repeatDelay: 3
               }}
-            />
+            >
+              <BilliLogo size={48} />
+            </motion.div>
           </motion.div>
 
           {/* Balance Card */}

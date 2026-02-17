@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import billiLogo from '@/assets/billi-logo.png';
+import DefaultAvatar from '@/components/DefaultAvatar';
 import { useApp } from '@/contexts/AppContext';
 
 interface Reply {
@@ -160,8 +160,8 @@ const PostReplies: React.FC<PostRepliesProps> = ({ postId, userId }) => {
                   >
                     <Avatar className="w-6 h-6">
                       <AvatarImage src={reply.profile.avatar_url || undefined} />
-                      <AvatarFallback className="bg-primary p-0.5">
-                        <img src={billiLogo} alt="Avatar" className="w-full h-full object-contain" />
+                      <AvatarFallback className="bg-primary p-0">
+                        <DefaultAvatar name={reply.profile.name} size={24} />
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">

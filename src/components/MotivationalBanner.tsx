@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { CoinIcon, RocketIcon, FireIcon, TrophyIcon, HeartIcon, StarIcon, ThumbsUpIcon, PiggyBankIcon } from '@/components/BilliIcons';
 
 const MotivationalBanner: React.FC = () => {
   const { t } = useApp();
@@ -10,16 +11,16 @@ const MotivationalBanner: React.FC = () => {
 
   // Quote definitions using translation keys
   const getQuotes = () => [
-    { textKey: 'everyDollarSaved', emoji: '💰' },
-    { textKey: 'futureThankYouQuote', emoji: '🙏' },
-    { textKey: 'smallStepsQuote', emoji: '🚀' },
-    { textKey: 'consistencyQuote', emoji: '🔥' },
-    { textKey: 'buildingWealthQuote', emoji: '🏗️' },
-    { textKey: 'championsQuote', emoji: '🏆' },
-    { textKey: 'financialFreedomQuote', emoji: '🌟' },
-    { textKey: 'keepStreakQuote', emoji: '⚡' },
-    { textKey: 'moneyPowerQuote', emoji: '💪' },
-    { textKey: 'beABillionaireQuote', emoji: '👑' },
+    { textKey: 'everyDollarSaved', Icon: CoinIcon },
+    { textKey: 'futureThankYouQuote', Icon: ThumbsUpIcon },
+    { textKey: 'smallStepsQuote', Icon: RocketIcon },
+    { textKey: 'consistencyQuote', Icon: FireIcon },
+    { textKey: 'buildingWealthQuote', Icon: PiggyBankIcon },
+    { textKey: 'championsQuote', Icon: TrophyIcon },
+    { textKey: 'financialFreedomQuote', Icon: StarIcon },
+    { textKey: 'keepStreakQuote', Icon: FireIcon },
+    { textKey: 'moneyPowerQuote', Icon: HeartIcon },
+    { textKey: 'beABillionaireQuote', Icon: TrophyIcon },
   ];
 
   const quotes = getQuotes();
@@ -74,9 +75,9 @@ const MotivationalBanner: React.FC = () => {
             repeat: Infinity,
             repeatDelay: 3
           }}
-          className="text-3xl"
+          className="w-10 h-10 flex-shrink-0"
         >
-          {currentQuote.emoji}
+          <currentQuote.Icon className="w-10 h-10" />
         </motion.div>
 
         <AnimatePresence mode="wait">

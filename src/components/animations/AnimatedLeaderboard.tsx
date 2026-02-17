@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Medal, Flame, TrendingUp, Crown } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import DefaultAvatar from '@/components/DefaultAvatar';
 
 interface LeaderboardMember {
   id: string;
@@ -117,9 +118,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-secondary flex items-center justify-center text-lg font-bold">
-                      {topThree[1].profile.name.charAt(0)}
-                    </div>
+                    <DefaultAvatar name={topThree[1].profile.name} size={56} className="w-full h-full" />
                   )}
                 </motion.div>
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-lg">🥈</span>
@@ -177,9 +176,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-xl font-bold text-white">
-                      {topThree[0].profile.name.charAt(0)}
-                    </div>
+                    <DefaultAvatar name={topThree[0].profile.name} size={72} className="w-full h-full" />
                   )}
                 </motion.div>
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xl">🥇</span>
@@ -214,9 +211,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-secondary flex items-center justify-center text-lg font-bold">
-                      {topThree[2].profile.name.charAt(0)}
-                    </div>
+                    <DefaultAvatar name={topThree[2].profile.name} size={48} className="w-full h-full" />
                   )}
                 </motion.div>
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-lg">🥉</span>
@@ -262,9 +257,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-secondary flex items-center justify-center font-semibold">
-                    {member.profile.name.charAt(0)}
-                  </div>
+                  <DefaultAvatar name={member.profile.name} size={40} className="w-full h-full" />
                 )}
               </div>
               

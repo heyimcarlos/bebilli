@@ -4,7 +4,8 @@ import { Share2, X, Download, Copy, Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
-import billiLogo from '@/assets/billi-logo.png';
+import BilliLogo from '@/components/BilliLogo';
+import DefaultAvatar from '@/components/DefaultAvatar';
 
 interface ShareProgressCardProps {
   isOpen: boolean;
@@ -117,7 +118,7 @@ const ShareProgressCard: React.FC<ShareProgressCardProps> = ({ isOpen, onClose, 
             <div className="relative z-10">
               {/* Header */}
               <div className="flex items-center gap-3 mb-6">
-                <img src={billiLogo} alt="Billi" className="w-10 h-10 rounded-xl" />
+                <BilliLogo size={40} />
                 <div>
                   <h3 className="text-white font-bold text-lg">Billi</h3>
                   <p className="text-white/70 text-xs">Economize junto</p>
@@ -126,11 +127,11 @@ const ShareProgressCard: React.FC<ShareProgressCardProps> = ({ isOpen, onClose, 
 
               {/* User info */}
               <div className="text-center mb-6">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/20 flex items-center justify-center text-3xl">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                   ) : (
-                    '👤'
+                    <DefaultAvatar name={profile?.name || 'User'} size={64} />
                   )}
                 </div>
                 <h2 className="text-white font-bold text-xl">{profile?.name || 'Economista'}</h2>
