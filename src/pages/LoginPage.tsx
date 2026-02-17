@@ -561,7 +561,7 @@ const LoginPage: React.FC = () => {
         {/* Logo Section */}
         <div className="relative z-10 text-center mb-6">
           <div className="mx-auto mb-3 flex items-center justify-center">
-            <BilliLogo size={100} />
+            <BilliLogo size={100} variant="white" />
           </div>
           
           <h1 className="text-3xl font-black text-white mb-1">Billi</h1>
