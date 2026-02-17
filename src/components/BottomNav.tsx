@@ -70,7 +70,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
                     repeatDelay: 3
                   }}
                 >
-                  <BilliLogo size={36} />
+                  <BilliLogo size={36} variant="white" />
                 </motion.div>
               </motion.div>
             ) : (
