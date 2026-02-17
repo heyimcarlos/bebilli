@@ -18,55 +18,60 @@ const BilliLogo: React.FC<BilliLogoProps> = ({ className = '', size = 48, showTe
       <svg
         width={size}
         height={size}
-        viewBox="0 0 200 200"
+        viewBox="0 0 180 180"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Top slant accent */}
+        {/* Top italic slant accent extending from B top-right */}
         <path
-          d="M95 28L160 42"
+          d="M88 30L148 18"
           stroke={bColor}
-          strokeWidth="22"
+          strokeWidth="18"
           strokeLinecap="round"
         />
 
-        {/* Main B shape */}
+        {/* Main B body */}
         <path
-          d="M70 40H120C142 40 158 54 158 72C158 84 152 92 142 96C154 100 162 112 162 126C162 146 146 160 120 160H70V40Z"
+          d="M62 32H110C130 32 146 44 146 62C146 74 140 82 130 86C142 90 150 102 150 116C150 136 134 150 110 150H62V32Z"
           fill={bColor}
         />
-        {/* B upper cutout */}
+        
+        {/* B upper hole */}
         <path
-          d="M96 62H114C122 62 128 68 128 76C128 84 122 90 114 90H96V62Z"
+          d="M88 52H106C114 52 120 58 120 66C120 74 114 80 106 80H88V52Z"
           fill={cutoutColor}
         />
-        {/* B lower cutout */}
+        
+        {/* B lower hole */}
         <path
-          d="M96 108H118C128 108 134 114 134 124C134 134 128 140 118 140H96V108Z"
+          d="M88 98H110C118 98 124 104 124 114C124 124 118 130 110 130H88V98Z"
           fill={cutoutColor}
         />
 
-        {/* Wing - 3 feathers */}
-        <g transform="translate(30, 88)">
+        {/* Wing - attached to left side of B */}
+        <g transform="translate(18, 78)">
+          {/* Bottom feather (longest, curves down) */}
           <path
-            d="M52 28C44 26 32 28 22 32C14 36 8 40 6 44C4 48 8 50 14 48C22 44 34 38 52 28Z"
+            d="M48 30C40 30 28 34 18 38C10 42 4 46 2 48C6 50 12 48 20 44C28 40 38 34 48 30Z"
             fill="white"
-            stroke="#1A1A1A"
-            strokeWidth="3"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M48 18C38 14 26 14 16 18C10 22 6 26 6 30C6 34 10 34 16 32C24 28 36 24 48 18Z"
-            fill="white"
-            stroke="#1A1A1A"
-            strokeWidth="3"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M44 10C36 6 26 4 18 8C12 12 12 16 16 18C22 18 34 14 44 10Z"
-            fill="white"
-            stroke="#1A1A1A"
+            stroke="#222"
             strokeWidth="2.5"
+            strokeLinejoin="round"
+          />
+          {/* Middle feather */}
+          <path
+            d="M44 20C34 18 22 20 14 24C8 28 4 32 4 34C8 34 14 32 22 28C30 24 38 22 44 20Z"
+            fill="white"
+            stroke="#222"
+            strokeWidth="2.5"
+            strokeLinejoin="round"
+          />
+          {/* Top feather (shortest) */}
+          <path
+            d="M40 12C32 10 22 12 16 16C12 18 10 22 14 22C18 22 28 18 40 12Z"
+            fill="white"
+            stroke="#222"
+            strokeWidth="2"
             strokeLinejoin="round"
           />
         </g>
