@@ -46,7 +46,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
           >
             {tab.special ? (
               <motion.div 
-                className="w-14 h-14 rounded-full bg-primary flex items-center justify-center overflow-hidden p-2"
+                className="w-14 h-14 rounded-full bg-primary flex items-center justify-center overflow-hidden"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 animate={{
@@ -60,18 +60,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
                   boxShadow: { duration: 2, repeat: Infinity },
                 }}
               >
-                <motion.div
-                  animate={{ 
-                    rotate: [0, -5, 5, 0],
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 3
-                  }}
-                >
-                  <BilliLogo size={36} variant="white" />
-                </motion.div>
+                <BilliLogo size={44} variant="white" />
               </motion.div>
             ) : (
               <>
