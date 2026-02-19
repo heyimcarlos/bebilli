@@ -19,8 +19,14 @@ const BilliLogo: React.FC<BilliLogoProps> = ({ className = '', size = 48, showTe
         alt="Billi"
         width={size}
         height={size}
-        className={`object-contain ${variant === 'white' ? 'brightness-0 invert' : ''}`}
-        style={{ width: size, height: size }}
+        className="object-contain"
+        style={{
+          width: size,
+          height: size,
+          ...(variant === 'white'
+            ? { mixBlendMode: 'screen' as const }
+            : {}),
+        }}
       />
 
       {showText && (
