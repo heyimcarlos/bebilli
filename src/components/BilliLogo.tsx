@@ -8,7 +8,7 @@ interface BilliLogoProps {
 }
 
 const BilliLogo: React.FC<BilliLogoProps> = ({ className = '', size = 48, showText = false, variant = 'default' }) => {
-  const bColor = variant === 'white' ? '#FFFFFF' : '#E8751A';
+  const bColor = variant === 'white' ? '#FFFFFF' : '#C86A12';
   const cutoutColor = variant === 'white' ? '#E8751A' : 'white';
   const textColor = variant === 'white' ? 'text-white' : 'text-foreground';
   const subColor = variant === 'white' ? 'text-white/70' : 'text-muted-foreground';
