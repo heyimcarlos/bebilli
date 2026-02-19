@@ -102,8 +102,9 @@ const LoginPage: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      // Let the Lovable Cloud library handle the redirect_uri automatically
-      const result = await lovable.auth.signInWithOAuth("google");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
       
       if (result.error) {
         toast({
@@ -553,7 +554,7 @@ const LoginPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(145deg, hsl(30 100% 50%) 0%, hsl(25 100% 45%) 50%, hsl(20 100% 40%) 100%)' }}>
+    <div className="min-h-screen flex flex-col bg-primary">
       <div className="relative flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
         {/* Glow effect */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-[120px]" />
@@ -561,11 +562,10 @@ const LoginPage: React.FC = () => {
         {/* Logo Section */}
         <div className="relative z-10 text-center mb-6">
           <div className="mx-auto mb-3 flex items-center justify-center">
-            <BilliLogo size={120} variant="white" />
+            <BilliLogo size={100} />
           </div>
           
           <h1 className="text-3xl font-black text-white mb-1">Billi</h1>
-          <p className="text-white/80 text-sm font-medium tracking-wide">bilionaire</p>
           
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mt-3">
             <span className="text-xs text-white font-medium">{t('saveTogetherShort')}</span>

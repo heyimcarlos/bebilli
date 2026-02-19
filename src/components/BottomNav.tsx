@@ -60,7 +60,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
                   boxShadow: { duration: 2, repeat: Infinity },
                 }}
               >
-                <BilliLogo size={44} variant="white" />
+                <BilliLogo size={56} />
               </motion.div>
             ) : (
               <>

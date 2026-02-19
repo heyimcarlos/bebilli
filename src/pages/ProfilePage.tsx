@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun } from 'lucide-react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -14,6 +14,12 @@ import DefaultAvatar from '@/components/DefaultAvatar';
 import ShareProgressCard from '@/components/ShareProgressCard';
 import ProfileBadges from '@/components/ProfileBadges';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -25,6 +31,13 @@ interface ProfilePageProps {
   onLogout: () => void;
 }
 
+const AVATAR_NAMES = [
+  'Alex', 'Jordan', 'Morgan', 'Taylor', 'Casey',
+  'Riley', 'Quinn', 'Avery', 'Dakota', 'Skyler',
+  'Jamie', 'Robin', 'Charlie', 'Drew', 'Sage',
+  'Kai', 'Remy', 'Finley', 'Parker', 'Reese',
+];
+
 const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const { t, language, setLanguage, currency, setCurrency, formatCurrency, formatPremiumPrice } = useApp();
   const { profile, user, updateProfile } = useAuthContext();
@@ -34,6 +47,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showShareCard, setShowShareCard] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   // Calculate stats for sharing
   const shareStats = {
@@ -86,7 +100,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               className="hidden"
             />
             <div className="w-24 h-24 rounded-full bg-primary overflow-hidden glow-primary">
-              {profile?.avatar_url ? (
+              {profile?.avatar_url?.startsWith('avatar:') ? (
+                <DefaultAvatar name={profile.avatar_url.replace('avatar:', '')} size={96} />
+              ) : profile?.avatar_url ? (
                 <img 
                   src={profile.avatar_url} 
                   alt={profile.name} 
@@ -96,17 +112,25 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
                 <DefaultAvatar name={profile?.name || 'User'} size={96} />
               )}
             </div>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-secondary border-2 border-background flex items-center justify-center hover:bg-secondary/80 transition-colors disabled:opacity-50"
-            >
-              {uploading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Camera className="w-4 h-4" />
-              )}
-            </button>
+            <div className="absolute -bottom-1 right-0 flex gap-1">
+              <button
+                onClick={() => setShowAvatarPicker(true)}
+                className="w-8 h-8 rounded-full bg-accent border-2 border-background flex items-center justify-center hover:bg-accent/80 transition-colors"
+              >
+                <Palette className="w-4 h-4 text-accent-foreground" />
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-8 h-8 rounded-full bg-secondary border-2 border-background flex items-center justify-center hover:bg-secondary/80 transition-colors disabled:opacity-50"
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
           
           <h1 className="text-2xl font-bold mb-1">{profile?.name || 'Billionaire'}</h1>
@@ -269,6 +293,33 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
         onClose={() => setShowShareCard(false)}
         stats={shareStats}
       />
+
+      {/* Avatar Picker Dialog */}
+      <Dialog open={showAvatarPicker} onOpenChange={setShowAvatarPicker}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Escolha seu avatar</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-4 gap-3 py-4 max-h-[60vh] overflow-y-auto">
+            {AVATAR_NAMES.map((avatarName) => (
+              <button
+                key={avatarName}
+                onClick={async () => {
+                  if (!user) return;
+                  const { error } = await updateProfile({ avatar_url: `avatar:${avatarName}` });
+                  if (!error) {
+                    toast({ title: '✨ Avatar atualizado!' });
+                    setShowAvatarPicker(false);
+                  }
+                }}
+                className="w-16 h-16 mx-auto rounded-full overflow-hidden border-2 border-transparent hover:border-primary transition-colors"
+              >
+                <DefaultAvatar name={avatarName} size={64} />
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
