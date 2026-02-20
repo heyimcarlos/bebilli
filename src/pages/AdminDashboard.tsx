@@ -96,7 +96,7 @@ interface CouponUsageInfo {
 // ===== Component =====
 const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { toast } = useToast();
-  const { formatCurrency } = useApp();
+  const { formatCurrency, t } = useApp();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState('users');
   
@@ -362,31 +362,31 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   // ===== ACTIONS =====
   const togglePremium = async (userId: string, current: boolean) => {
     await supabase.from('profiles').update({ is_premium: !current }).eq('id', userId);
-    toast({ title: current ? 'Premium desativado' : 'Premium ativado!' });
+    toast({ title: current ? t('adminPremiumDeactivated') : t('adminPremiumActivated') });
     fetchUsers();
   };
 
   const toggleAdmin = async (userId: string, currentRole: string) => {
     if (currentRole === 'admin') {
       await supabase.from('user_roles').delete().eq('user_id', userId).eq('role', 'admin');
-      toast({ title: 'Admin removido' });
+      toast({ title: t('adminAdminRemoved') });
     } else {
       await supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any });
-      toast({ title: 'Admin adicionado!' });
+      toast({ title: t('adminAdminAdded') });
     }
     fetchUsers();
   };
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
-    toast({ title: 'Código copiado!', description: code });
+    toast({ title: t('adminCodeCopied'), description: code });
   };
 
   const handleRegenerateCode = async (groupId: string) => {
     setRegeneratingCode(groupId);
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     await supabase.from('groups').update({ invite_code: newCode }).eq('id', groupId);
-    toast({ title: 'Código regenerado!', description: newCode });
+    toast({ title: t('adminCodeRegenerated'), description: newCode });
     fetchGroups();
     setRegeneratingCode(null);
   };
@@ -401,9 +401,9 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       valid_until: couponForm.valid_until || null,
       created_by: user?.id,
     });
-    if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); }
+    if (error) { toast({ title: t('error'), description: error.message, variant: 'destructive' }); }
     else {
-      toast({ title: 'Cupom criado!' });
+      toast({ title: t('adminCouponCreated') });
       setCouponForm({ code: '', description: '', discount_percentage: '', max_uses: '', valid_until: '' });
       setShowCouponForm(false);
       fetchCoupons();
@@ -412,50 +412,50 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   const toggleCoupon = async (couponId: string, isActive: boolean) => {
     await supabase.from('subscription_coupons').update({ is_active: !isActive }).eq('id', couponId);
-    toast({ title: isActive ? 'Cupom desativado' : 'Cupom ativado!' });
+    toast({ title: isActive ? t('adminDeactivate') : t('adminActivate') });
     fetchCoupons();
   };
 
   // ===== EXCEL EXPORTS =====
   const exportUsers = () => {
     const rows = filteredUsers.map(u => ({
-      Nome: u.name,
-      Email: userEmails[u.id] || '',
-      País: u.country || '',
-      Cidade: u.city || '',
-      Telefone: u.phone || '',
-      Idioma: u.language || '',
-      Moeda: u.currency || '',
-      Nível: u.level,
-      Premium: u.is_premium ? 'Sim' : 'Não',
-      Role: u.role || 'user',
-      'Streak Atual': u.current_streak,
-      'Melhor Streak': u.best_streak,
-      'Total Depósitos': u.total_contributions,
-      'Máx Economizado': u.max_saved,
-      'Dias no App': daysSince(u.created_at),
-      Cadastro: u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '',
-      'Última Contrib.': u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yyyy') : '',
-      Grupos: (u.groups || []).map(g => g.group_name).join(', '),
-      Comunidades: (u.communities || []).join(', '),
+      [t('name')]: u.name,
+      [t('email')]: userEmails[u.id] || '',
+      [t('country')]: u.country || '',
+      [t('city')]: u.city || '',
+      [t('phone')]: u.phone || '',
+      [t('adminLanguage')]: u.language || '',
+      [t('adminCurrency')]: u.currency || '',
+      [t('level')]: u.level,
+      'Premium': u.is_premium ? '✓' : '✗',
+      'Role': u.role || 'user',
+      [t('adminCurrentStreak')]: u.current_streak,
+      [t('adminBestStreak')]: u.best_streak,
+      [t('adminTotalDeposits')]: u.total_contributions,
+      [t('adminMaxSaved')]: u.max_saved,
+      [t('adminDaysInApp')]: daysSince(u.created_at),
+      [t('adminRegistration')]: u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '',
+      [t('adminLastContribution')]: u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yyyy') : '',
+      [t('adminGroups2')]: (u.groups || []).map(g => g.group_name).join(', '),
+      [t('adminCommunities')]: (u.communities || []).join(', '),
     }));
-    exportToExcel([{ sheetName: 'Usuários', rows }], 'billi-usuarios');
+    exportToExcel([{ sheetName: t('adminUsers'), rows }], 'billi-users');
   };
 
   const exportGroups = () => {
     const rows = filteredGroups.map(g => ({
-      Nome: g.name,
-      Descrição: g.description || '',
-      Código: g.invite_code,
-      Membros: g.member_count,
-      Depósitos: g.total_deposits,
-      Retiradas: g.total_withdrawals,
-      Líquido: g.total_deposits - g.total_withdrawals,
-      Meta: g.goal_amount,
-      'Progresso %': g.goal_amount > 0 ? ((g.total_deposits - g.total_withdrawals) / g.goal_amount * 100).toFixed(1) : '0',
-      Criação: g.created_at ? format(new Date(g.created_at), 'dd/MM/yyyy') : '',
+      [t('name')]: g.name,
+      [t('description')]: g.description || '',
+      [t('adminCode')]: g.invite_code,
+      [t('adminMembers')]: g.member_count,
+      [t('adminDepositsLabel')]: g.total_deposits,
+      [t('adminWithdrawals')]: g.total_withdrawals,
+      [t('adminNet')]: g.total_deposits - g.total_withdrawals,
+      [t('adminGoal')]: g.goal_amount,
+      [t('adminProgress') + ' %']: g.goal_amount > 0 ? ((g.total_deposits - g.total_withdrawals) / g.goal_amount * 100).toFixed(1) : '0',
+      [t('adminCreation')]: g.created_at ? format(new Date(g.created_at), 'dd/MM/yyyy') : '',
     }));
-    exportToExcel([{ sheetName: 'Grupos', rows }], 'billi-grupos');
+    exportToExcel([{ sheetName: t('adminGroups'), rows }], 'billi-groups');
   };
 
   const exportFinancial = () => {
@@ -469,75 +469,75 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       const totalWith = withs.reduce((s: number, c: any) => s + Number(c.amount), 0);
       const days = daysSince(u.created_at) || 1;
       return {
-        Nome: u.name,
-        Email: userEmails[u.id] || '',
-        'Total Depósitos': totalDep,
-        'Total Retiradas': totalWith,
-        Líquido: totalDep - totalWith,
-        'Média/Dia': (totalDep / days).toFixed(2),
-        'Projeção/Mês': (totalDep / days * 30).toFixed(2),
-        'Projeção/Ano': (totalDep / days * 365).toFixed(2),
+        [t('name')]: u.name,
+        [t('email')]: userEmails[u.id] || '',
+        [t('adminDepositsLabel')]: totalDep,
+        [t('adminWithdrawals')]: totalWith,
+        [t('adminNet')]: totalDep - totalWith,
+        [t('adminAvgPerDay')]: (totalDep / days).toFixed(2),
+        [t('adminProjectionMonth')]: (totalDep / days * 30).toFixed(2),
+        [t('adminProjectionYear')]: (totalDep / days * 365).toFixed(2),
       };
     });
-    exportToExcel([{ sheetName: 'Financeiro', rows }], 'billi-financeiro');
+    exportToExcel([{ sheetName: t('adminFinancial'), rows }], 'billi-financial');
   };
 
   const exportSubscriptions = () => {
     const rows = subscriptions.map((s: any) => ({
-      Usuário: s.user_name,
-      Plano: s.plan_type === 'annual' ? 'Anual' : 'Mensal',
-      Status: s.status,
-      Valor: `${s.currency} ${Number(s.amount).toFixed(2)}`,
-      Pagamento: s.payment_method,
-      Cupom: s.coupon_code,
-      Assinatura: s.subscribed_at ? format(new Date(s.subscribed_at), 'dd/MM/yyyy') : '',
-      Renovação: s.renewal_date ? format(new Date(s.renewal_date), 'dd/MM/yyyy') : '',
-      Vencimento: s.expires_at ? format(new Date(s.expires_at), 'dd/MM/yyyy') : '',
+      [t('name')]: s.user_name,
+      [t('adminPlan')]: s.plan_type === 'annual' ? t('adminAnnual') : t('adminMonthly'),
+      [t('adminStatus')]: s.status,
+      [t('adminValue')]: `${s.currency} ${Number(s.amount).toFixed(2)}`,
+      [t('adminPayment')]: s.payment_method,
+      [t('adminCoupon')]: s.coupon_code,
+      [t('adminSubscriptionDate')]: s.subscribed_at ? format(new Date(s.subscribed_at), 'dd/MM/yyyy') : '',
+      [t('adminRenewal')]: s.renewal_date ? format(new Date(s.renewal_date), 'dd/MM/yyyy') : '',
+      [t('adminExpiration')]: s.expires_at ? format(new Date(s.expires_at), 'dd/MM/yyyy') : '',
     }));
-    exportToExcel([{ sheetName: 'Assinaturas', rows }], 'billi-assinaturas');
+    exportToExcel([{ sheetName: t('adminSubscriptions'), rows }], 'billi-subscriptions');
   };
 
   const exportCoupons = () => {
     const couponRows = coupons.map(c => ({
-      Código: c.code,
-      Descrição: c.description || '',
-      'Desconto %': c.discount_percentage || '',
-      'Desconto Valor': c.discount_amount || '',
-      Ativo: c.is_active ? 'Sim' : 'Não',
-      'Usos Atuais': c.current_uses,
-      'Usos Máximos': c.max_uses || 'Ilimitado',
-      'Válido Até': c.valid_until ? format(new Date(c.valid_until), 'dd/MM/yyyy') : 'Sem limite',
+      [t('adminCouponCode')]: c.code,
+      [t('adminCouponDescription')]: c.description || '',
+      [t('adminDiscountPercent')]: c.discount_percentage || '',
+      [t('adminValue')]: c.discount_amount || '',
+      [t('adminStatus')]: c.is_active ? '✓' : '✗',
+      [t('adminUsages')]: c.current_uses,
+      [t('adminMaxUses')]: c.max_uses || t('adminUnlimited'),
+      [t('adminValidUntil')]: c.valid_until ? format(new Date(c.valid_until), 'dd/MM/yyyy') : t('adminNoLimit'),
     }));
     const usageRows = couponUsages.map(cu => ({
-      Cupom: cu.coupon_code,
-      Usuário: cu.user_name,
-      'Data Uso': format(new Date(cu.used_at), 'dd/MM/yyyy'),
+      [t('adminCoupon')]: cu.coupon_code,
+      [t('name')]: cu.user_name,
+      [t('adminUsedAt')]: format(new Date(cu.used_at), 'dd/MM/yyyy'),
     }));
     exportToExcel([
-      { sheetName: 'Cupons', rows: couponRows },
-      { sheetName: 'Resgates', rows: usageRows },
-    ], 'billi-cupons');
+      { sheetName: t('adminCoupons'), rows: couponRows },
+      { sheetName: t('adminRedemptions'), rows: usageRows },
+    ], 'billi-coupons');
   };
 
   const exportAll = () => {
     const usersRows = filteredUsers.map(u => ({
-      Nome: u.name, Email: userEmails[u.id] || '', País: u.country || '', Nível: u.level,
-      Premium: u.is_premium ? 'Sim' : 'Não', 'Streak Atual': u.current_streak,
-      'Total Depósitos': u.total_contributions, 'Máx Economizado': u.max_saved,
+      [t('name')]: u.name, [t('email')]: userEmails[u.id] || '', [t('country')]: u.country || '', [t('level')]: u.level,
+      'Premium': u.is_premium ? '✓' : '✗', [t('adminCurrentStreak')]: u.current_streak,
+      [t('adminTotalDeposits')]: u.total_contributions, [t('adminMaxSaved')]: u.max_saved,
     }));
     const groupsRows = filteredGroups.map(g => ({
-      Nome: g.name, Membros: g.member_count, Depósitos: g.total_deposits,
-      Meta: g.goal_amount, Código: g.invite_code,
+      [t('name')]: g.name, [t('adminMembers')]: g.member_count, [t('adminDepositsLabel')]: g.total_deposits,
+      [t('adminGoal')]: g.goal_amount, [t('adminCode')]: g.invite_code,
     }));
     const subsRows = subscriptions.map((s: any) => ({
-      Usuário: s.user_name, Plano: s.plan_type, Status: s.status,
-      Valor: `${s.currency} ${Number(s.amount).toFixed(2)}`,
+      [t('name')]: s.user_name, [t('adminPlan')]: s.plan_type, [t('adminStatus')]: s.status,
+      [t('adminValue')]: `${s.currency} ${Number(s.amount).toFixed(2)}`,
     }));
     exportToExcel([
-      { sheetName: 'Usuários', rows: usersRows },
-      { sheetName: 'Grupos', rows: groupsRows },
-      { sheetName: 'Assinaturas', rows: subsRows },
-    ], 'billi-relatorio-completo');
+      { sheetName: t('adminUsers'), rows: usersRows },
+      { sheetName: t('adminGroups'), rows: groupsRows },
+      { sheetName: t('adminSubscriptions'), rows: subsRows },
+    ], 'billi-full-report');
   };
   const availableCountries = useMemo(() => [...new Set(users.map(u => u.country).filter(Boolean))].sort(), [users]);
   const availableCurrencies = useMemo(() => [...new Set(users.map(u => u.currency).filter(Boolean))].sort(), [users]);
@@ -588,22 +588,21 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-        <h1 className="text-2xl font-bold mb-2">Acesso negado</h1>
-        <p className="text-muted-foreground mb-4">Você não tem permissão para acessar esta página.</p>
-        <Button onClick={onBack}>Voltar</Button>
+        <h1 className="text-2xl font-bold mb-2">{t('adminAccessDenied')}</h1>
+        <p className="text-muted-foreground mb-4">{t('adminNoPermission')}</p>
+        <Button onClick={onBack}>{t('back')}</Button>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
       <div className="px-4 pt-12 pb-4">
         <div className="flex items-center gap-3 mb-4">
           <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
           <div>
-            <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-            <p className="text-sm text-muted-foreground">Gestão completa da plataforma</p>
+            <h1 className="text-2xl font-bold">{t('adminPanel')}</h1>
+            <p className="text-sm text-muted-foreground">{t('adminPlatformManagement')}</p>
           </div>
           <Button variant="outline" size="sm" onClick={exportAll} className="h-8 text-xs ml-auto">
             <Download className="w-3 h-3 mr-1" />Excel
@@ -615,10 +614,10 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="px-4 mb-4">
         <div className="grid grid-cols-4 gap-2">
           {[
-            { icon: Users, label: 'Usuários', value: totalUsers },
+            { icon: Users, label: t('adminUsers'), value: totalUsers },
             { icon: Crown, label: 'Premium', value: premiumUsers },
-            { icon: Target, label: 'Grupos', value: totalGroupsCount },
-            { icon: TrendingUp, label: 'Líquido', value: formatCurrency(totalGroupNet) },
+            { icon: Target, label: t('adminGroups'), value: totalGroupsCount },
+            { icon: TrendingUp, label: t('adminNet'), value: formatCurrency(totalGroupNet) },
           ].map(({ icon: Icon, label, value }, i) => (
             <div key={label} className="glass-card p-2 text-center">
               <Icon className="w-4 h-4 mx-auto mb-1 text-primary" />
@@ -633,19 +632,19 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="px-4 mb-4 flex gap-2">
         <Select value={filterCountry} onValueChange={setFilterCountry}>
           <SelectTrigger className="h-8 text-xs flex-1">
-            <Globe className="w-3 h-3 mr-1" /><SelectValue placeholder="País" />
+            <Globe className="w-3 h-3 mr-1" /><SelectValue placeholder={t('country')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os países</SelectItem>
+            <SelectItem value="all">{t('adminAllCountries')}</SelectItem>
             {availableCountries.map(c => <SelectItem key={c} value={c!}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterCurrency} onValueChange={setFilterCurrency}>
           <SelectTrigger className="h-8 text-xs flex-1">
-            <Coins className="w-3 h-3 mr-1" /><SelectValue placeholder="Moeda" />
+            <Coins className="w-3 h-3 mr-1" /><SelectValue placeholder={t('currency')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas as moedas</SelectItem>
+            <SelectItem value="all">{t('adminAllCurrencies')}</SelectItem>
             {availableCurrencies.map(c => <SelectItem key={c} value={c!}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -655,11 +654,11 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-5 h-9">
-            <TabsTrigger value="users" className="text-[10px] px-1"><UserCog className="w-3 h-3 mr-0.5" />Usuários</TabsTrigger>
-            <TabsTrigger value="groups" className="text-[10px] px-1"><Target className="w-3 h-3 mr-0.5" />Grupos</TabsTrigger>
-            <TabsTrigger value="financial" className="text-[10px] px-1"><BarChart3 className="w-3 h-3 mr-0.5" />Financeiro</TabsTrigger>
-            <TabsTrigger value="subscriptions" className="text-[10px] px-1"><CreditCard className="w-3 h-3 mr-0.5" />Assinat.</TabsTrigger>
-            <TabsTrigger value="coupons" className="text-[10px] px-1"><Ticket className="w-3 h-3 mr-0.5" />Cupons</TabsTrigger>
+            <TabsTrigger value="users" className="text-[10px] px-1"><UserCog className="w-3 h-3 mr-0.5" />{t('adminUsers')}</TabsTrigger>
+            <TabsTrigger value="groups" className="text-[10px] px-1"><Target className="w-3 h-3 mr-0.5" />{t('adminGroups')}</TabsTrigger>
+            <TabsTrigger value="financial" className="text-[10px] px-1"><BarChart3 className="w-3 h-3 mr-0.5" />{t('adminFinancial')}</TabsTrigger>
+            <TabsTrigger value="subscriptions" className="text-[10px] px-1"><CreditCard className="w-3 h-3 mr-0.5" />{t('adminSubscriptions')}</TabsTrigger>
+            <TabsTrigger value="coupons" className="text-[10px] px-1"><Ticket className="w-3 h-3 mr-0.5" />{t('adminCoupons')}</TabsTrigger>
           </TabsList>
 
           {/* ==================== USERS TAB ==================== */}
@@ -667,9 +666,9 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportUsers} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Buscar por nome..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10 h-9" />
+              <Input placeholder={t('adminSearchUsers')} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10 h-9" />
             </div>
-            <p className="text-xs text-muted-foreground">{filteredUsers.length} usuário(s)</p>
+            <p className="text-xs text-muted-foreground">{filteredUsers.length} {t('adminUserCount')}</p>
 
             {usersLoading ? (
               <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
@@ -688,9 +687,9 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                           {u.role === 'admin' && <span className="text-[9px] px-1 py-0.5 rounded bg-destructive/20 text-destructive font-medium">ADMIN</span>}
                           {u.is_premium && <span className="text-[9px] px-1 py-0.5 rounded bg-accent/20 text-accent font-medium">VIP</span>}
                         </div>
-                        <p className="text-[10px] text-muted-foreground">
-                          Nv{u.level} • {u.consistency_days}d ativo • {u.country || '—'} • {u.currency || '—'}
-                        </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            Nv{u.level} • {u.consistency_days}d • {u.country || '—'} • {u.currency || '—'}
+                          </p>
                         {userEmails[u.id] && (
                           <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                             <Mail className="w-3 h-3" />{userEmails[u.id]}
@@ -705,23 +704,23 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-3 pt-2 border-t border-border">
                         {/* Profile details */}
                         <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div><span className="text-muted-foreground">Cidade:</span> {u.city || '—'}</div>
-                          <div><span className="text-muted-foreground">Telefone:</span> {u.phone || '—'}</div>
-                          <div><span className="text-muted-foreground">Idioma:</span> {u.language || '—'}</div>
-                          <div><span className="text-muted-foreground">Moeda:</span> {u.currency || '—'}</div>
-                          <div><span className="text-muted-foreground">Streak atual:</span> {u.current_streak}d</div>
-                          <div><span className="text-muted-foreground">Melhor streak:</span> {u.best_streak}d</div>
-                          <div><span className="text-muted-foreground">Máx economizado:</span> {formatCurrency(u.max_saved)}</div>
-                          <div><span className="text-muted-foreground">Total depósitos:</span> {u.total_contributions}</div>
-                          <div><span className="text-muted-foreground">Cadastro:</span> {u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '—'}</div>
-                          <div><span className="text-muted-foreground">Dias no app:</span> {daysSince(u.created_at)}</div>
-                          <div><span className="text-muted-foreground">Última contrib.:</span> {u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yy') : '—'}</div>
+                          <div><span className="text-muted-foreground">{t('adminCity')}:</span> {u.city || '—'}</div>
+                          <div><span className="text-muted-foreground">{t('adminPhone')}:</span> {u.phone || '—'}</div>
+                          <div><span className="text-muted-foreground">{t('adminLanguage')}:</span> {u.language || '—'}</div>
+                          <div><span className="text-muted-foreground">{t('adminCurrency')}:</span> {u.currency || '—'}</div>
+                          <div><span className="text-muted-foreground">{t('adminCurrentStreak')}:</span> {u.current_streak}d</div>
+                          <div><span className="text-muted-foreground">{t('adminBestStreak')}:</span> {u.best_streak}d</div>
+                          <div><span className="text-muted-foreground">{t('adminMaxSaved')}:</span> {formatCurrency(u.max_saved)}</div>
+                          <div><span className="text-muted-foreground">{t('adminTotalDeposits')}:</span> {u.total_contributions}</div>
+                          <div><span className="text-muted-foreground">{t('adminRegistration')}:</span> {u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '—'}</div>
+                          <div><span className="text-muted-foreground">{t('adminDaysInApp')}:</span> {daysSince(u.created_at)}</div>
+                          <div><span className="text-muted-foreground">{t('adminLastContribution')}:</span> {u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yy') : '—'}</div>
                         </div>
 
                         {/* User groups */}
                         {u.groups && u.groups.length > 0 && (
                           <div>
-                            <p className="text-xs font-semibold mb-1">Grupos ({u.groups.length})</p>
+                            <p className="text-xs font-semibold mb-1">{t('adminGroups2')} ({u.groups.length})</p>
                             <div className="space-y-1">
                               {u.groups.map(g => (
                                 <div key={g.group_id} className="bg-muted/30 rounded p-2 text-xs flex justify-between">
@@ -736,7 +735,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {/* User communities */}
                         {u.communities && u.communities.length > 0 && (
                           <div>
-                            <p className="text-xs font-semibold mb-1">Comunidades ({u.communities.length})</p>
+                            <p className="text-xs font-semibold mb-1">{t('adminCommunities')} ({u.communities.length})</p>
                             <div className="flex flex-wrap gap-1">
                               {u.communities.map((c, i) => (
                                 <span key={i} className="bg-muted/50 rounded px-2 py-0.5 text-[10px]">{c}</span>
@@ -748,17 +747,17 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {/* Actions */}
                         <div className="flex flex-wrap gap-2">
                           <Button size="sm" variant={u.is_premium ? "destructive" : "default"} onClick={() => togglePremium(u.id, u.is_premium)} className="h-7 text-xs">
-                            <Crown className="w-3 h-3 mr-1" />{u.is_premium ? 'Remover VIP' : 'Dar VIP'}
+                            <Crown className="w-3 h-3 mr-1" />{u.is_premium ? t('adminRemoveVIP') : t('adminGiveVIP')}
                           </Button>
                           <Button size="sm" variant={u.role === 'admin' ? "destructive" : "outline"} onClick={() => toggleAdmin(u.id, u.role || 'user')} className="h-7 text-xs">
-                            <Shield className="w-3 h-3 mr-1" />{u.role === 'admin' ? 'Remover Admin' : 'Tornar Admin'}
+                            <Shield className="w-3 h-3 mr-1" />{u.role === 'admin' ? t('adminRemoveAdmin') : t('adminMakeAdmin')}
                           </Button>
                         </div>
                       </motion.div>
                     )}
                   </div>
                 ))}
-                {filteredUsers.length === 0 && <p className="text-center py-8 text-muted-foreground">Nenhum usuário encontrado.</p>}
+                {filteredUsers.length === 0 && <p className="text-center py-8 text-muted-foreground">{t('adminNoUsersFound')}</p>}
               </div>
             )}
           </TabsContent>
@@ -768,9 +767,9 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportGroups} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Buscar por nome ou código..." value={groupSearch} onChange={(e) => setGroupSearch(e.target.value)} className="pl-10 h-9" />
+              <Input placeholder={t('adminSearchGroups')} value={groupSearch} onChange={(e) => setGroupSearch(e.target.value)} className="pl-10 h-9" />
             </div>
-            <p className="text-xs text-muted-foreground">{filteredGroups.length} grupo(s)</p>
+            <p className="text-xs text-muted-foreground">{filteredGroups.length} {t('adminGroupCount')}</p>
 
             {groupsLoading ? (
               <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
@@ -789,7 +788,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         )}
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-sm truncate">{group.name}</h3>
-                          <p className="text-[10px] text-muted-foreground">{group.member_count} membros • {format(new Date(group.created_at!), 'dd/MM/yy')}</p>
+                          <p className="text-[10px] text-muted-foreground">{group.member_count} {t('members')} • {format(new Date(group.created_at!), 'dd/MM/yy')}</p>
                         </div>
                         {expandedGroup === group.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
@@ -806,15 +805,15 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                       {/* Stats row */}
                       <div className="grid grid-cols-4 gap-1 text-center text-xs">
-                        <div className="bg-muted/30 rounded p-1"><p className="font-bold text-primary">{formatCurrency(group.total_deposits)}</p><p className="text-[9px] text-muted-foreground">Depósitos</p></div>
-                        <div className="bg-muted/30 rounded p-1"><p className="font-bold text-destructive">{formatCurrency(group.total_withdrawals)}</p><p className="text-[9px] text-muted-foreground">Retiradas</p></div>
-                        <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(netAmount)}</p><p className="text-[9px] text-muted-foreground">Líquido</p></div>
-                        <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(group.goal_amount)}</p><p className="text-[9px] text-muted-foreground">Meta</p></div>
+                         <div className="bg-muted/30 rounded p-1"><p className="font-bold text-primary">{formatCurrency(group.total_deposits)}</p><p className="text-[9px] text-muted-foreground">{t('adminDepositsLabel')}</p></div>
+                         <div className="bg-muted/30 rounded p-1"><p className="font-bold text-destructive">{formatCurrency(group.total_withdrawals)}</p><p className="text-[9px] text-muted-foreground">{t('adminWithdrawals')}</p></div>
+                         <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(netAmount)}</p><p className="text-[9px] text-muted-foreground">{t('adminNet')}</p></div>
+                         <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(group.goal_amount)}</p><p className="text-[9px] text-muted-foreground">{t('adminGoal')}</p></div>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex justify-between text-[10px]">
-                          <span className="text-muted-foreground">Progresso</span>
+                          <span className="text-muted-foreground">{t('adminProgress')}</span>
                           <span className="font-medium">{Math.min(Math.max(progress, 0), 100).toFixed(1)}%</span>
                         </div>
                         <Progress value={Math.min(Math.max(progress, 0), 100)} className="h-1.5" />
@@ -823,7 +822,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                       {/* Expanded: member breakdown */}
                       {expandedGroup === group.id && (
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-1 pt-2 border-t border-border">
-                          <p className="text-xs font-semibold">Membros</p>
+                          <p className="text-xs font-semibold">{t('adminMembers')}</p>
                           {group.members.map(m => (
                             <div key={m.user_id} className="flex justify-between items-center bg-muted/20 rounded p-1.5 text-xs">
                               <span>{m.user_name} <span className="text-muted-foreground">({m.role})</span></span>
@@ -835,7 +834,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
                   );
                 })}
-                {filteredGroups.length === 0 && <p className="text-center py-8 text-muted-foreground">Nenhum grupo encontrado.</p>}
+                {filteredGroups.length === 0 && <p className="text-center py-8 text-muted-foreground">{t('adminNoGroupsFound')}</p>}
               </div>
             )}
           </TabsContent>
@@ -845,10 +844,10 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportFinancial} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: 'Hoje', value: financialStats.todayDeposits, icon: Calendar },
-                { label: 'Este mês', value: financialStats.monthDeposits, icon: BarChart3 },
-                { label: 'Este ano', value: financialStats.yearDeposits, icon: TrendingUp },
-                { label: 'Total geral', value: financialStats.totalDeposits, icon: DollarSign },
+                { label: t('adminToday'), value: financialStats.todayDeposits, icon: Calendar },
+                { label: t('adminMonth'), value: financialStats.monthDeposits, icon: BarChart3 },
+                { label: t('adminYear'), value: financialStats.yearDeposits, icon: TrendingUp },
+                { label: t('adminTotal'), value: financialStats.totalDeposits, icon: DollarSign },
               ].map(({ label, value, icon: Icon }) => (
                 <div key={label} className="glass-card p-3 text-center">
                   <Icon className="w-4 h-4 mx-auto mb-1 text-primary" />
@@ -860,7 +859,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             {/* Per-user financial breakdown */}
             <div>
-              <p className="text-sm font-semibold mb-2">Economia por usuário</p>
+              <p className="text-sm font-semibold mb-2">{t('adminFinancial')}</p>
               <div className="space-y-2">
                 {filteredUsers.slice(0, 20).map(u => {
                   const userDeposits = allContributions.filter(c => c.user_id === u.id && c.type === 'deposit');
@@ -878,12 +877,12 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <div key={u.id} className="glass-card p-2 text-xs">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-semibold">{u.name}</span>
-                        <span className="text-primary font-bold">{formatCurrency(totalDep - totalWith)} líq.</span>
+                        <span className="text-primary font-bold">{formatCurrency(totalDep - totalWith)} {t('adminNet').toLowerCase()}</span>
                       </div>
                       <div className="grid grid-cols-3 gap-1 text-center">
-                        <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(perDay)}</p><p className="text-[9px] text-muted-foreground">/dia</p></div>
-                        <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(perMonth)}</p><p className="text-[9px] text-muted-foreground">/mês</p></div>
-                        <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(perYear)}</p><p className="text-[9px] text-muted-foreground">/ano</p></div>
+                         <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(perDay)}</p><p className="text-[9px] text-muted-foreground">/{t('adminToday').charAt(0).toLowerCase()}</p></div>
+                         <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(perMonth)}</p><p className="text-[9px] text-muted-foreground">/{t('adminMonth').charAt(0).toLowerCase()}</p></div>
+                         <div className="bg-muted/30 rounded p-1"><p className="font-bold">{formatCurrency(perYear)}</p><p className="text-[9px] text-muted-foreground">/{t('adminYear').charAt(0).toLowerCase()}</p></div>
                       </div>
                     </div>
                   );
@@ -902,18 +901,18 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </div>
               <div className="glass-card p-2 text-center">
                 <p className="text-lg font-bold text-primary">{subscriptions.filter((s: any) => s.status === 'active').length}</p>
-                <p className="text-[10px] text-muted-foreground">Ativas</p>
+                <p className="text-[10px] text-muted-foreground">{t('adminStatus')}</p>
               </div>
               <div className="glass-card p-2 text-center">
                 <p className="text-lg font-bold">{subscriptions.filter((s: any) => s.plan_type === 'annual').length}</p>
-                <p className="text-[10px] text-muted-foreground">Anuais</p>
+                <p className="text-[10px] text-muted-foreground">{t('adminAnnual')}</p>
               </div>
             </div>
 
             {subscriptionsLoading ? (
               <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : subscriptions.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground text-xs">Nenhuma assinatura registrada.</p>
+              <p className="text-center py-8 text-muted-foreground text-xs">{t('adminNoSubscriptions')}</p>
             ) : (
               <div className="space-y-2">
                 {subscriptions.map((sub: any) => (
@@ -929,18 +928,18 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         sub.status === 'expired' ? 'bg-muted text-muted-foreground' :
                         'bg-amber-500/20 text-amber-600'
                       }`}>
-                        {sub.status === 'active' ? 'Ativa' : sub.status === 'cancelled' ? 'Cancelada' : sub.status === 'expired' ? 'Expirada' : 'Pendente'}
+                        {sub.status === 'active' ? t('adminStatus') : sub.status === 'cancelled' ? t('cancel') : sub.status === 'expired' ? t('adminExpiration') : sub.status}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div><span className="text-muted-foreground">Plano:</span> {sub.plan_type === 'annual' ? 'Anual' : 'Mensal'}</div>
-                      <div><span className="text-muted-foreground">Valor:</span> {sub.currency} {Number(sub.amount).toFixed(2)}</div>
-                      <div><span className="text-muted-foreground">Pagamento:</span> {sub.payment_method === 'card' ? 'Cartão' : sub.payment_method === 'pix' ? 'Pix' : sub.payment_method}</div>
-                      <div><span className="text-muted-foreground">Cupom:</span> {sub.coupon_code}</div>
-                      <div><span className="text-muted-foreground">Assinatura:</span> {sub.subscribed_at ? format(new Date(sub.subscribed_at), 'dd/MM/yy') : '—'}</div>
-                      <div><span className="text-muted-foreground">Pagamento:</span> {sub.payment_date ? format(new Date(sub.payment_date), 'dd/MM/yy') : '—'}</div>
-                      <div><span className="text-muted-foreground">Renovação:</span> {sub.renewal_date ? format(new Date(sub.renewal_date), 'dd/MM/yy') : '—'}</div>
-                      <div><span className="text-muted-foreground">Vencimento:</span> {sub.expires_at ? format(new Date(sub.expires_at), 'dd/MM/yy') : '—'}</div>
+                      <div><span className="text-muted-foreground">{t('adminPlan')}:</span> {sub.plan_type === 'annual' ? t('adminAnnual') : t('adminMonthly')}</div>
+                      <div><span className="text-muted-foreground">{t('adminValue')}:</span> {sub.currency} {Number(sub.amount).toFixed(2)}</div>
+                      <div><span className="text-muted-foreground">{t('adminPayment')}:</span> {sub.payment_method}</div>
+                      <div><span className="text-muted-foreground">{t('adminCoupon')}:</span> {sub.coupon_code}</div>
+                      <div><span className="text-muted-foreground">{t('adminSubscriptionDate')}:</span> {sub.subscribed_at ? format(new Date(sub.subscribed_at), 'dd/MM/yy') : '—'}</div>
+                      <div><span className="text-muted-foreground">{t('adminPayment')}:</span> {sub.payment_date ? format(new Date(sub.payment_date), 'dd/MM/yy') : '—'}</div>
+                      <div><span className="text-muted-foreground">{t('adminRenewal')}:</span> {sub.renewal_date ? format(new Date(sub.renewal_date), 'dd/MM/yy') : '—'}</div>
+                      <div><span className="text-muted-foreground">{t('adminExpiration')}:</span> {sub.expires_at ? format(new Date(sub.expires_at), 'dd/MM/yy') : '—'}</div>
                     </div>
                   </div>
                 ))}
@@ -952,19 +951,19 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <TabsContent value="coupons" className="space-y-3 mt-4">
             <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportCoupons} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <Button onClick={() => setShowCouponForm(!showCouponForm)} className="w-full h-8 text-xs">
-              <Ticket className="w-3 h-3 mr-1" />{showCouponForm ? 'Cancelar' : 'Criar Novo Cupom'}
+              <Ticket className="w-3 h-3 mr-1" />{showCouponForm ? t('cancel') : t('adminCreateCoupon')}
             </Button>
 
             {showCouponForm && (
               <div className="glass-card p-3 space-y-2">
-                <Input placeholder="Código (ex: SAVE20)" value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} className="h-8 text-xs" />
-                <Input placeholder="Descrição" value={couponForm.description} onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })} className="h-8 text-xs" />
+                <Input placeholder={t('adminCouponCode')} value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} className="h-8 text-xs" />
+                <Input placeholder={t('adminCouponDescription')} value={couponForm.description} onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })} className="h-8 text-xs" />
                 <div className="grid grid-cols-2 gap-2">
-                  <Input type="number" placeholder="Desconto %" value={couponForm.discount_percentage} onChange={(e) => setCouponForm({ ...couponForm, discount_percentage: e.target.value })} className="h-8 text-xs" />
-                  <Input type="number" placeholder="Usos máximos" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} className="h-8 text-xs" />
+                  <Input type="number" placeholder={t('adminDiscountPercent')} value={couponForm.discount_percentage} onChange={(e) => setCouponForm({ ...couponForm, discount_percentage: e.target.value })} className="h-8 text-xs" />
+                  <Input type="number" placeholder={t('adminMaxUses')} value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} className="h-8 text-xs" />
                 </div>
                 <Input type="date" value={couponForm.valid_until} onChange={(e) => setCouponForm({ ...couponForm, valid_until: e.target.value })} className="h-8 text-xs" />
-                <Button onClick={createCoupon} className="w-full h-8 text-xs" disabled={!couponForm.code}>Criar Cupom</Button>
+                <Button onClick={createCoupon} className="w-full h-8 text-xs" disabled={!couponForm.code}>{t('adminCreateCoupon')}</Button>
               </div>
             )}
 
@@ -981,24 +980,24 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {coupon.discount_percentage && <span className="ml-1 text-xs text-primary">{coupon.discount_percentage}% off</span>}
                       </div>
                       <Button size="sm" variant={coupon.is_active ? "default" : "outline"} onClick={() => toggleCoupon(coupon.id, coupon.is_active)} className="h-6 text-[10px]">
-                        {coupon.is_active ? <><ToggleRight className="w-3 h-3 mr-0.5" />Ativo</> : <><ToggleLeft className="w-3 h-3 mr-0.5" />Inativo</>}
+                        {coupon.is_active ? <><ToggleRight className="w-3 h-3 mr-0.5" />{t('adminActivate')}</> : <><ToggleLeft className="w-3 h-3 mr-0.5" />{t('adminDeactivate')}</>}
                       </Button>
                     </div>
                     <p className="text-[10px] text-muted-foreground">{coupon.description}</p>
                     <div className="flex gap-3 text-[10px] text-muted-foreground">
-                      <span>Usos: {coupon.current_uses}{coupon.max_uses ? `/${coupon.max_uses}` : ''}</span>
-                      {coupon.valid_until && <span>Até: {format(new Date(coupon.valid_until), 'dd/MM/yy')}</span>}
+                      <span>{t('adminUsages')}: {coupon.current_uses}{coupon.max_uses ? `/${coupon.max_uses}` : ''}</span>
+                      {coupon.valid_until && <span>{t('adminValidUntil')}: {format(new Date(coupon.valid_until), 'dd/MM/yy')}</span>}
                     </div>
                   </div>
                 ))}
-                {coupons.length === 0 && <p className="text-center py-4 text-muted-foreground text-xs">Nenhum cupom cadastrado.</p>}
+                {coupons.length === 0 && <p className="text-center py-4 text-muted-foreground text-xs">{t('adminNoCoupons')}</p>}
               </div>
             )}
 
             {/* Coupon usages */}
             {couponUsages.length > 0 && (
               <div>
-                <p className="text-sm font-semibold mb-2">Cupons Resgatados</p>
+                <p className="text-sm font-semibold mb-2">{t('adminRedemptions')}</p>
                 <div className="space-y-1">
                   {couponUsages.map(cu => (
                     <div key={cu.id} className="flex justify-between items-center bg-muted/30 rounded p-2 text-xs">
