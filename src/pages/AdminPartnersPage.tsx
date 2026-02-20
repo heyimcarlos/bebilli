@@ -433,14 +433,30 @@ const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         </div>
                       </div>
                     </div>
+                    <div>
+                      <Label htmlFor="min_group_progress" className="text-primary font-semibold">
+                        🎯 % do Grupo que Desbloqueia este Cupom *
+                      </Label>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Quando o progresso do grupo atingir este %, o cupom será liberado para os membros.
+                      </p>
+                      <div className="relative">
+                        <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                        <Input 
+                          name="min_group_progress" 
+                          type="number" 
+                          defaultValue={editingCoupon?.min_group_progress || 0} 
+                          min={0} 
+                          max={100} 
+                          className="pl-10 border-primary/30"
+                          placeholder="Ex: 25, 50, 75, 100"
+                        />
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="min_level">Min Level</Label>
+                        <Label htmlFor="min_level">Min Level (opcional)</Label>
                         <Input name="min_level" type="number" defaultValue={editingCoupon?.min_level || 1} min={1} />
-                      </div>
-                      <div>
-                        <Label htmlFor="min_group_progress">Min Progress %</Label>
-                        <Input name="min_group_progress" type="number" defaultValue={editingCoupon?.min_group_progress || 0} min={0} max={100} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -484,11 +500,11 @@ const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                           </div>
                           <p className="text-sm text-muted-foreground">{partner?.name}</p>
                           <p className="text-sm">{coupon.description}</p>
-                          <div className="flex gap-2 mt-2 text-xs text-muted-foreground">
+                          <div className="flex gap-2 mt-2 text-xs text-muted-foreground flex-wrap">
                             {coupon.discount_percentage && <span>{coupon.discount_percentage}% off</span>}
                             {coupon.discount_amount && <span>${coupon.discount_amount} off</span>}
                             <span>• Level {coupon.min_level}+</span>
-                            {coupon.min_group_progress > 0 && <span>• {coupon.min_group_progress}% progress</span>}
+                            <span className="text-primary font-semibold">• 🎯 Desbloqueia em {coupon.min_group_progress}%</span>
                           </div>
                         </div>
                         <div className="flex gap-2">

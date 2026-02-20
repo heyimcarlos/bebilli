@@ -645,6 +645,65 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          amount: number
+          cancelled_at: string | null
+          coupon_id: string | null
+          created_at: string
+          currency: string
+          expires_at: string | null
+          id: string
+          payment_date: string
+          payment_method: string
+          plan_type: string
+          renewal_date: string | null
+          status: string
+          subscribed_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          cancelled_at?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          payment_date?: string
+          payment_method?: string
+          plan_type: string
+          renewal_date?: string | null
+          status?: string
+          subscribed_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          cancelled_at?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          payment_date?: string
+          payment_method?: string
+          plan_type?: string
+          renewal_date?: string | null
+          status?: string
+          subscribed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       groups_member_view: {

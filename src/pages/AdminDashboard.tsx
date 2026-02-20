@@ -121,6 +121,10 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   // Contributions raw data for financial tab
   const [allContributions, setAllContributions] = useState<any[]>([]);
   
+  // Subscriptions state
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [subscriptionsLoading, setSubscriptionsLoading] = useState(false);
+
   // Filters
   const [filterCountry, setFilterCountry] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
@@ -153,6 +157,35 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     fetchCoupons();
     fetchContributions();
     fetchCouponUsages();
+    fetchSubscriptions();
+  };
+
+  // ===== FETCH SUBSCRIPTIONS =====
+  const fetchSubscriptions = async () => {
+    setSubscriptionsLoading(true);
+    const { data } = await supabase.from('user_subscriptions').select('*').order('created_at', { ascending: false });
+    if (data) {
+      // Enrich with user names
+      const userIds = [...new Set(data.map((s: any) => s.user_id))];
+      const { data: profiles } = userIds.length > 0
+        ? await supabase.from('profiles').select('id, name').in('id', userIds)
+        : { data: [] };
+      const nameMap = new Map((profiles || []).map((p: any) => [p.id, p.name]));
+
+      // Enrich with coupon codes
+      const couponIds = [...new Set(data.filter((s: any) => s.coupon_id).map((s: any) => s.coupon_id))];
+      const { data: couponsData } = couponIds.length > 0
+        ? await supabase.from('subscription_coupons').select('id, code').in('id', couponIds)
+        : { data: [] };
+      const couponMap = new Map((couponsData || []).map((c: any) => [c.id, c.code]));
+
+      setSubscriptions(data.map((s: any) => ({
+        ...s,
+        user_name: nameMap.get(s.user_id) || 'Desconhecido',
+        coupon_code: s.coupon_id ? couponMap.get(s.coupon_id) || '—' : '—',
+      })));
+    }
+    setSubscriptionsLoading(false);
   };
 
   // ===== FETCH USERS =====
@@ -478,10 +511,11 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-4 h-9">
+          <TabsList className="w-full grid grid-cols-5 h-9">
             <TabsTrigger value="users" className="text-[10px] px-1"><UserCog className="w-3 h-3 mr-0.5" />Usuários</TabsTrigger>
             <TabsTrigger value="groups" className="text-[10px] px-1"><Target className="w-3 h-3 mr-0.5" />Grupos</TabsTrigger>
             <TabsTrigger value="financial" className="text-[10px] px-1"><BarChart3 className="w-3 h-3 mr-0.5" />Financeiro</TabsTrigger>
+            <TabsTrigger value="subscriptions" className="text-[10px] px-1"><CreditCard className="w-3 h-3 mr-0.5" />Assinat.</TabsTrigger>
             <TabsTrigger value="coupons" className="text-[10px] px-1"><Ticket className="w-3 h-3 mr-0.5" />Cupons</TabsTrigger>
           </TabsList>
 
@@ -705,6 +739,61 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }).filter(Boolean)}
               </div>
             </div>
+          </TabsContent>
+
+          {/* ==================== SUBSCRIPTIONS TAB ==================== */}
+          <TabsContent value="subscriptions" className="space-y-3 mt-4">
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="glass-card p-2 text-center">
+                <p className="text-lg font-bold">{subscriptions.length}</p>
+                <p className="text-[10px] text-muted-foreground">Total</p>
+              </div>
+              <div className="glass-card p-2 text-center">
+                <p className="text-lg font-bold text-primary">{subscriptions.filter((s: any) => s.status === 'active').length}</p>
+                <p className="text-[10px] text-muted-foreground">Ativas</p>
+              </div>
+              <div className="glass-card p-2 text-center">
+                <p className="text-lg font-bold">{subscriptions.filter((s: any) => s.plan_type === 'annual').length}</p>
+                <p className="text-[10px] text-muted-foreground">Anuais</p>
+              </div>
+            </div>
+
+            {subscriptionsLoading ? (
+              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
+            ) : subscriptions.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground text-xs">Nenhuma assinatura registrada.</p>
+            ) : (
+              <div className="space-y-2">
+                {subscriptions.map((sub: any) => (
+                  <div key={sub.id} className="glass-card p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Crown className="w-4 h-4 text-primary" />
+                        <span className="font-semibold text-sm">{sub.user_name}</span>
+                      </div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                        sub.status === 'active' ? 'bg-green-500/20 text-green-600' :
+                        sub.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
+                        sub.status === 'expired' ? 'bg-muted text-muted-foreground' :
+                        'bg-amber-500/20 text-amber-600'
+                      }`}>
+                        {sub.status === 'active' ? 'Ativa' : sub.status === 'cancelled' ? 'Cancelada' : sub.status === 'expired' ? 'Expirada' : 'Pendente'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div><span className="text-muted-foreground">Plano:</span> {sub.plan_type === 'annual' ? 'Anual' : 'Mensal'}</div>
+                      <div><span className="text-muted-foreground">Valor:</span> {sub.currency} {Number(sub.amount).toFixed(2)}</div>
+                      <div><span className="text-muted-foreground">Pagamento:</span> {sub.payment_method === 'card' ? 'Cartão' : sub.payment_method === 'pix' ? 'Pix' : sub.payment_method}</div>
+                      <div><span className="text-muted-foreground">Cupom:</span> {sub.coupon_code}</div>
+                      <div><span className="text-muted-foreground">Assinatura:</span> {sub.subscribed_at ? format(new Date(sub.subscribed_at), 'dd/MM/yy') : '—'}</div>
+                      <div><span className="text-muted-foreground">Pagamento:</span> {sub.payment_date ? format(new Date(sub.payment_date), 'dd/MM/yy') : '—'}</div>
+                      <div><span className="text-muted-foreground">Renovação:</span> {sub.renewal_date ? format(new Date(sub.renewal_date), 'dd/MM/yy') : '—'}</div>
+                      <div><span className="text-muted-foreground">Vencimento:</span> {sub.expires_at ? format(new Date(sub.expires_at), 'dd/MM/yy') : '—'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* ==================== COUPONS TAB ==================== */}

@@ -1,111 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Lock, Star, Percent, ExternalLink, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
-export interface PartnerCoupon {
+interface PartnerCouponData {
   id: string;
-  partnerName: string;
-  partnerLogo: string;
-  discount: string;
-  description: Record<string, string>;
   code: string;
-  unlockLevel: number;
-  category: string;
-  expiresAt?: string;
-  url?: string;
+  description: string;
+  discount_percentage: number | null;
+  discount_amount: number | null;
+  min_level: number;
+  min_group_progress: number;
+  partner: {
+    name: string;
+    logo_url: string | null;
+    website_url: string | null;
+    category: string;
+  };
 }
-
-// Demo partner coupons (in production, these would come from the database)
-const demoCoupons: PartnerCoupon[] = [
-  {
-    id: '1',
-    partnerName: 'Airbnb',
-    partnerLogo: 'https://logo.clearbit.com/airbnb.com',
-    discount: '15%',
-    description: {
-      en: 'Off your next booking',
-      pt: 'De desconto na próxima reserva',
-      es: 'En tu próxima reserva',
-      fr: 'Sur votre prochaine réservation',
-      it: 'Sul tuo prossimo soggiorno',
-      de: 'Auf Ihre nächste Buchung',
-    },
-    code: 'BILLI15',
-    unlockLevel: 2,
-    category: 'Travel',
-    url: 'https://airbnb.com',
-  },
-  {
-    id: '2',
-    partnerName: 'Uber',
-    partnerLogo: 'https://logo.clearbit.com/uber.com',
-    discount: '$10',
-    description: {
-      en: 'Off your next 3 rides',
-      pt: 'De desconto nas próximas 3 viagens',
-      es: 'En tus próximos 3 viajes',
-      fr: 'Sur vos 3 prochaines courses',
-      it: 'Sui tuoi prossimi 3 viaggi',
-      de: 'Auf Ihre nächsten 3 Fahrten',
-    },
-    code: 'BILLISAVE10',
-    unlockLevel: 3,
-    category: 'Transport',
-  },
-  {
-    id: '3',
-    partnerName: 'Amazon',
-    partnerLogo: 'https://logo.clearbit.com/amazon.com',
-    discount: '20%',
-    description: {
-      en: 'On select products',
-      pt: 'Em produtos selecionados',
-      es: 'En productos seleccionados',
-      fr: 'Sur les produits sélectionnés',
-      it: 'Su prodotti selezionati',
-      de: 'Auf ausgewählte Produkte',
-    },
-    code: 'BILLI20OFF',
-    unlockLevel: 5,
-    category: 'Shopping',
-  },
-  {
-    id: '4',
-    partnerName: 'Netflix',
-    partnerLogo: 'https://logo.clearbit.com/netflix.com',
-    discount: '1 month',
-    description: {
-      en: 'Free subscription',
-      pt: 'Assinatura grátis',
-      es: 'Suscripción gratis',
-      fr: 'Abonnement gratuit',
-      it: 'Abbonamento gratuito',
-      de: 'Kostenloses Abonnement',
-    },
-    code: 'BILLIFREE',
-    unlockLevel: 7,
-    category: 'Entertainment',
-  },
-  {
-    id: '5',
-    partnerName: 'Expedia',
-    partnerLogo: 'https://logo.clearbit.com/expedia.com',
-    discount: '25%',
-    description: {
-      en: 'On hotel bookings',
-      pt: 'Em reservas de hotéis',
-      es: 'En reservas de hoteles',
-      fr: 'Sur les réservations d\'hôtels',
-      it: 'Sulle prenotazioni alberghiere',
-      de: 'Auf Hotelbuchungen',
-    },
-    code: 'BILLI25HOTEL',
-    unlockLevel: 10,
-    category: 'Travel',
-  },
-];
 
 interface PartnerCouponsProps {
   userLevel: number;
@@ -113,9 +27,52 @@ interface PartnerCouponsProps {
 }
 
 const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgress = 0 }) => {
-  const { t, language } = useApp();
-  const [selectedCoupon, setSelectedCoupon] = useState<PartnerCoupon | null>(null);
+  const { t } = useApp();
+  const [coupons, setCoupons] = useState<PartnerCouponData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCoupon, setSelectedCoupon] = useState<PartnerCouponData | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('partner_coupons')
+        .select('id, code, description, discount_percentage, discount_amount, min_level, min_group_progress, partner_id')
+        .eq('is_active', true)
+        .order('min_group_progress', { ascending: true });
+
+      if (error || !data) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch partner details
+      const partnerIds = [...new Set(data.map(c => c.partner_id))];
+      const { data: partners } = await supabase
+        .from('partners')
+        .select('id, name, logo_url, website_url, category')
+        .in('id', partnerIds);
+
+      const partnerMap = new Map((partners || []).map(p => [p.id, p]));
+
+      const mapped: PartnerCouponData[] = data.map(c => ({
+        id: c.id,
+        code: c.code,
+        description: c.description,
+        discount_percentage: c.discount_percentage,
+        discount_amount: c.discount_amount,
+        min_level: c.min_level,
+        min_group_progress: c.min_group_progress,
+        partner: partnerMap.get(c.partner_id) || { name: 'Partner', logo_url: null, website_url: null, category: '' },
+      }));
+
+      setCoupons(mapped);
+      setLoading(false);
+    };
+
+    fetchCoupons();
+  }, []);
 
   const handleCopyCode = async (code: string) => {
     try {
@@ -127,17 +84,36 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
     }
   };
 
-  const getProgressMilestones = () => {
-    return [25, 50, 75, 100];
+  const isUnlocked = (coupon: PartnerCouponData) => {
+    return groupProgress >= coupon.min_group_progress && userLevel >= coupon.min_level;
   };
 
-  const unlockedByProgress = (requiredProgress: number) => groupProgress >= requiredProgress;
+  // Get unique progress milestones from coupons
+  const milestones = [...new Set(coupons.map(c => c.min_group_progress))].sort((a, b) => a - b);
+  const displayMilestones = milestones.length > 0 ? milestones : [25, 50, 75, 100];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (coupons.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <Gift className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
+        <p className="text-sm text-muted-foreground">{t('noCouponsAvailable') || 'No partner coupons available yet'}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Gift className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold">{t('partners')}</h3>
+        <h3 className="font-semibold">{t('partners') || 'Partner Rewards'}</h3>
       </div>
 
       {/* Progress-based unlocks */}
@@ -148,26 +124,26 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
             <motion.div
               className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: `${groupProgress}%` }}
+              animate={{ width: `${Math.min(groupProgress, 100)}%` }}
               transition={{ duration: 1, ease: 'easeOut' }}
             />
           </div>
           <div className="flex justify-between mt-2">
-            {getProgressMilestones().map((milestone) => (
+            {displayMilestones.map((milestone) => (
               <div
                 key={milestone}
                 className={`flex flex-col items-center ${
-                  unlockedByProgress(milestone) ? 'text-primary' : 'text-muted-foreground'
+                  groupProgress >= milestone ? 'text-primary' : 'text-muted-foreground'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                    unlockedByProgress(milestone)
+                    groupProgress >= milestone
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-secondary'
                   }`}
                 >
-                  {unlockedByProgress(milestone) ? '✓' : <Lock className="w-3 h-3" />}
+                  {groupProgress >= milestone ? '✓' : <Lock className="w-3 h-3" />}
                 </div>
                 <span className="text-xs mt-1">{milestone}%</span>
               </div>
@@ -178,48 +154,55 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
 
       {/* Coupons Grid */}
       <div className="grid gap-3">
-        {demoCoupons.map((coupon) => {
-          const isUnlocked = userLevel >= coupon.unlockLevel;
-          
+        {coupons.map((coupon) => {
+          const unlocked = isUnlocked(coupon);
+          const discountLabel = coupon.discount_percentage
+            ? `${coupon.discount_percentage}%`
+            : coupon.discount_amount
+            ? `$${coupon.discount_amount}`
+            : '';
+
           return (
             <motion.div
               key={coupon.id}
-              className={`glass-card p-4 ${!isUnlocked ? 'opacity-60' : ''}`}
-              whileHover={isUnlocked ? { scale: 1.02 } : undefined}
-              onClick={() => isUnlocked && setSelectedCoupon(coupon)}
+              className={`glass-card p-4 ${!unlocked ? 'opacity-60' : ''}`}
+              whileHover={unlocked ? { scale: 1.02 } : undefined}
+              onClick={() => unlocked && setSelectedCoupon(coupon)}
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <img
-                    src={coupon.partnerLogo}
-                    alt={coupon.partnerName}
-                    className={`w-12 h-12 rounded-xl object-contain bg-white p-1 ${
-                      !isUnlocked ? 'grayscale' : ''
-                    }`}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/48?text=' + coupon.partnerName[0];
-                    }}
-                  />
-                  {!isUnlocked && (
+                  {coupon.partner.logo_url ? (
+                    <img
+                      src={coupon.partner.logo_url}
+                      alt={coupon.partner.name}
+                      className={`w-12 h-12 rounded-xl object-contain bg-white p-1 ${!unlocked ? 'grayscale' : ''}`}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/48?text=${coupon.partner.name[0]}`;
+                      }}
+                    />
+                  ) : (
+                    <div className={`w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-lg font-bold ${!unlocked ? 'grayscale' : ''}`}>
+                      {coupon.partner.name[0]}
+                    </div>
+                  )}
+                  {!unlocked && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl">
                       <Lock className="w-4 h-4 text-white" />
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold truncate">{coupon.partnerName}</h4>
+                    <h4 className="font-semibold truncate">{coupon.partner.name}</h4>
                     <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-bold">
-                      {coupon.discount}
+                      {discountLabel}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {coupon.description[language] || coupon.description.en}
-                  </p>
+                  <p className="text-sm text-muted-foreground truncate">{coupon.description}</p>
                 </div>
 
-                {isUnlocked ? (
+                {unlocked ? (
                   <Button
                     size="sm"
                     variant="outline"
@@ -234,7 +217,7 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
                 ) : (
                   <div className="text-xs text-muted-foreground text-center">
                     <Lock className="w-4 h-4 mx-auto mb-1" />
-                    Lvl {coupon.unlockLevel}
+                    {coupon.min_group_progress}%
                   </div>
                 )}
               </div>
@@ -261,20 +244,26 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center">
-                <img
-                  src={selectedCoupon.partnerLogo}
-                  alt={selectedCoupon.partnerName}
-                  className="w-20 h-20 rounded-2xl mx-auto mb-4 object-contain bg-white p-2"
-                />
-                <h3 className="text-xl font-bold mb-1">{selectedCoupon.partnerName}</h3>
+                {selectedCoupon.partner.logo_url ? (
+                  <img
+                    src={selectedCoupon.partner.logo_url}
+                    alt={selectedCoupon.partner.name}
+                    className="w-20 h-20 rounded-2xl mx-auto mb-4 object-contain bg-white p-2"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-2xl mx-auto mb-4 bg-primary/20 flex items-center justify-center text-2xl font-bold">
+                    {selectedCoupon.partner.name[0]}
+                  </div>
+                )}
+                <h3 className="text-xl font-bold mb-1">{selectedCoupon.partner.name}</h3>
                 <div className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-primary/20 text-primary font-bold text-lg mb-4">
                   <Star className="w-5 h-5" />
-                  {selectedCoupon.discount}
+                  {selectedCoupon.discount_percentage
+                    ? `${selectedCoupon.discount_percentage}% OFF`
+                    : `$${selectedCoupon.discount_amount} OFF`}
                 </div>
-                <p className="text-muted-foreground mb-6">
-                  {selectedCoupon.description[language] || selectedCoupon.description.en}
-                </p>
-                
+                <p className="text-muted-foreground mb-6">{selectedCoupon.description}</p>
+
                 <div className="bg-secondary rounded-xl p-4 mb-4">
                   <p className="text-xs text-muted-foreground mb-2">{t('couponCode') || 'Coupon Code'}</p>
                   <p className="text-2xl font-mono font-bold tracking-wider">{selectedCoupon.code}</p>
@@ -287,11 +276,11 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
                   {copiedCode === selectedCoupon.code ? '✓ Copied!' : t('copyCode') || 'Copy Code'}
                 </Button>
 
-                {selectedCoupon.url && (
+                {selectedCoupon.partner.website_url && (
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => window.open(selectedCoupon.url, '_blank')}
+                    onClick={() => window.open(selectedCoupon.partner.website_url!, '_blank')}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     {t('visitPartner') || 'Visit Partner'}
