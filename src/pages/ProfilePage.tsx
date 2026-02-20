@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import BilliLogo from '@/components/BilliLogo';
 import DefaultAvatar from '@/components/DefaultAvatar';
 import ShareProgressCard from '@/components/ShareProgressCard';
+import InviteToBilli from '@/components/InviteToBilli';
 import ProfileBadges from '@/components/ProfileBadges';
 import PremiumAnalytics from '@/components/PremiumAnalytics';
 import { supabase } from '@/integrations/supabase/client';
@@ -203,6 +204,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
           <Share2 className="w-5 h-5 mr-2" />
           {t('shareProgress')}
         </Button>
+      </div>
+
+      {/* Invite to Billi */}
+      <div className="px-6 mb-6">
+        <InviteToBilli />
       </div>
 
       {/* Badges Section */}
