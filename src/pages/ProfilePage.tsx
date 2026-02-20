@@ -6,6 +6,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useGroups } from '@/hooks/useGroups';
 import { useContributions } from '@/hooks/useContributions';
+import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +14,7 @@ import BilliLogo from '@/components/BilliLogo';
 import DefaultAvatar from '@/components/DefaultAvatar';
 import ShareProgressCard from '@/components/ShareProgressCard';
 import ProfileBadges from '@/components/ProfileBadges';
+import PremiumAnalytics from '@/components/PremiumAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -46,6 +48,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const { groups } = useGroups(user?.id);
   const { uploadAvatar, uploading } = useImageUpload();
   const { toast } = useToast();
+  const { isPremium } = usePremiumCheck(user?.id);
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showShareCard, setShowShareCard] = useState(false);
@@ -210,8 +213,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
           totalAmount={profile?.max_saved || 0}
           groupsCount={groups.length}
           level={profile?.level || 1}
+          isPremium={isPremium}
         />
       </div>
+
+      {/* Premium Analytics */}
+      {isPremium && (
+        <div className="px-6 mb-6">
+          <PremiumAnalytics />
+        </div>
+      )}
 
       {/* Settings */}
       <div className="px-6">

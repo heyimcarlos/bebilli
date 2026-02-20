@@ -157,8 +157,9 @@ export interface Badge {
   name: Record<string, string>;
   description: Record<string, string>;
   icon: string;
-  requirement: { type: 'streak' | 'contributions' | 'amount' | 'groups' | 'level'; value: number };
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
+  requirement: { type: 'streak' | 'contributions' | 'amount' | 'groups' | 'level' | 'premium'; value: number };
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'vip';
+  premiumOnly?: boolean;
 }
 
 export const badges: Badge[] = [
@@ -250,6 +251,34 @@ export const badges: Badge[] = [
     requirement: { type: 'streak', value: 365 },
     tier: 'diamond',
   },
+  // Premium-exclusive badges
+  {
+    id: 'vip_member',
+    name: { en: 'VIP Member', pt: 'Membro VIP', es: 'Miembro VIP', fr: 'Membre VIP', it: 'Membro VIP', de: 'VIP-Mitglied' },
+    description: { en: 'Premium subscriber', pt: 'Assinante Premium', es: 'Suscriptor Premium', fr: 'Abonné Premium', it: 'Abbonato Premium', de: 'Premium-Abonnent' },
+    icon: '👑',
+    requirement: { type: 'premium', value: 1 },
+    tier: 'vip',
+    premiumOnly: true,
+  },
+  {
+    id: 'vip_saver',
+    name: { en: 'VIP Saver', pt: 'Poupador VIP', es: 'Ahorrador VIP', fr: 'Épargnant VIP', it: 'Risparmiatore VIP', de: 'VIP-Sparer' },
+    description: { en: 'Save $500 as VIP', pt: 'Economize $500 como VIP', es: 'Ahorra $500 como VIP', fr: 'Économisez 500$ en VIP', it: 'Risparmia 500$ da VIP', de: '500$ als VIP sparen' },
+    icon: '💫',
+    requirement: { type: 'amount', value: 500 },
+    tier: 'vip',
+    premiumOnly: true,
+  },
+  {
+    id: 'vip_streak',
+    name: { en: 'VIP Streak', pt: 'Streak VIP', es: 'Racha VIP', fr: 'Série VIP', it: 'Serie VIP', de: 'VIP-Serie' },
+    description: { en: '14-day streak as VIP', pt: 'Streak de 14 dias como VIP', es: 'Racha de 14 días como VIP', fr: 'Série de 14 jours en VIP', it: 'Serie di 14 giorni da VIP', de: '14-Tage-Serie als VIP' },
+    icon: '🔱',
+    requirement: { type: 'streak', value: 14 },
+    tier: 'vip',
+    premiumOnly: true,
+  },
 ];
 
 export const tierColors = {
@@ -258,4 +287,5 @@ export const tierColors = {
   gold: { bg: 'bg-yellow-500/20', text: 'text-yellow-500', border: 'border-yellow-500/30' },
   platinum: { bg: 'bg-cyan-400/20', text: 'text-cyan-400', border: 'border-cyan-400/30' },
   diamond: { bg: 'bg-purple-400/20', text: 'text-purple-400', border: 'border-purple-400/30' },
+  vip: { bg: 'bg-amber-500/20', text: 'text-amber-500', border: 'border-amber-500/40' },
 };

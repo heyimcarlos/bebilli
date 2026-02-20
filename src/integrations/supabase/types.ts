@@ -377,6 +377,7 @@ export type Database = {
           min_group_progress: number
           min_level: number
           partner_id: string
+          premium_only: boolean
           valid_from: string
           valid_until: string | null
         }
@@ -393,6 +394,7 @@ export type Database = {
           min_group_progress?: number
           min_level?: number
           partner_id: string
+          premium_only?: boolean
           valid_from?: string
           valid_until?: string | null
         }
@@ -409,6 +411,7 @@ export type Database = {
           min_group_progress?: number
           min_level?: number
           partner_id?: string
+          premium_only?: boolean
           valid_from?: string
           valid_until?: string | null
         }

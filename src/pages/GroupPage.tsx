@@ -478,6 +478,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             <PartnerCoupons 
               userLevel={profile?.level || 1} 
               groupProgress={progress}
+              isPremium={profile?.is_premium || false}
             />
           </TabsContent>
         </Tabs>
