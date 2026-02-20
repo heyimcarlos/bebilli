@@ -17,6 +17,8 @@ export interface UserProfile {
   total_contributions: number;
   level: number;
   last_contribution_at: string | null;
+  language: string | null;
+  currency: string | null;
 }
 
 export const useAuth = () => {
@@ -73,13 +75,13 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name: string, phone?: string, country?: string, city?: string) => {
+  const signUp = async (email: string, password: string, name: string, phone?: string, country?: string, city?: string, language?: string, currency?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { name, phone, country, city },
+        data: { name, phone, country, city, language, currency },
       },
     });
     return { data, error };

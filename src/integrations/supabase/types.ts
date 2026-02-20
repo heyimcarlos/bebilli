@@ -478,9 +478,11 @@ export type Database = {
           consistency_days: number | null
           country: string | null
           created_at: string | null
+          currency: string | null
           current_streak: number | null
           id: string
           is_premium: boolean | null
+          language: string | null
           last_contribution_at: string | null
           level: number | null
           max_saved: number | null
@@ -496,9 +498,11 @@ export type Database = {
           consistency_days?: number | null
           country?: string | null
           created_at?: string | null
+          currency?: string | null
           current_streak?: number | null
           id: string
           is_premium?: boolean | null
+          language?: string | null
           last_contribution_at?: string | null
           level?: number | null
           max_saved?: number | null
@@ -514,9 +518,11 @@ export type Database = {
           consistency_days?: number | null
           country?: string | null
           created_at?: string | null
+          currency?: string | null
           current_streak?: number | null
           id?: string
           is_premium?: boolean | null
+          language?: string | null
           last_contribution_at?: string | null
           level?: number | null
           max_saved?: number | null
