@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Lock, Star, Percent, ExternalLink, Loader2 } from 'lucide-react';
+import { Gift, Lock, Star, Percent, ExternalLink, Loader2, Crown } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ interface PartnerCouponData {
   discount_amount: number | null;
   min_level: number;
   min_group_progress: number;
+  premium_only: boolean;
   partner: {
     name: string;
     logo_url: string | null;
@@ -23,11 +24,12 @@ interface PartnerCouponData {
 
 interface PartnerCouponsProps {
   userLevel: number;
-  groupProgress?: number; // 0-100
+  groupProgress?: number;
+  isPremium?: boolean;
 }
 
-const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgress = 0 }) => {
-  const { t } = useApp();
+const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgress = 0, isPremium = false }) => {
+  const { t, formatCurrency } = useApp();
   const [coupons, setCoupons] = useState<PartnerCouponData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCoupon, setSelectedCoupon] = useState<PartnerCouponData | null>(null);
@@ -38,7 +40,7 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
       setLoading(true);
       const { data, error } = await supabase
         .from('partner_coupons')
-        .select('id, code, description, discount_percentage, discount_amount, min_level, min_group_progress, partner_id')
+        .select('id, code, description, discount_percentage, discount_amount, min_level, min_group_progress, premium_only, partner_id')
         .eq('is_active', true)
         .order('min_group_progress', { ascending: true });
 
@@ -47,7 +49,6 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
         return;
       }
 
-      // Fetch partner details
       const partnerIds = [...new Set(data.map(c => c.partner_id))];
       const { data: partners } = await supabase
         .from('partners')
@@ -64,6 +65,7 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
         discount_amount: c.discount_amount,
         min_level: c.min_level,
         min_group_progress: c.min_group_progress,
+        premium_only: (c as any).premium_only || false,
         partner: partnerMap.get(c.partner_id) || { name: 'Partner', logo_url: null, website_url: null, category: '' },
       }));
 
@@ -85,10 +87,16 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
   };
 
   const isUnlocked = (coupon: PartnerCouponData) => {
+    if (coupon.premium_only && !isPremium) return false;
     return groupProgress >= coupon.min_group_progress && userLevel >= coupon.min_level;
   };
 
-  // Get unique progress milestones from coupons
+  const getLockedReason = (coupon: PartnerCouponData): string => {
+    if (coupon.premium_only && !isPremium) return t('premiumOnly') || 'Premium Only';
+    if (groupProgress < coupon.min_group_progress) return `${coupon.min_group_progress}%`;
+    return `Level ${coupon.min_level}`;
+  };
+
   const milestones = [...new Set(coupons.map(c => c.min_group_progress))].sort((a, b) => a - b);
   const displayMilestones = milestones.length > 0 ? milestones : [25, 50, 75, 100];
 
@@ -159,13 +167,13 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
           const discountLabel = coupon.discount_percentage
             ? `${coupon.discount_percentage}%`
             : coupon.discount_amount
-            ? `$${coupon.discount_amount}`
+            ? formatCurrency(coupon.discount_amount)
             : '';
 
           return (
             <motion.div
               key={coupon.id}
-              className={`glass-card p-4 ${!unlocked ? 'opacity-60' : ''}`}
+              className={`glass-card p-4 ${!unlocked ? 'opacity-60' : ''} ${coupon.premium_only ? 'border border-amber-500/30' : ''}`}
               whileHover={unlocked ? { scale: 1.02 } : undefined}
               onClick={() => unlocked && setSelectedCoupon(coupon)}
             >
@@ -187,7 +195,11 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
                   )}
                   {!unlocked && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl">
-                      <Lock className="w-4 h-4 text-white" />
+                      {coupon.premium_only && !isPremium ? (
+                        <Crown className="w-4 h-4 text-amber-400" />
+                      ) : (
+                        <Lock className="w-4 h-4 text-white" />
+                      )}
                     </div>
                   )}
                 </div>
@@ -198,6 +210,11 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
                     <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-bold">
                       {discountLabel}
                     </span>
+                    {coupon.premium_only && (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center gap-1">
+                        <Crown className="w-3 h-3" /> VIP
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground truncate">{coupon.description}</p>
                 </div>
@@ -216,8 +233,12 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
                   </Button>
                 ) : (
                   <div className="text-xs text-muted-foreground text-center">
-                    <Lock className="w-4 h-4 mx-auto mb-1" />
-                    {coupon.min_group_progress}%
+                    {coupon.premium_only && !isPremium ? (
+                      <Crown className="w-4 h-4 mx-auto mb-1 text-amber-500" />
+                    ) : (
+                      <Lock className="w-4 h-4 mx-auto mb-1" />
+                    )}
+                    {getLockedReason(coupon)}
                   </div>
                 )}
               </div>
@@ -244,6 +265,11 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center">
+                {selectedCoupon.premium_only && (
+                  <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold mb-3">
+                    <Crown className="w-3 h-3" /> {t('exclusivePremium') || 'VIP Exclusive'}
+                  </div>
+                )}
                 {selectedCoupon.partner.logo_url ? (
                   <img
                     src={selectedCoupon.partner.logo_url}
@@ -260,7 +286,7 @@ const PartnerCoupons: React.FC<PartnerCouponsProps> = ({ userLevel, groupProgres
                   <Star className="w-5 h-5" />
                   {selectedCoupon.discount_percentage
                     ? `${selectedCoupon.discount_percentage}% OFF`
-                    : `$${selectedCoupon.discount_amount} OFF`}
+                    : `${formatCurrency(selectedCoupon.discount_amount || 0)} OFF`}
                 </div>
                 <p className="text-muted-foreground mb-6">{selectedCoupon.description}</p>
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { HelpCircle, Send, Loader2, X } from 'lucide-react';
+import { HelpCircle, Send, Loader2, Crown } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +19,7 @@ interface SupportFormModalProps {
 const SupportFormModal: React.FC<SupportFormModalProps> = ({ isOpen, onClose }) => {
   const { t } = useApp();
   const { profile, user } = useAuthContext();
+  const { isPremium } = usePremiumCheck(user?.id);
   const { toast } = useToast();
   const [name, setName] = useState(profile?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -31,15 +33,22 @@ const SupportFormModal: React.FC<SupportFormModalProps> = ({ isOpen, onClose }) 
 
     setSending(true);
 
-    // Build mailto link with pre-filled content
-    const body = `${t('supportName') || 'Name'}: ${name}\n${t('email') || 'Email'}: ${email}\n\n${description}`;
-    const mailtoLink = `mailto:contact@bebilli.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // Premium users get priority tag in subject
+    const priorityPrefix = isPremium ? '[⭐ VIP PRIORITY] ' : '';
+    const fullSubject = `${priorityPrefix}${subject}`;
+    const premiumTag = isPremium ? `\n🌟 Status: VIP Premium Member\n` : '';
+    const body = `${t('supportName') || 'Name'}: ${name}\n${t('email') || 'Email'}: ${email}${premiumTag}\n\n${description}`;
+    const mailtoLink = `mailto:contact@bebilli.com?subject=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(body)}`;
     
     window.open(mailtoLink, '_blank');
     
     toast({
-      title: t('supportSent') || 'Support request sent!',
-      description: t('supportSentDesc') || 'Your email client has been opened with the message.',
+      title: isPremium 
+        ? (t('prioritySupportSent') || '⭐ Priority support request sent!')
+        : (t('supportSent') || 'Support request sent!'),
+      description: isPremium
+        ? (t('prioritySupportSentDesc') || 'As a VIP member, your request will be handled with priority.')
+        : (t('supportSentDesc') || 'Your email client has been opened with the message.'),
     });
 
     setSending(false);
@@ -55,8 +64,26 @@ const SupportFormModal: React.FC<SupportFormModalProps> = ({ isOpen, onClose }) 
           <DialogTitle className="flex items-center gap-2">
             <HelpCircle className="w-5 h-5 text-primary" />
             {t('needHelp') || 'Need help?'}
+            {isPremium && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold ml-auto">
+                <Crown className="w-3 h-3" />
+                {t('prioritySupport') || 'Priority'}
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
+
+        {isPremium && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-700 dark:text-amber-300 flex items-center gap-2"
+          >
+            <Crown className="w-4 h-4 shrink-0" />
+            {t('vipSupportMessage') || 'As a VIP member, your support request is prioritized and handled faster.'}
+          </motion.div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <Label className="text-xs">{t('supportName') || 'Name'}</Label>
@@ -103,9 +130,9 @@ const SupportFormModal: React.FC<SupportFormModalProps> = ({ isOpen, onClose }) 
               maxLength={2000}
             />
           </div>
-          <Button type="submit" className="w-full h-10" disabled={sending || !subject.trim() || !description.trim()}>
+          <Button type="submit" className={`w-full h-10 ${isPremium ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white' : ''}`} disabled={sending || !subject.trim() || !description.trim()}>
             {sending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
-            {t('supportSend') || 'Send'}
+            {isPremium ? (t('sendPriority') || '⭐ Send Priority') : (t('supportSend') || 'Send')}
           </Button>
         </form>
       </DialogContent>

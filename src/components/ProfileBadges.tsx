@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Award } from 'lucide-react';
+import { Lock, Award, Crown } from 'lucide-react';
 import { badges, tierColors, Badge } from '@/lib/localization';
 import { useApp } from '@/contexts/AppContext';
 
@@ -10,6 +10,7 @@ interface ProfileBadgesProps {
   totalAmount: number;
   groupsCount: number;
   level: number;
+  isPremium?: boolean;
 }
 
 const ProfileBadges: React.FC<ProfileBadgesProps> = ({
@@ -18,10 +19,15 @@ const ProfileBadges: React.FC<ProfileBadgesProps> = ({
   totalAmount,
   groupsCount,
   level,
+  isPremium = false,
 }) => {
   const { language, t } = useApp();
 
+  // Filter badges: show premium badges only if user is premium
+  const availableBadges = badges.filter(b => !b.premiumOnly || isPremium);
+
   const checkBadgeUnlocked = (badge: Badge): boolean => {
+    if (badge.premiumOnly && !isPremium) return false;
     switch (badge.requirement.type) {
       case 'streak':
         return streak >= badge.requirement.value;
@@ -33,6 +39,8 @@ const ProfileBadges: React.FC<ProfileBadgesProps> = ({
         return groupsCount >= badge.requirement.value;
       case 'level':
         return level >= badge.requirement.value;
+      case 'premium':
+        return isPremium;
       default:
         return false;
     }
@@ -56,12 +64,15 @@ const ProfileBadges: React.FC<ProfileBadgesProps> = ({
       case 'level':
         current = level;
         break;
+      case 'premium':
+        current = isPremium ? 1 : 0;
+        break;
     }
     return Math.min(100, (current / badge.requirement.value) * 100);
   };
 
-  const unlockedBadges = badges.filter(checkBadgeUnlocked);
-  const lockedBadges = badges.filter(b => !checkBadgeUnlocked(b));
+  const unlockedBadges = availableBadges.filter(checkBadgeUnlocked);
+  const lockedBadges = availableBadges.filter(b => !checkBadgeUnlocked(b));
 
   return (
     <div className="space-y-4">
@@ -69,7 +80,7 @@ const ProfileBadges: React.FC<ProfileBadgesProps> = ({
         <Award className="w-5 h-5 text-primary" />
         <h3 className="font-semibold">{t('achievements') || 'Achievements'}</h3>
         <span className="text-sm text-muted-foreground">
-          ({unlockedBadges.length}/{badges.length})
+          ({unlockedBadges.length}/{availableBadges.length})
         </span>
       </div>
 
@@ -82,7 +93,7 @@ const ProfileBadges: React.FC<ProfileBadgesProps> = ({
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
-              className={`glass-card p-3 text-center border ${tierColors[badge.tier].border}`}
+              className={`glass-card p-3 text-center border ${tierColors[badge.tier].border} ${badge.premiumOnly ? 'bg-gradient-to-br from-amber-500/5 to-orange-500/5' : ''}`}
             >
               <div className={`text-3xl mb-1 ${tierColors[badge.tier].text}`}>
                 {badge.icon}
@@ -90,7 +101,8 @@ const ProfileBadges: React.FC<ProfileBadgesProps> = ({
               <p className="text-xs font-medium truncate">
                 {badge.name[language] || badge.name.en}
               </p>
-              <div className={`text-[10px] ${tierColors[badge.tier].text} capitalize`}>
+              <div className={`text-[10px] ${tierColors[badge.tier].text} capitalize flex items-center justify-center gap-1`}>
+                {badge.premiumOnly && <Crown className="w-2.5 h-2.5" />}
                 {badge.tier}
               </div>
             </motion.div>
@@ -108,22 +120,23 @@ const ProfileBadges: React.FC<ProfileBadgesProps> = ({
               return (
                 <div
                   key={badge.id}
-                  className="glass-card p-3 flex items-center gap-3 opacity-60"
+                  className={`glass-card p-3 flex items-center gap-3 opacity-60 ${badge.premiumOnly ? 'border border-amber-500/20' : ''}`}
                 >
                   <div className="relative">
                     <div className="text-2xl grayscale">{badge.icon}</div>
                     <Lock className="w-3 h-3 absolute -bottom-1 -right-1 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-medium truncate flex items-center gap-1">
                       {badge.name[language] || badge.name.en}
+                      {badge.premiumOnly && <Crown className="w-3 h-3 text-amber-500" />}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       {badge.description[language] || badge.description.en}
                     </p>
                     <div className="mt-1 h-1 bg-secondary rounded-full overflow-hidden">
                       <motion.div
-                        className="h-full bg-primary/50 rounded-full"
+                        className={`h-full rounded-full ${badge.premiumOnly ? 'bg-amber-500/50' : 'bg-primary/50'}`}
                         initial={{ width: 0 }}
                         animate={{ width: `${progress}%` }}
                         transition={{ duration: 1, ease: 'easeOut' }}

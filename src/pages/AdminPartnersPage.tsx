@@ -35,6 +35,7 @@ interface Coupon {
   max_uses: number | null;
   current_uses: number;
   is_active: boolean;
+  premium_only: boolean;
 }
 
 const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
@@ -171,6 +172,7 @@ const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       valid_until: formData.get('valid_until') as string || null,
       max_uses: formData.get('max_uses') ? Number(formData.get('max_uses')) : null,
       is_active: formData.get('is_active') === 'on',
+      premium_only: formData.get('premium_only') === 'on',
     };
 
     if (editingCoupon) {
@@ -473,6 +475,13 @@ const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                       <Switch name="is_active" defaultChecked={editingCoupon?.is_active ?? true} />
                       <Label>Active</Label>
                     </div>
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                      <Switch name="premium_only" defaultChecked={editingCoupon?.premium_only ?? false} />
+                      <Label className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+                        👑 Exclusivo Premium
+                      </Label>
+                      <span className="text-xs text-muted-foreground ml-auto">Apenas VIP</span>
+                    </div>
                   </div>
 
                   <Button type="submit" className="w-full btn-primary">
@@ -505,6 +514,7 @@ const AdminPartnersPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             {coupon.discount_amount && <span>${coupon.discount_amount} off</span>}
                             <span>• Level {coupon.min_level}+</span>
                             <span className="text-primary font-semibold">• 🎯 Desbloqueia em {coupon.min_group_progress}%</span>
+                            {(coupon as any).premium_only && <span className="text-amber-500 font-semibold">• 👑 Premium Only</span>}
                           </div>
                         </div>
                         <div className="flex gap-2">
