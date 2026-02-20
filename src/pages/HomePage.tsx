@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2, ImagePlus, X, Crown } from 'lucide-react';
+import SupportCard from '@/components/SupportCard';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { validateGoalAmount } from '@/lib/validation';
@@ -170,8 +171,10 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     return true;
   };
 
-  const handleDailyChallengeContribute = () => {
-    if (groups.length > 0) {
+  const handleDailyChallengeContribute = (groupId: string) => {
+    if (groupId) {
+      onGroupClick(groupId);
+    } else if (groups.length > 0) {
       onGroupClick(groups[0].id);
     }
   };
@@ -277,7 +280,11 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
           onContribute={handleDailyChallengeContribute}
           totalGoal={totalGoal}
           userName={profile?.name}
+          groups={groups.map(g => ({ id: g.id, name: g.name, goal_amount: g.goal_amount }))}
         />
+
+        {/* Support Card */}
+        <SupportCard />
 
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3 mb-6">

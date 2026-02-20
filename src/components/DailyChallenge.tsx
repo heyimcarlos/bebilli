@@ -4,18 +4,26 @@ import { Target, Check, Gift, Clock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
 
+interface GroupInfo {
+  id: string;
+  name: string;
+  goal_amount: number;
+}
+
 interface DailyChallengeProps {
   hasContributedToday: boolean;
-  onContribute: () => void;
-  totalGoal?: number; // Sum of all user's group goals
+  onContribute: (groupId: string) => void;
+  totalGoal?: number;
   userName?: string;
+  groups?: GroupInfo[];
 }
 
 const DailyChallenge: React.FC<DailyChallengeProps> = ({ 
   hasContributedToday,
   onContribute,
   totalGoal = 0,
-  userName = ''
+  userName = '',
+  groups = [],
 }) => {
   const { formatCurrency, t } = useApp();
   const [timeLeft, setTimeLeft] = useState('');
@@ -24,6 +32,8 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
     amount: number;
     reward: string;
     description: string;
+    groupName: string;
+    groupId: string;
   } | null>(null);
 
   useEffect(() => {
@@ -94,13 +104,20 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
       
       const template = challengeTemplates[variation.type as keyof typeof challengeTemplates];
       
+      // Pick a different group each day
+      const targetGroup = groups.length > 0 
+        ? groups[dayOfYear % groups.length] 
+        : null;
+      
       setTodayChallenge({
-        title: totalGoal > 0 
-          ? `${t('save') || 'Save'} ${formatCurrency(finalAmount)} ${t('today') || 'today'}`
+        title: targetGroup 
+          ? `${t('save') || 'Save'} ${formatCurrency(finalAmount)} → ${targetGroup.name}`
           : template.title,
         amount: finalAmount,
         reward: template.reward,
-        description: template.description
+        description: template.description,
+        groupName: targetGroup?.name || '',
+        groupId: targetGroup?.id || '',
       });
     };
 
@@ -123,7 +140,7 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
     updateCountdown();
     const interval = setInterval(updateCountdown, 60000);
     return () => clearInterval(interval);
-  }, [totalGoal, formatCurrency, t]);
+  }, [totalGoal, formatCurrency, t, groups]);
 
   if (!todayChallenge) return null;
 
@@ -208,7 +225,7 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
         </motion.div>
       ) : (
         <Button
-          onClick={onContribute}
+          onClick={() => onContribute(todayChallenge.groupId)}
           className="w-full btn-primary text-primary-foreground"
           size="sm"
         >

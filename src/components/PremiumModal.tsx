@@ -12,9 +12,14 @@ interface PremiumModalProps {
   reason?: 'group_limit' | 'feature';
 }
 
+type PlanType = 'monthly' | 'annual';
+
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = 'group_limit' }) => {
   const { t, formatPremiumPrice } = useApp();
   const PREMIUM_PRICE_CAD = 5.90;
+  const ANNUAL_PRICE_CAD = PREMIUM_PRICE_CAD * 12 * 0.9; // 10% discount
+  const ANNUAL_MONTHLY_CAD = ANNUAL_PRICE_CAD / 12;
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>('annual');
   const [couponCode, setCouponCode] = useState('');
   const [couponError, setCouponError] = useState('');
   const { loading, appliedCoupon, validateCoupon, clearCoupon, calculateDiscount, getDiscountLabel } = useSubscriptionCoupon();
@@ -41,8 +46,11 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
     setCouponError('');
   };
 
-  const finalPrice = calculateDiscount(PREMIUM_PRICE_CAD);
-  const hasDiscount = appliedCoupon?.valid && finalPrice < PREMIUM_PRICE_CAD;
+  const basePrice = selectedPlan === 'monthly' ? PREMIUM_PRICE_CAD : ANNUAL_MONTHLY_CAD;
+  const totalPrice = selectedPlan === 'annual' ? ANNUAL_PRICE_CAD : PREMIUM_PRICE_CAD;
+  const finalMonthly = calculateDiscount(basePrice);
+  const finalTotal = calculateDiscount(totalPrice);
+  const hasDiscount = appliedCoupon?.valid && finalMonthly < basePrice;
 
   if (!isOpen) return null;
 
@@ -105,6 +113,37 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
             <p className="text-center text-muted-foreground mb-6">
               {t('unlockFullPotential') || 'Unlock the full potential of Billi'}
             </p>
+
+            {/* Plan Toggle */}
+            <div className="flex gap-3 mb-6">
+              <button
+                onClick={() => setSelectedPlan('monthly')}
+                className={`flex-1 p-3 rounded-xl border-2 transition-all ${
+                  selectedPlan === 'monthly'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border bg-secondary/30 hover:border-muted-foreground/30'
+                }`}
+              >
+                <p className="text-sm font-semibold">{t('monthly') || 'Monthly'}</p>
+                <p className="text-lg font-bold text-primary">{formatPremiumPrice(PREMIUM_PRICE_CAD)}</p>
+                <p className="text-xs text-muted-foreground">/{t('month') || 'month'}</p>
+              </button>
+              <button
+                onClick={() => setSelectedPlan('annual')}
+                className={`flex-1 p-3 rounded-xl border-2 transition-all relative ${
+                  selectedPlan === 'annual'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border bg-secondary/30 hover:border-muted-foreground/30'
+                }`}
+              >
+                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-success text-success-foreground text-[10px] font-bold rounded-full">
+                  -10%
+                </span>
+                <p className="text-sm font-semibold">{t('annual') || 'Annual'}</p>
+                <p className="text-lg font-bold text-primary">{formatPremiumPrice(ANNUAL_MONTHLY_CAD)}</p>
+                <p className="text-xs text-muted-foreground">/{t('month') || 'month'}</p>
+              </button>
+            </div>
 
             {/* Features */}
             <div className="space-y-3 mb-6">
@@ -204,23 +243,28 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
             {/* Price */}
             <div className="text-center mb-6">
               <div className="flex items-baseline justify-center gap-2">
-                {hasDiscount && (
+                {(hasDiscount || selectedPlan === 'annual') && (
                   <span className="text-xl text-muted-foreground line-through">
                     {formatPremiumPrice(PREMIUM_PRICE_CAD)}
                   </span>
                 )}
                 <span className={`text-4xl font-bold ${hasDiscount ? 'text-green-500' : 'text-primary'}`}>
-                  {formatPremiumPrice(finalPrice)}
+                  {formatPremiumPrice(finalMonthly)}
                 </span>
                 <span className="text-muted-foreground">/{t('month') || 'month'}</span>
               </div>
+              {selectedPlan === 'annual' && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formatPremiumPrice(finalTotal)} /{t('year') || 'year'}
+                </p>
+              )}
               {hasDiscount && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="text-sm text-green-500 font-medium mt-1"
                 >
-                  🎉 {t('youSave') || 'You save'} {formatPremiumPrice(PREMIUM_PRICE_CAD - finalPrice)}!
+                  🎉 {t('youSave') || 'You save'} {formatPremiumPrice(basePrice - finalMonthly)}/{t('month') || 'month'}!
                 </motion.p>
               )}
               <p className="text-xs text-muted-foreground mt-1">

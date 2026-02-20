@@ -554,22 +554,46 @@ const LoginPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-primary">
-      <div className="relative flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
-        {/* Glow effect */}
+    <div className="min-h-screen flex flex-col lg:flex-row bg-primary">
+      {/* Left side - Branding (desktop only) */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-12 relative">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-[120px]" />
-        
-        {/* Logo Section */}
-        <div className="relative z-10 text-center mb-6">
+        <div className="relative z-10 max-w-md text-center">
+          <BilliLogo size={120} />
+          <h1 className="text-5xl font-black text-white mt-6 mb-4">Billi</h1>
+          <p className="text-xl text-white/80 leading-relaxed">
+            {t('gamifiedSocialFinance') || 'Gamified Social Finance'}
+          </p>
+          <p className="text-white/60 mt-4 text-sm">
+            {t('saveTogetherShort') || 'Save Together'}
+          </p>
+        </div>
+      </div>
+
+      {/* Right side - Forms */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto lg:bg-background lg:rounded-l-3xl relative">
+        {/* Mobile header */}
+        <div className="lg:hidden relative z-10 text-center mb-6">
+          <div className="absolute top-[-80px] left-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-[120px]" />
           <div className="mx-auto mb-3 flex items-center justify-center">
             <BilliLogo size={100} />
           </div>
-          
           <h1 className="text-3xl font-black text-white mb-1">Billi</h1>
-          
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mt-3">
             <span className="text-xs text-white font-medium">{t('saveTogetherShort')}</span>
           </div>
+        </div>
+
+        {/* Desktop header */}
+        <div className="hidden lg:block text-center mb-8">
+          <h2 className="text-2xl font-bold text-foreground">
+            {viewMode === 'signup' ? (t('createAccount') || 'Create Account') : (t('welcomeBack') || 'Welcome back')}
+          </h2>
+          <p className="text-muted-foreground text-sm mt-1">
+            {viewMode === 'signup' 
+              ? (t('signUpDescription') || 'Join thousands saving together')
+              : (t('loginDescription') || 'Continue your savings journey')}
+          </p>
         </div>
 
         {/* Dynamic Content */}

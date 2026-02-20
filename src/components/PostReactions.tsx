@@ -19,7 +19,7 @@ interface PostReactionsProps {
   postOwnerName?: string;
 }
 
-const AVAILABLE_EMOJIS = ['👍', '❤️', '🔥', '💡', '👏'];
+const AVAILABLE_EMOJIS = ['❤️', '👍', '👎', '😢', '🔥', '💡', '👏'];
 
 const PostReactions: React.FC<PostReactionsProps> = ({ postId, userId, isOwn, postOwnerId, postOwnerName }) => {
   const [reactions, setReactions] = useState<Reaction[]>([]);
