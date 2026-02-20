@@ -4,7 +4,7 @@ import {
   ArrowLeft, Users, Target, Key, Copy, RefreshCw, Loader2, Search, 
   TrendingUp, Crown, Shield, UserCog, Ticket, Mail, ToggleLeft, ToggleRight,
   ChevronDown, ChevronUp, DollarSign, Calendar, Filter, BarChart3, Eye,
-  Activity, Globe, Coins, CreditCard, Receipt
+  Activity, Globe, Coins, CreditCard, Receipt, Download
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/contexts/AppContext';
 import { format } from 'date-fns';
+import { exportToExcel } from '@/lib/excelExport';
 
 // ===== Types =====
 interface UserFull {
@@ -415,7 +416,129 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     fetchCoupons();
   };
 
-  // ===== COMPUTED =====
+  // ===== EXCEL EXPORTS =====
+  const exportUsers = () => {
+    const rows = filteredUsers.map(u => ({
+      Nome: u.name,
+      Email: userEmails[u.id] || '',
+      País: u.country || '',
+      Cidade: u.city || '',
+      Telefone: u.phone || '',
+      Idioma: u.language || '',
+      Moeda: u.currency || '',
+      Nível: u.level,
+      Premium: u.is_premium ? 'Sim' : 'Não',
+      Role: u.role || 'user',
+      'Streak Atual': u.current_streak,
+      'Melhor Streak': u.best_streak,
+      'Total Depósitos': u.total_contributions,
+      'Máx Economizado': u.max_saved,
+      'Dias no App': daysSince(u.created_at),
+      Cadastro: u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '',
+      'Última Contrib.': u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yyyy') : '',
+      Grupos: (u.groups || []).map(g => g.group_name).join(', '),
+      Comunidades: (u.communities || []).join(', '),
+    }));
+    exportToExcel([{ sheetName: 'Usuários', rows }], 'billi-usuarios');
+  };
+
+  const exportGroups = () => {
+    const rows = filteredGroups.map(g => ({
+      Nome: g.name,
+      Descrição: g.description || '',
+      Código: g.invite_code,
+      Membros: g.member_count,
+      Depósitos: g.total_deposits,
+      Retiradas: g.total_withdrawals,
+      Líquido: g.total_deposits - g.total_withdrawals,
+      Meta: g.goal_amount,
+      'Progresso %': g.goal_amount > 0 ? ((g.total_deposits - g.total_withdrawals) / g.goal_amount * 100).toFixed(1) : '0',
+      Criação: g.created_at ? format(new Date(g.created_at), 'dd/MM/yyyy') : '',
+    }));
+    exportToExcel([{ sheetName: 'Grupos', rows }], 'billi-grupos');
+  };
+
+  const exportFinancial = () => {
+    const rows = filteredUsers.filter(u => {
+      const userDeps = allContributions.filter(c => c.user_id === u.id && c.type === 'deposit');
+      return userDeps.length > 0;
+    }).map(u => {
+      const deps = allContributions.filter(c => c.user_id === u.id && c.type === 'deposit');
+      const withs = allContributions.filter(c => c.user_id === u.id && c.type === 'withdrawal');
+      const totalDep = deps.reduce((s: number, c: any) => s + Number(c.amount), 0);
+      const totalWith = withs.reduce((s: number, c: any) => s + Number(c.amount), 0);
+      const days = daysSince(u.created_at) || 1;
+      return {
+        Nome: u.name,
+        Email: userEmails[u.id] || '',
+        'Total Depósitos': totalDep,
+        'Total Retiradas': totalWith,
+        Líquido: totalDep - totalWith,
+        'Média/Dia': (totalDep / days).toFixed(2),
+        'Projeção/Mês': (totalDep / days * 30).toFixed(2),
+        'Projeção/Ano': (totalDep / days * 365).toFixed(2),
+      };
+    });
+    exportToExcel([{ sheetName: 'Financeiro', rows }], 'billi-financeiro');
+  };
+
+  const exportSubscriptions = () => {
+    const rows = subscriptions.map((s: any) => ({
+      Usuário: s.user_name,
+      Plano: s.plan_type === 'annual' ? 'Anual' : 'Mensal',
+      Status: s.status,
+      Valor: `${s.currency} ${Number(s.amount).toFixed(2)}`,
+      Pagamento: s.payment_method,
+      Cupom: s.coupon_code,
+      Assinatura: s.subscribed_at ? format(new Date(s.subscribed_at), 'dd/MM/yyyy') : '',
+      Renovação: s.renewal_date ? format(new Date(s.renewal_date), 'dd/MM/yyyy') : '',
+      Vencimento: s.expires_at ? format(new Date(s.expires_at), 'dd/MM/yyyy') : '',
+    }));
+    exportToExcel([{ sheetName: 'Assinaturas', rows }], 'billi-assinaturas');
+  };
+
+  const exportCoupons = () => {
+    const couponRows = coupons.map(c => ({
+      Código: c.code,
+      Descrição: c.description || '',
+      'Desconto %': c.discount_percentage || '',
+      'Desconto Valor': c.discount_amount || '',
+      Ativo: c.is_active ? 'Sim' : 'Não',
+      'Usos Atuais': c.current_uses,
+      'Usos Máximos': c.max_uses || 'Ilimitado',
+      'Válido Até': c.valid_until ? format(new Date(c.valid_until), 'dd/MM/yyyy') : 'Sem limite',
+    }));
+    const usageRows = couponUsages.map(cu => ({
+      Cupom: cu.coupon_code,
+      Usuário: cu.user_name,
+      'Data Uso': format(new Date(cu.used_at), 'dd/MM/yyyy'),
+    }));
+    exportToExcel([
+      { sheetName: 'Cupons', rows: couponRows },
+      { sheetName: 'Resgates', rows: usageRows },
+    ], 'billi-cupons');
+  };
+
+  const exportAll = () => {
+    const usersRows = filteredUsers.map(u => ({
+      Nome: u.name, Email: userEmails[u.id] || '', País: u.country || '', Nível: u.level,
+      Premium: u.is_premium ? 'Sim' : 'Não', 'Streak Atual': u.current_streak,
+      'Total Depósitos': u.total_contributions, 'Máx Economizado': u.max_saved,
+    }));
+    const groupsRows = filteredGroups.map(g => ({
+      Nome: g.name, Membros: g.member_count, Depósitos: g.total_deposits,
+      Meta: g.goal_amount, Código: g.invite_code,
+    }));
+    const subsRows = subscriptions.map((s: any) => ({
+      Usuário: s.user_name, Plano: s.plan_type, Status: s.status,
+      Valor: `${s.currency} ${Number(s.amount).toFixed(2)}`,
+    }));
+    exportToExcel([
+      { sheetName: 'Usuários', rows: usersRows },
+      { sheetName: 'Grupos', rows: groupsRows },
+      { sheetName: 'Assinaturas', rows: subsRows },
+    ], 'billi-relatorio-completo');
+  };
   const availableCountries = useMemo(() => [...new Set(users.map(u => u.country).filter(Boolean))].sort(), [users]);
   const availableCurrencies = useMemo(() => [...new Set(users.map(u => u.currency).filter(Boolean))].sort(), [users]);
 
@@ -482,6 +605,9 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <h1 className="text-2xl font-bold">Painel Administrativo</h1>
             <p className="text-sm text-muted-foreground">Gestão completa da plataforma</p>
           </div>
+          <Button variant="outline" size="sm" onClick={exportAll} className="h-8 text-xs ml-auto">
+            <Download className="w-3 h-3 mr-1" />Excel
+          </Button>
         </div>
       </div>
 
@@ -538,6 +664,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
           {/* ==================== USERS TAB ==================== */}
           <TabsContent value="users" className="space-y-3 mt-4">
+            <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportUsers} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Buscar por nome..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10 h-9" />
@@ -638,6 +765,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
           {/* ==================== GROUPS TAB ==================== */}
           <TabsContent value="groups" className="space-y-3 mt-4">
+            <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportGroups} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Buscar por nome ou código..." value={groupSearch} onChange={(e) => setGroupSearch(e.target.value)} className="pl-10 h-9" />
@@ -714,6 +842,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
           {/* ==================== FINANCIAL TAB ==================== */}
           <TabsContent value="financial" className="space-y-4 mt-4">
+            <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportFinancial} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { label: 'Hoje', value: financialStats.todayDeposits, icon: Calendar },
@@ -765,6 +894,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
           {/* ==================== SUBSCRIPTIONS TAB ==================== */}
           <TabsContent value="subscriptions" className="space-y-3 mt-4">
+            <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportSubscriptions} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <div className="grid grid-cols-3 gap-2 mb-4">
               <div className="glass-card p-2 text-center">
                 <p className="text-lg font-bold">{subscriptions.length}</p>
@@ -820,6 +950,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
           {/* ==================== COUPONS TAB ==================== */}
           <TabsContent value="coupons" className="space-y-3 mt-4">
+            <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportCoupons} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
             <Button onClick={() => setShowCouponForm(!showCouponForm)} className="w-full h-8 text-xs">
               <Ticket className="w-3 h-3 mr-1" />{showCouponForm ? 'Cancelar' : 'Criar Novo Cupom'}
             </Button>
