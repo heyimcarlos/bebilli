@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 interface UserFull {
   id: string;
   name: string;
+  email?: string;
   avatar_url: string | null;
   is_premium: boolean;
   level: number;
@@ -148,8 +149,24 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   useEffect(() => {
     if (isAuthorized) {
       fetchAll();
+      fetchUserEmails();
     }
   }, [isAuthorized]);
+
+  // Fetch user emails via edge function
+  const [userEmails, setUserEmails] = useState<Record<string, string>>({});
+  const fetchUserEmails = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data, error } = await supabase.functions.invoke('admin-user-emails');
+      if (!error && data?.emails) {
+        setUserEmails(data.emails);
+      }
+    } catch (e) {
+      console.error('Failed to fetch user emails:', e);
+    }
+  };
 
   const fetchAll = () => {
     fetchUsers();
@@ -547,6 +564,11 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <p className="text-[10px] text-muted-foreground">
                           Nv{u.level} • {u.consistency_days}d ativo • {u.country || '—'} • {u.currency || '—'}
                         </p>
+                        {userEmails[u.id] && (
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            <Mail className="w-3 h-3" />{userEmails[u.id]}
+                          </p>
+                        )}
                       </div>
                       {expandedUser === u.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                     </div>

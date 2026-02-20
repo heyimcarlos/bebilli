@@ -23,6 +23,7 @@ import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import GoalCelebration from '@/components/GoalCelebration';
 import { Loader2, User, EyeOff, Crown, HelpCircle } from 'lucide-react';
 import VIPCard from '@/components/VIPCard';
+import SupportFormModal from '@/components/SupportFormModal';
 
 const AppContent: React.FC = () => {
   const { formatCurrency, t } = useApp();
@@ -45,6 +46,7 @@ const AppContent: React.FC = () => {
     reward?: string;
   }>({ show: false, milestone: 0, groupName: '' });
   const [goalCelebration, setGoalCelebration] = useState<{ show: boolean; groupName: string }>({ show: false, groupName: '' });
+  const [showSupportForm, setShowSupportForm] = useState(false);
 
   // Request notification permission when user logs in
   useEffect(() => {
@@ -166,15 +168,15 @@ const AppContent: React.FC = () => {
         transition={{ type: 'spring', delay: 0.3 }}
       >
         {/* Help icon */}
-        <motion.a
-          href="mailto:contact@bebilli.com"
+        <motion.button
+          onClick={() => setShowSupportForm(true)}
           className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-card transition-all"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           title={t('needHelp') || 'Need help?'}
         >
           <HelpCircle className="w-4.5 h-4.5" />
-        </motion.a>
+        </motion.button>
         {/* Crown / VIP */}
         <motion.button
           onClick={() => setShowPremiumModal(true)}
@@ -227,6 +229,7 @@ const AppContent: React.FC = () => {
       <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} reason="feature" />
       <WeeklySummaryModal isOpen={showWeeklySummary && !!summary} onClose={markSummaryShown} totalSaved={summary?.totalSavedThisWeek || 0} contributionCount={summary?.contributionCount || 0} topGroup={summary?.topGroup || null} groupProgress={summary?.groupProgress || []} formatCurrency={formatCurrency} />
       <InstallPWA />
+      <SupportFormModal isOpen={showSupportForm} onClose={() => setShowSupportForm(false)} />
     </>
   );
 };

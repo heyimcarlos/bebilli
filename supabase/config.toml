@@ -1,1 +1,4 @@
 project_id = "nslcrlxwubbapjaowozc"
+
+[functions.admin-user-emails]
+verify_jwt = false
