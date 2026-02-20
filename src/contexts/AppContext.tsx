@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'pt' | 'en' | 'fr' | 'es' | 'it' | 'de';
 export type Currency = 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP' | 'AUD' | 'JPY' | 'CNY' | 'INR' | 'KRW' | 'SGD' | 'HKD' | 'NZD' | 'SEK' | 'NOK' | 'DKK' | 'PLN' | 'ZAR' | 'AED' | 'THB' | 'MYR' | 'PHP';
@@ -1662,8 +1663,45 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     getStoredValue<Currency>(STORAGE_KEY_CURRENCY, 'CAD')
   );
   const [user, setUser] = useState<User | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Persist language to localStorage
+  // Load language/currency from profile when user logs in
+  useEffect(() => {
+    const loadPrefsFromProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('language, currency')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        
+        if (data) {
+          if (data.language && ['pt', 'en', 'fr', 'es', 'it', 'de'].includes(data.language)) {
+            setLanguageState(data.language as Language);
+            localStorage.setItem(STORAGE_KEY_LANGUAGE, data.language);
+          }
+          if (data.currency) {
+            setCurrencyState(data.currency as Currency);
+            localStorage.setItem(STORAGE_KEY_CURRENCY, data.currency);
+          }
+        }
+        setProfileLoaded(true);
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user && !profileLoaded) {
+        loadPrefsFromProfile();
+      }
+    });
+
+    loadPrefsFromProfile();
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Persist language to profile + localStorage
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     try {
@@ -1671,9 +1709,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {
       console.error('Failed to save language preference:', e);
     }
+    // Also save to profile
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase.from('profiles').update({ language: lang }).eq('id', session.user.id).then(() => {});
+      }
+    });
   };
 
-  // Persist currency to localStorage
+  // Persist currency to profile + localStorage
   const setCurrency = (curr: Currency) => {
     setCurrencyState(curr);
     try {
@@ -1681,6 +1725,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {
       console.error('Failed to save currency preference:', e);
     }
+    // Also save to profile
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase.from('profiles').update({ currency: curr }).eq('id', session.user.id).then(() => {});
+      }
+    });
   };
   const [groups, setGroups] = useState<Group[]>([
     {

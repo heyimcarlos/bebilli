@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette, Shield } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -13,6 +13,8 @@ import BilliLogo from '@/components/BilliLogo';
 import DefaultAvatar from '@/components/DefaultAvatar';
 import ShareProgressCard from '@/components/ShareProgressCard';
 import ProfileBadges from '@/components/ProfileBadges';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -48,6 +50,22 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showShareCard, setShowShareCard] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      setIsAdmin(!!data);
+    };
+    checkAdmin();
+  }, [user]);
 
   // Calculate stats for sharing
   const shareStats = {
@@ -277,10 +295,21 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
           </div>
         </div>
 
+        {isAdmin && (
+          <Button
+            onClick={() => navigate('/admin')}
+            variant="outline"
+            className="w-full mt-4 h-12 border-primary text-primary hover:bg-primary/10"
+          >
+            <Shield className="w-5 h-5 mr-2" />
+            Painel Administrativo
+          </Button>
+        )}
+
         <Button
           onClick={onLogout}
           variant="outline"
-          className="w-full mt-6 h-12 border-destructive text-destructive hover:bg-destructive/10"
+          className="w-full mt-4 h-12 border-destructive text-destructive hover:bg-destructive/10"
         >
           <LogOut className="w-5 h-5 mr-2" />
           {t('signOut')}

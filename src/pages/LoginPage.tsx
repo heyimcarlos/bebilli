@@ -156,7 +156,7 @@ const LoginPage: React.FC = () => {
     }
 
     try {
-      const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone, formData.country, formData.city);
+      const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone, formData.country, formData.city, language, currency);
       if (error) {
         toast({
           title: t('error'),
