@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
+import GoalCelebration from '@/components/GoalCelebration';
 import { Loader2, User, EyeOff } from 'lucide-react';
 import VIPCard from '@/components/VIPCard';
 
@@ -41,6 +42,7 @@ const AppContent: React.FC = () => {
     groupName: string;
     reward?: string;
   }>({ show: false, milestone: 0, groupName: '' });
+  const [goalCelebration, setGoalCelebration] = useState<{ show: boolean; groupName: string }>({ show: false, groupName: '' });
 
   // Request notification permission when user logs in
   useEffect(() => {
@@ -71,16 +73,21 @@ const AppContent: React.FC = () => {
     const milestones = [25, 50, 75, 100];
     for (const milestone of milestones) {
       if (oldProgress < milestone && newProgress >= milestone) {
-        setShowConfetti(true);
-        const reward = milestone === 100 ? '🎉 All partners unlocked!' : undefined;
-        setMilestoneData({
-          show: true,
-          milestone,
-          groupName,
-          reward,
-        });
+        if (milestone === 100) {
+          // Show special 100% celebration
+          setGoalCelebration({ show: true, groupName });
+        } else {
+          setShowConfetti(true);
+          setMilestoneData({
+            show: true,
+            milestone,
+            groupName,
+            reward: undefined,
+          });
+        }
         
         // Send push notification for milestone
+        const reward = milestone === 100 ? '🎉 All partners unlocked!' : undefined;
         sendMilestoneNotification(milestone, groupName, reward);
         return;
       }
@@ -189,6 +196,11 @@ const AppContent: React.FC = () => {
           groupName={milestoneData.groupName}
           reward={milestoneData.reward}
         />
+        <GoalCelebration
+          isOpen={goalCelebration.show}
+          onClose={() => setGoalCelebration({ show: false, groupName: '' })}
+          groupName={goalCelebration.groupName}
+        />
       </>
     );
   }
@@ -263,6 +275,11 @@ const AppContent: React.FC = () => {
         milestone={milestoneData.milestone}
         groupName={milestoneData.groupName}
         reward={milestoneData.reward}
+      />
+      <GoalCelebration
+        isOpen={goalCelebration.show}
+        onClose={() => setGoalCelebration({ show: false, groupName: '' })}
+        groupName={goalCelebration.groupName}
       />
       
       {/* Weekly Summary Modal */}

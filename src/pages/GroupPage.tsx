@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -12,6 +12,10 @@ import QuickWinModal from '@/components/QuickWinModal';
 import EditGroupModal from '@/components/EditGroupModal';
 import PartnerCoupons from '@/components/PartnerCoupons';
 import GroupActionsMenu from '@/components/GroupActionsMenu';
+import AudioRecorder from '@/components/AudioRecorder';
+import DefaultAvatar from '@/components/DefaultAvatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useGroupChat } from '@/hooks/useGroupChat';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
 import {
   Dialog,
@@ -33,7 +37,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const { groups, profile, addContribution, addWithdrawal, refreshGroups, updateGroup, leaveGroup, deleteGroup, hideGroup, user } = useAuthContext();
   const { toast } = useToast();
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Array<{ id: string; name: string; content: string; isBot?: boolean }>>([]);
+  const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showContributeModal, setShowContributeModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -46,6 +50,13 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
 
   const group = groups.find((g) => g.id === groupId);
+  const { messages: chatMessages, loading: chatLoading, sendMessage: sendChatMessage, uploadAudio } = useGroupChat(groupId, user?.id);
+  const chatEndRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
   if (!group) return null;
 
   const progress = group.goal_amount > 0 ? (group.current_amount / group.goal_amount) * 100 : 0;
@@ -198,13 +209,16 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     }
   };
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
+  const handleSendMessage = async () => {
+    if (!message.trim() && !pendingAudio) return;
     
-    setMessages([
-      ...messages,
-      { id: Date.now().toString(), name: profile?.name || 'You', content: message },
-    ]);
+    let audioUrl: string | null = null;
+    if (pendingAudio) {
+      audioUrl = await uploadAudio(pendingAudio);
+      setPendingAudio(null);
+    }
+    
+    await sendChatMessage(message.trim() || undefined, audioUrl || undefined);
     setMessage('');
   };
 
@@ -377,26 +391,71 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 </div>
               </motion.div>
               
-              <AnimatePresence>
-                {messages.map((msg) => (
-                  <motion.div 
-                    key={msg.id} 
-                    className="flex gap-3 justify-end"
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                  >
-                    <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-none px-4 py-2 max-w-[80%]">
-                      <p className="text-sm">{msg.content}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {chatLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <AnimatePresence initial={false}>
+                  {chatMessages.map((msg) => {
+                    const isOwn = msg.user_id === user?.id;
+                    return (
+                      <motion.div 
+                        key={msg.id} 
+                        className={`flex gap-3 ${isOwn ? 'justify-end' : ''}`}
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                      >
+                        {!isOwn && (
+                          <Avatar className="w-8 h-8 flex-shrink-0">
+                            <AvatarImage src={msg.profile?.avatar_url || undefined} />
+                            <AvatarFallback className="bg-primary p-0">
+                              <DefaultAvatar name={msg.profile?.name || 'U'} size={32} />
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div className={`max-w-[80%] ${isOwn ? 'text-right' : ''}`}>
+                          {!isOwn && (
+                            <p className="text-xs text-muted-foreground mb-0.5">{msg.profile?.name}</p>
+                          )}
+                          <div className={`inline-block rounded-2xl ${
+                            isOwn 
+                              ? 'bg-primary text-primary-foreground rounded-tr-sm' 
+                              : 'bg-secondary rounded-tl-sm'
+                          }`}>
+                            {msg.content && (
+                              <p className="text-sm px-4 py-2">{msg.content}</p>
+                            )}
+                            {msg.audio_url && (
+                              <div className="px-3 py-2">
+                                <audio src={msg.audio_url} controls className="h-8 max-w-[200px]" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              )}
+              <div ref={chatEndRef} />
             </div>
             
+            {/* Audio preview */}
+            {pendingAudio && (
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 border border-border">
+                <audio src={URL.createObjectURL(pendingAudio)} controls className="h-8 flex-1" />
+                <Button variant="ghost" size="icon" onClick={() => setPendingAudio(null)} className="shrink-0 w-8 h-8">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+            
             <div className="flex gap-2">
+              <AudioRecorder onAudioReady={(blob) => setPendingAudio(blob)} disabled={false} />
               <Input
-                placeholder="Type your message..."
+                placeholder={t('typeMessage') || 'Type your message...'}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -405,6 +464,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
                   onClick={handleSendMessage}
+                  disabled={!message.trim() && !pendingAudio}
                   className="btn-primary text-primary-foreground w-12 h-12"
                 >
                   <Send className="w-5 h-5" />
