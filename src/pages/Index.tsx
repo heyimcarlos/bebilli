@@ -15,12 +15,13 @@ import HomePage from '@/pages/HomePage';
 import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
+import PremiumModal from '@/components/PremiumModal';
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import GoalCelebration from '@/components/GoalCelebration';
-import { Loader2, User, EyeOff } from 'lucide-react';
+import { Loader2, User, EyeOff, Crown, HelpCircle } from 'lucide-react';
 import VIPCard from '@/components/VIPCard';
 
 const AppContent: React.FC = () => {
@@ -35,6 +36,7 @@ const AppContent: React.FC = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHiddenGroups, setShowHiddenGroups] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [milestoneData, setMilestoneData] = useState<{
     show: boolean;
@@ -74,19 +76,11 @@ const AppContent: React.FC = () => {
     for (const milestone of milestones) {
       if (oldProgress < milestone && newProgress >= milestone) {
         if (milestone === 100) {
-          // Show special 100% celebration
           setGoalCelebration({ show: true, groupName });
         } else {
           setShowConfetti(true);
-          setMilestoneData({
-            show: true,
-            milestone,
-            groupName,
-            reward: undefined,
-          });
+          setMilestoneData({ show: true, milestone, groupName, reward: undefined });
         }
-        
-        // Send push notification for milestone
         const reward = milestone === 100 ? '🎉 All partners unlocked!' : undefined;
         sendMilestoneNotification(milestone, groupName, reward);
         return;
@@ -95,33 +89,21 @@ const AppContent: React.FC = () => {
   };
 
   const handleScanSuccess = async (amount: number) => {
-    const group = selectedGroupId 
-      ? groups.find(g => g.id === selectedGroupId) 
+    const group = selectedGroupId
+      ? groups.find(g => g.id === selectedGroupId)
       : groups[0];
-    
+
     if (group) {
       const oldProgress = (group.current_amount / group.goal_amount) * 100;
-      
-      // Add contribution to database
       const { error } = await addContribution(group.id, amount);
-      
+
       if (error) {
-        toast({
-          title: 'Error',
-          description: error.message,
-          variant: 'destructive',
-        });
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
         return;
       }
 
       const newProgress = ((group.current_amount + amount) / group.goal_amount) * 100;
-      
-      toast({
-        title: '🚀 Contribution recorded!',
-        description: `Your contribution of ${formatCurrency(amount)} has been confirmed.`,
-      });
-
-      // Check for milestone achievements
+      toast({ title: '🚀 Contribution recorded!', description: `Your contribution of ${formatCurrency(amount)} has been confirmed.` });
       checkMilestone(oldProgress, newProgress, group.name);
 
       addNotification({
@@ -135,9 +117,7 @@ const AppContent: React.FC = () => {
       });
     }
 
-    setTimeout(() => {
-      setShowScanner(false);
-    }, 1000);
+    setTimeout(() => { setShowScanner(false); }, 1000);
   };
 
   // Show loading while checking auth
@@ -157,10 +137,7 @@ const AppContent: React.FC = () => {
   if (showScanner) {
     return (
       <AnimatePresence>
-        <ScannerOverlay
-          onClose={() => setShowScanner(false)}
-          onSuccess={handleScanSuccess}
-        />
+        <ScannerOverlay onClose={() => setShowScanner(false)} onSuccess={handleScanSuccess} />
       </AnimatePresence>
     );
   }
@@ -168,39 +145,13 @@ const AppContent: React.FC = () => {
   if (selectedGroupId) {
     return (
       <>
-        <GroupPage
-          groupId={selectedGroupId}
-          onBack={() => setSelectedGroupId(null)}
-        />
-        <BottomNav 
-          activeTab={activeTab} 
-          onTabChange={handleTabChange} 
-        />
-        <NotificationPanel
-          isOpen={showNotifications}
-          onClose={() => setShowNotifications(false)}
-          onGroupClick={handleGroupClick}
-        />
-        <HiddenGroupsDrawer
-          isOpen={showHiddenGroups}
-          onClose={() => setShowHiddenGroups(false)}
-        />
-        <ConfettiCelebration 
-          isActive={showConfetti} 
-          onComplete={() => setShowConfetti(false)} 
-        />
-        <MilestoneModal
-          isOpen={milestoneData.show}
-          onClose={() => setMilestoneData(prev => ({ ...prev, show: false }))}
-          milestone={milestoneData.milestone}
-          groupName={milestoneData.groupName}
-          reward={milestoneData.reward}
-        />
-        <GoalCelebration
-          isOpen={goalCelebration.show}
-          onClose={() => setGoalCelebration({ show: false, groupName: '' })}
-          groupName={goalCelebration.groupName}
-        />
+        <GroupPage groupId={selectedGroupId} onBack={() => setSelectedGroupId(null)} />
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
+        <HiddenGroupsDrawer isOpen={showHiddenGroups} onClose={() => setShowHiddenGroups(false)} />
+        <ConfettiCelebration isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
+        <MilestoneModal isOpen={milestoneData.show} onClose={() => setMilestoneData(prev => ({ ...prev, show: false }))} milestone={milestoneData.milestone} groupName={milestoneData.groupName} reward={milestoneData.reward} />
+        <GoalCelebration isOpen={goalCelebration.show} onClose={() => setGoalCelebration({ show: false, groupName: '' })} groupName={goalCelebration.groupName} />
       </>
     );
   }
@@ -208,30 +159,48 @@ const AppContent: React.FC = () => {
   return (
     <>
       {/* Floating Top Right Icons */}
-      <motion.div 
-        className="fixed top-14 right-4 z-50 flex items-center gap-3"
+      <motion.div
+        className="fixed top-14 right-4 z-50 flex items-center gap-2"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 0.3 }}
       >
-        <VIPCard />
+        {/* Help icon */}
+        <motion.a
+          href="mailto:contact@bebilli.com"
+          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-card transition-all"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          title={t('needHelp') || 'Need help?'}
+        >
+          <HelpCircle className="w-4.5 h-4.5" />
+        </motion.a>
+        {/* Crown / VIP */}
+        <motion.button
+          onClick={() => setShowPremiumModal(true)}
+          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-amber-500 hover:bg-card transition-all"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Crown className="w-4.5 h-4.5" />
+        </motion.button>
         <motion.button
           onClick={() => setShowHiddenGroups(true)}
-          className="w-10 h-10 rounded-full bg-card shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card/90 transition-all"
+          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card transition-all"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           title={t('hiddenGroups') || 'Hidden Groups'}
         >
-          <EyeOff className="w-5 h-5" />
+          <EyeOff className="w-4.5 h-4.5" />
         </motion.button>
         <NotificationBell onClick={() => setShowNotifications(true)} />
         <motion.button
           onClick={() => setActiveTab('profile')}
-          className="w-10 h-10 rounded-full bg-card shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card/90 transition-all"
+          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card transition-all"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          <User className="w-5 h-5" />
+          <User className="w-4.5 h-4.5" />
         </motion.button>
       </motion.div>
 
@@ -249,58 +218,19 @@ const AppContent: React.FC = () => {
         </motion.div>
       </AnimatePresence>
 
-      <BottomNav 
-        activeTab={activeTab} 
-        onTabChange={handleTabChange} 
-      />
-      
-      <NotificationPanel
-        isOpen={showNotifications}
-        onClose={() => setShowNotifications(false)}
-        onGroupClick={handleGroupClick}
-      />
-
-      <HiddenGroupsDrawer
-        isOpen={showHiddenGroups}
-        onClose={() => setShowHiddenGroups(false)}
-      />
-
-      <ConfettiCelebration 
-        isActive={showConfetti} 
-        onComplete={() => setShowConfetti(false)} 
-      />
-      <MilestoneModal
-        isOpen={milestoneData.show}
-        onClose={() => setMilestoneData(prev => ({ ...prev, show: false }))}
-        milestone={milestoneData.milestone}
-        groupName={milestoneData.groupName}
-        reward={milestoneData.reward}
-      />
-      <GoalCelebration
-        isOpen={goalCelebration.show}
-        onClose={() => setGoalCelebration({ show: false, groupName: '' })}
-        groupName={goalCelebration.groupName}
-      />
-      
-      {/* Weekly Summary Modal */}
-      <WeeklySummaryModal
-        isOpen={showWeeklySummary && !!summary}
-        onClose={markSummaryShown}
-        totalSaved={summary?.totalSavedThisWeek || 0}
-        contributionCount={summary?.contributionCount || 0}
-        topGroup={summary?.topGroup || null}
-        groupProgress={summary?.groupProgress || []}
-        formatCurrency={formatCurrency}
-      />
-
-      {/* PWA Install Banner */}
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
+      <HiddenGroupsDrawer isOpen={showHiddenGroups} onClose={() => setShowHiddenGroups(false)} />
+      <ConfettiCelebration isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
+      <MilestoneModal isOpen={milestoneData.show} onClose={() => setMilestoneData(prev => ({ ...prev, show: false }))} milestone={milestoneData.milestone} groupName={milestoneData.groupName} reward={milestoneData.reward} />
+      <GoalCelebration isOpen={goalCelebration.show} onClose={() => setGoalCelebration({ show: false, groupName: '' })} groupName={goalCelebration.groupName} />
+      <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} reason="feature" />
+      <WeeklySummaryModal isOpen={showWeeklySummary && !!summary} onClose={markSummaryShown} totalSaved={summary?.totalSavedThisWeek || 0} contributionCount={summary?.contributionCount || 0} topGroup={summary?.topGroup || null} groupProgress={summary?.groupProgress || []} formatCurrency={formatCurrency} />
       <InstallPWA />
     </>
   );
 };
 
-// Index component - NO duplicate providers here!
-// AppProvider and AuthProvider are already in App.tsx
 const Index: React.FC = () => {
   return (
     <NotificationProvider>
