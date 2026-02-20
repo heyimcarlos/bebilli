@@ -27,7 +27,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, groupName, i
     if (!hasValidCode) return '';
     
     if (language === 'pt') {
-      return `🚀 Junte-se ao grupo "${groupName}" no Billi e vamos conquistar nosso sonho juntos! Use o código: ${inviteCode} ou acesse: ${inviteLink}`;
+      return `🚀 Junte-se ao grupo "${groupName}" na Billi e vamos conquistar nosso sonho juntos! Use o código: ${inviteCode} ou acesse: ${inviteLink}`;
     } else if (language === 'fr') {
       return `🚀 Rejoignez le groupe "${groupName}" sur Billi et réalisons notre rêve ensemble! Utilisez le code: ${inviteCode} ou accédez: ${inviteLink}`;
     }
