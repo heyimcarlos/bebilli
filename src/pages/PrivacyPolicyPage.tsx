@@ -55,9 +55,9 @@ const PrivacyPolicyPage: React.FC = () => {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold text-foreground">5. Data Security</h2>
+          <h2 className="text-xl font-bold text-foreground">5. Data Protection</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            We implement industry-standard security measures including Row-Level Security (RLS) policies, encrypted data transmission, and secure authentication. Your data is stored on enterprise-grade cloud infrastructure with regular security audits.
+            We take your privacy seriously and implement measures to protect your personal information. Your data is stored on reliable cloud infrastructure with access controls in place.
           </p>
         </section>
 

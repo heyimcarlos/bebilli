@@ -41,7 +41,7 @@ const WeeklySummaryModal: React.FC<WeeklySummaryModalProps> = ({
         onClick={onClose}
       >
         <motion.div
-          className="bg-card border border-border rounded-2xl w-full max-w-md overflow-hidden"
+          className="bg-card border border-border rounded-2xl w-full max-w-md overflow-hidden max-h-[85vh] overflow-y-auto"
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}

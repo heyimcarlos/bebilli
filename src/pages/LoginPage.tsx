@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Loader2, Mail, UserPlus, Shield, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award, Quote } from 'lucide-react';
+import { ArrowRight, Loader2, Mail, UserPlus, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award, Quote } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -123,7 +123,6 @@ const LoginPage: React.FC = () => {
     { icon: TrendingUp, titleKey: 'featureTrackTitle', descKey: 'featureTrackDesc' },
     { icon: Users, titleKey: 'featureSaveTogetherTitle', descKey: 'featureSaveTogetherDesc' },
     { icon: Trophy, titleKey: 'featureStreaksTitle', descKey: 'featureStreaksDesc' },
-    { icon: Shield, titleKey: 'featureSecureTitle', descKey: 'featureSecureDesc' },
   ];
 
   const steps = [
@@ -138,6 +137,10 @@ const LoginPage: React.FC = () => {
     { q: 'faqQ2', a: 'faqA2' },
     { q: 'faqQ3', a: 'faqA3' },
     { q: 'faqQ5', a: 'faqA5' },
+    { q: 'faqQ6', a: 'faqA6' },
+    { q: 'faqQ7', a: 'faqA7' },
+    { q: 'faqQ8', a: 'faqA8' },
+    { q: 'faqQ9', a: 'faqA9' },
   ];
 
   const renderInitialView = () => (
