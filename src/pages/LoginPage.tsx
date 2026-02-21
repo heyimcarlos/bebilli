@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Loader2, Mail, UserPlus } from 'lucide-react';
+import { ArrowRight, Loader2, Mail, UserPlus, Shield, TrendingUp, Users, Trophy } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import BilliLogo from '@/components/BilliLogo';
 import { useToast } from '@/hooks/use-toast';
 import { lovable } from '@/integrations/lovable';
+import { Link } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -62,6 +63,13 @@ const countriesList = [
   { code: 'AU', name: 'Australia', flag: '🇦🇺' },
   { code: 'NZ', name: 'New Zealand', flag: '🇳🇿' },
   { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
+];
+
+const features = [
+  { icon: TrendingUp, title: 'Track your savings', desc: 'Monitor every contribution and watch your wealth grow in real time.' },
+  { icon: Users, title: 'Save together', desc: 'Join groups with friends, family or coworkers and build accountability.' },
+  { icon: Trophy, title: 'Earn streaks & badges', desc: 'Stay consistent and climb the leaderboard. Your discipline is your status.' },
+  { icon: Shield, title: 'Private & secure', desc: 'Your financial data stays yours. Bank-level encryption, always.' },
 ];
 
 const LoginPage: React.FC = () => {
@@ -136,103 +144,79 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  const renderAuthForm = () => {
+    if (viewMode === 'login') return renderLoginForm();
+    if (viewMode === 'signup') return renderSignupForm();
+    return renderInitialView();
+  };
+
   const renderInitialView = () => (
-    <div className="w-full max-w-sm space-y-5">
-      {/* Login Section */}
+    <div className="w-full space-y-5">
       <div className="space-y-3">
-        <h2 className="text-base font-semibold text-center text-foreground lg:text-foreground">{t('login')}</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setViewMode('login')}
-            className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 hover:bg-card transition-colors"
-          >
-            <div className="w-11 h-11 rounded-full bg-primary/15 flex items-center justify-center">
-              <Mail className="w-5 h-5 text-primary" />
-            </div>
-            <span className="text-sm font-medium text-foreground">{t('email')}</span>
-          </button>
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-            className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 hover:bg-card transition-colors disabled:opacity-50"
-          >
-            {googleLoading ? (
-              <Loader2 className="w-11 h-11 animate-spin text-muted-foreground" />
-            ) : (
-              <>
-                <div className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center">
-                  <GoogleIcon />
-                </div>
-                <span className="text-sm font-medium text-foreground">Google</span>
-              </>
-            )}
-          </button>
-        </div>
+        <h2 className="text-xl font-bold text-foreground">{t('login')}</h2>
+        <Button
+          type="button"
+          onClick={() => setViewMode('login')}
+          variant="outline"
+          className="w-full h-12 rounded-xl border-border bg-card hover:bg-secondary flex items-center justify-center gap-3 text-foreground font-medium"
+        >
+          <Mail className="w-5 h-5" />
+          {t('continueWithEmail') || 'Continue with e-mail'}
+        </Button>
+        <Button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={googleLoading}
+          variant="outline"
+          className="w-full h-12 rounded-xl border-border bg-card hover:bg-secondary flex items-center justify-center gap-3 text-foreground font-medium"
+        >
+          {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><GoogleIcon /> {t('continueWithGoogle')}</>}
+        </Button>
       </div>
 
-      {/* Divider */}
       <div className="relative flex items-center">
         <div className="flex-grow border-t border-border" />
         <span className="flex-shrink mx-4 text-muted-foreground text-sm">{t('or')}</span>
         <div className="flex-grow border-t border-border" />
       </div>
 
-      {/* Signup Section */}
       <div className="space-y-3">
-        <h2 className="text-base font-semibold text-center text-foreground lg:text-foreground">{t('createAccount') || 'Create Account'}</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setViewMode('signup')}
-            className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 hover:bg-card transition-colors"
-          >
-            <div className="w-11 h-11 rounded-full bg-accent/15 flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-accent" />
-            </div>
-            <span className="text-sm font-medium text-foreground">{t('email')}</span>
-          </button>
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-            className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 hover:bg-card transition-colors disabled:opacity-50"
-          >
-            {googleLoading ? (
-              <Loader2 className="w-11 h-11 animate-spin text-muted-foreground" />
-            ) : (
-              <>
-                <div className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center">
-                  <GoogleIcon />
-                </div>
-                <span className="text-sm font-medium text-foreground">Google</span>
-              </>
-            )}
-          </button>
-        </div>
+        <h2 className="text-xl font-bold text-foreground">{t('createAccount') || 'Create Account'}</h2>
+        <Button
+          type="button"
+          onClick={() => setViewMode('signup')}
+          className="w-full h-12 rounded-xl btn-primary text-primary-foreground font-semibold flex items-center justify-center gap-3"
+        >
+          <UserPlus className="w-5 h-5" />
+          {t('signUpNow') || 'Sign up now'}
+        </Button>
       </div>
     </div>
   );
 
   const renderLoginForm = () => (
-    <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
-      <div className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-6 space-y-4">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-semibold text-foreground">{t('login')}</h2>
-          <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">
-            ← {t('back') || 'Back'}
-          </button>
-        </div>
-        <div className="space-y-2">
+    <form onSubmit={handleLogin} className="w-full space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-bold text-foreground">{t('login')}</h2>
+        <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">
+          ← {t('back') || 'Back'}
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <div className="space-y-1.5">
           <Label htmlFor="email">{t('email')}</Label>
           <Input id="email" type="email" placeholder={t('enterEmail')} value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="bg-secondary border-border" required />
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="password">{t('password')}</Label>
           <Input id="password" type="password" placeholder="••••••••" value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="bg-secondary border-border" required minLength={6} />
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="h-11 bg-card border-border rounded-xl" required minLength={6} />
         </div>
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full h-12 btn-primary text-primary-foreground font-semibold rounded-2xl">
+      <Button type="submit" disabled={loading} className="w-full h-12 btn-primary text-primary-foreground font-semibold rounded-xl">
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>{t('login')} <ArrowRight className="w-5 h-5 ml-2" /></>}
       </Button>
 
@@ -243,56 +227,56 @@ const LoginPage: React.FC = () => {
       </div>
 
       <Button type="button" variant="outline" onClick={handleGoogleSignIn} disabled={googleLoading}
-        className="w-full h-11 bg-card hover:bg-secondary text-foreground font-medium rounded-2xl border border-border flex items-center justify-center gap-3">
+        className="w-full h-11 bg-card hover:bg-secondary text-foreground font-medium rounded-xl border-border flex items-center justify-center gap-3">
         {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><GoogleIcon /> {t('continueWithGoogle')}</>}
       </Button>
 
       <button type="button" onClick={() => setViewMode('signup')} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-        {t('noAccount')} {t('signUpNow')}
+        {t('noAccount')} <span className="text-primary font-medium">{t('signUpNow')}</span>
       </button>
     </form>
   );
 
   const renderSignupForm = () => (
-    <form onSubmit={handleSignup} className="w-full max-w-sm space-y-4">
-      <div className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-6 space-y-4">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-semibold text-foreground">{t('signup')}</h2>
-          <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">
-            ← {t('back') || 'Back'}
-          </button>
-        </div>
+    <form onSubmit={handleSignup} className="w-full space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-bold text-foreground">{t('signup')}</h2>
+        <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">
+          ← {t('back') || 'Back'}
+        </button>
+      </div>
 
-        <div className="space-y-2">
+      <div className="space-y-3">
+        <div className="space-y-1.5">
           <Label htmlFor="name">{t('fullName') || 'Full Name'}</Label>
           <Input id="name" placeholder={t('enterFullName') || 'Enter your full name'} value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="bg-secondary border-border" required />
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
           <p className="text-xs text-muted-foreground">{t('fullNameHint') || 'Please enter first and last name'}</p>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="phone">{t('phone')}</Label>
           <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="bg-secondary border-border" required />
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="signup-email">{t('email')}</Label>
           <Input id="signup-email" type="email" placeholder={t('enterEmail')} value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="bg-secondary border-border" required />
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="signup-password">{t('password')}</Label>
           <Input id="signup-password" type="password" placeholder="••••••••" value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="bg-secondary border-border" required minLength={6} />
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="h-11 bg-card border-border rounded-xl" required minLength={6} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label>{t('country')}</Label>
             <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
-              <SelectTrigger className="bg-secondary border-border"><SelectValue placeholder={t('selectCountry')} /></SelectTrigger>
+              <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue placeholder={t('selectCountry')} /></SelectTrigger>
               <SelectContent className="max-h-60">
                 {countriesList.map((country) => (
                   <SelectItem key={country.code} value={country.code}>{country.flag} {country.name}</SelectItem>
@@ -300,17 +284,17 @@ const LoginPage: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label>{t('city')}</Label>
             <Input placeholder={t('cityPlaceholder')} value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="bg-secondary border-border" required />
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label>{t('gender')}</Label>
           <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value as 'M' | 'F' | 'O' })}>
-            <SelectTrigger className="bg-secondary border-border"><SelectValue placeholder="Gender" /></SelectTrigger>
+            <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue placeholder="Gender" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="M">{t('male')}</SelectItem>
               <SelectItem value="F">{t('female')}</SelectItem>
@@ -320,10 +304,10 @@ const LoginPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label>{t('language')}</Label>
             <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
-              <SelectTrigger className="bg-secondary border-border"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="en">🇨🇦 English</SelectItem>
                 <SelectItem value="fr">🇫🇷 Français</SelectItem>
@@ -334,10 +318,10 @@ const LoginPage: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label>{t('currency')}</Label>
             <Select value={currency} onValueChange={(value) => setCurrency(value as any)}>
-              <SelectTrigger className="bg-secondary border-border"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent className="max-h-60">
                 <SelectItem value="CAD">CA$ CAD</SelectItem>
                 <SelectItem value="USD">US$ USD</SelectItem>
@@ -369,70 +353,106 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full h-12 btn-primary text-primary-foreground font-semibold rounded-2xl">
+      <Button type="submit" disabled={loading} className="w-full h-12 btn-primary text-primary-foreground font-semibold rounded-xl">
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>{t('signup')} <ArrowRight className="w-5 h-5 ml-2" /></>}
       </Button>
 
+      <p className="text-xs text-center text-muted-foreground">
+        {t('agreeToTerms') || 'By signing up, you agree to our'}{' '}
+        <Link to="/privacy" className="text-primary hover:underline">{t('privacyPolicy') || 'Privacy Policy'}</Link>
+      </p>
+
       <button type="button" onClick={() => setViewMode('login')} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-        {t('hasAccount')} {t('signInNow')}
+        {t('hasAccount')} <span className="text-primary font-medium">{t('signInNow')}</span>
       </button>
     </form>
   );
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
-      {/* Left side - Branding (desktop only) */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-12 relative bg-primary">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-[120px]" />
-        <div className="relative z-10 max-w-md text-center">
-          <BilliLogo size={120} />
-          <h1 className="text-5xl font-black text-white mt-6 mb-4">Billi</h1>
-          <p className="text-2xl font-bold text-white/90 leading-relaxed italic">
+      {/* Left Hero — Desktop */}
+      <div className="hidden lg:flex lg:w-[55%] flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-primary">
+        {/* Decorative blobs */}
+        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-white/5 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[120px]" />
+
+        {/* Top: Logo + headline */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-12">
+            <BilliLogo size={52} />
+            <span className="text-3xl font-black text-white tracking-tight">Billi</span>
+          </div>
+
+          <h1 className="text-4xl xl:text-5xl font-black text-white leading-[1.15] max-w-lg">
             Build your billion.
-          </p>
-          <p className="text-lg text-white/70 mt-3">
+          </h1>
+          <p className="text-xl text-white/80 mt-4 max-w-md italic font-medium">
             {t('romanticizeYourSavings') || 'Romanticize your savings.'}
           </p>
-          <p className="text-white/50 mt-4 text-sm">
+          <p className="text-white/50 mt-2 max-w-md text-sm">
             {t('gamifiedSocialFinance')}
           </p>
         </div>
+
+        {/* Features grid */}
+        <div className="relative z-10 grid grid-cols-2 gap-5 mt-12">
+          {features.map((f, i) => (
+            <div key={i} className="flex gap-3 items-start">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                <f.icon className="w-5 h-5 text-white/90" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white">{f.title}</h3>
+                <p className="text-xs text-white/60 leading-relaxed mt-0.5">{f.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="relative z-10 flex items-center gap-4 text-white/40 text-xs mt-8">
+          <span>© {new Date().getFullYear()} Billi</span>
+          <Link to="/privacy" className="hover:text-white/70 transition-colors">{t('privacyPolicy') || 'Privacy Policy'}</Link>
+        </div>
       </div>
 
-      {/* Right side - Forms */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto relative">
-        {/* Mobile header */}
-        <div className="lg:hidden text-center mb-8">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/15 rounded-full blur-[100px]" />
+      {/* Right: Auth form */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 lg:px-12 xl:px-20 overflow-y-auto relative">
+        {/* Mobile hero */}
+        <div className="lg:hidden text-center mb-8 w-full">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/10 rounded-full blur-[100px]" />
           <div className="relative z-10">
             <div className="mx-auto mb-3 flex items-center justify-center">
-              <BilliLogo size={80} />
+              <BilliLogo size={72} />
             </div>
             <h1 className="text-3xl font-black text-foreground mb-1">Billi</h1>
-            <p className="text-sm font-semibold text-foreground/80 italic mt-1">Build your billion.</p>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mt-2">
-              <span className="text-xs text-primary font-medium">{t('romanticizeYourSavings') || 'Romanticize your savings.'}</span>
-            </div>
+            <p className="text-sm font-semibold text-foreground/80 italic">Build your billion.</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('romanticizeYourSavings') || 'Romanticize your savings.'}</p>
           </div>
         </div>
 
-        {/* Desktop header */}
-        <div className="hidden lg:block text-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground">
-            {viewMode === 'signup' ? (t('createAccount') || 'Create Account') : (t('welcomeBack') || 'Welcome back')}
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            {viewMode === 'signup'
-              ? (t('signUpDescription'))
-              : (t('loginDescription'))}
-          </p>
-        </div>
+        {/* Form container */}
+        <div className="relative z-10 w-full max-w-md">
+          {/* Desktop sub-header */}
+          <div className="hidden lg:block mb-6">
+            <h2 className="text-2xl font-bold text-foreground">
+              {viewMode === 'signup' ? (t('createAccount') || 'Create your account') : (t('welcomeBack') || 'Welcome back')}
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              {viewMode === 'signup'
+                ? (t('signUpDescription') || 'Start building your financial discipline today.')
+                : (t('loginDescription') || 'Sign in to continue your journey.')}
+            </p>
+          </div>
 
-        {/* Dynamic Content */}
-        <div className="relative z-10 w-full flex justify-center">
-          {viewMode === 'initial' && renderInitialView()}
-          {viewMode === 'login' && renderLoginForm()}
-          {viewMode === 'signup' && renderSignupForm()}
+          {renderAuthForm()}
+
+          {/* Mobile footer */}
+          <div className="lg:hidden text-center mt-8">
+            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              {t('privacyPolicy') || 'Privacy Policy'}
+            </Link>
+          </div>
         </div>
       </div>
     </div>
