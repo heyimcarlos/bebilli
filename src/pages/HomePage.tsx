@@ -197,7 +197,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
           <UserStatsCard currentStreak={profile.current_streak || 0} bestStreak={profile.best_streak || 0} totalContributions={profile.total_contributions || 0} level={profile.level || 1} maxSaved={profile.max_saved || 0} />
         )}
         <MotivationalBanner />
-        <BillionaireCheckin hasCheckedInToday={hasContributedToday} onCheckin={handleDailyChallengeContribute} totalGoal={totalGoal} userName={profile?.name} groups={groups.map(g => ({ id: g.id, name: g.name, goal_amount: g.goal_amount }))} />
+        <BillionaireCheckin hasCheckedInToday={hasContributedToday} onCheckin={handleDailyChallengeContribute} groups={groups.map(g => ({ id: g.id, name: g.name, goal_amount: g.goal_amount }))} />
 
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3 mb-6">
