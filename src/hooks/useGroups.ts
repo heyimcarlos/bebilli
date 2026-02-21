@@ -228,7 +228,7 @@ export const useGroups = (userId: string | undefined) => {
     };
   }, [fetchGroups, userId]);
 
-  const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string, groupType: 'individual' | 'shared' = 'shared') => {
+  const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string, groupType: 'individual' | 'shared' = 'shared', category: string = 'other') => {
     if (!userId) return { error: new Error('Not authenticated') };
 
     // Use the secure database function to create group atomically
@@ -238,6 +238,7 @@ export const useGroups = (userId: string | undefined) => {
       group_image_url: imageUrl || null,
       group_description: description || null,
       group_type: groupType,
+      group_category: category,
     });
 
     if (error) {

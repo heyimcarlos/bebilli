@@ -106,7 +106,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
       const uploadedUrl = await uploadGroupImage(selectedImage, user.id);
       if (uploadedUrl) imageUrl = uploadedUrl;
     }
-    const { error } = await createGroup(newGroup.name, goalAmount, imageUrl, newGroup.description || undefined, newGroup.type);
+    const { error } = await createGroup(newGroup.name, goalAmount, imageUrl, newGroup.description || undefined, newGroup.type, newGroup.category);
     setCreating(false);
     if (error) {
       toast({ title: t('error'), description: error.message, variant: 'destructive' });
