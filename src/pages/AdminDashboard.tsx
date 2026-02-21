@@ -425,27 +425,37 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   // ===== EXCEL EXPORTS =====
   const exportUsers = () => {
-    const rows = filteredUsers.map(u => ({
-      [t('name')]: u.name,
-      [t('email')]: userEmails[u.id] || '',
-      [t('country')]: u.country || '',
-      [t('city')]: u.city || '',
-      [t('phone')]: u.phone || '',
-      [t('adminLanguage')]: u.language || '',
-      [t('adminCurrency')]: u.currency || '',
-      [t('level')]: u.level,
-      'Premium': u.is_premium ? '✓' : '✗',
-      'Role': u.role || 'user',
-      [t('adminCurrentStreak')]: u.current_streak,
-      [t('adminBestStreak')]: u.best_streak,
-      [t('adminTotalDeposits')]: u.total_contributions,
-      [t('adminMaxSaved')]: u.max_saved,
-      [t('adminDaysInApp')]: daysSince(u.created_at),
-      [t('adminRegistration')]: u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '',
-      [t('adminLastContribution')]: u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yyyy') : '',
-      [t('adminGroups2')]: (u.groups || []).map(g => g.group_name).join(', '),
-      [t('adminCommunities')]: (u.communities || []).join(', '),
-    }));
+    const rows = filteredUsers.map(u => {
+      const behavior = getUserBehavior(u);
+      return {
+        [t('name')]: u.name,
+        [t('email')]: userEmails[u.id] || '',
+        [t('country')]: u.country || '',
+        [t('city')]: u.city || '',
+        [t('phone')]: u.phone || '',
+        [t('adminLanguage')]: u.language || '',
+        [t('adminCurrency')]: u.currency || '',
+        [t('level')]: u.level,
+        'Premium': u.is_premium ? '✓' : '✗',
+        'Role': u.role || 'user',
+        'Status': behavior.status,
+        'Engajamento': behavior.engagement,
+        [t('adminCurrentStreak')]: u.current_streak,
+        [t('adminBestStreak')]: u.best_streak,
+        [t('adminTotalDeposits')]: u.total_contributions,
+        'Valor médio aporte': behavior.avgContribValue.toFixed(2),
+        'Total depositado': behavior.totalDeposited.toFixed(2),
+        [t('adminMaxSaved')]: u.max_saved,
+        [t('adminDaysInApp')]: behavior.daysInApp,
+        'Dias sem aporte': behavior.daysSinceLastContrib,
+        'Intervalo médio (dias)': behavior.avgGapDays.toFixed(1),
+        'Aportes/semana': (behavior.contribFreq * 7).toFixed(2),
+        [t('adminRegistration')]: u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '',
+        [t('adminLastContribution')]: u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yyyy') : '',
+        [t('adminGroups2')]: (u.groups || []).map(g => g.group_name).join(', '),
+        [t('adminCommunities')]: (u.communities || []).join(', '),
+      };
+    });
     exportToExcel([{ sheetName: t('adminUsers'), rows }], 'billi-users');
   };
 
@@ -583,11 +593,59 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const totalGroupsCount = groups.length;
   const totalGroupNet = groups.reduce((sum, g) => sum + g.total_deposits - g.total_withdrawals, 0);
 
-  // Days since registration
+  // Days since a date
   const daysSince = (dateStr: string) => {
     if (!dateStr) return 0;
     return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
   };
+
+  // Behavioral metrics per user
+  const getUserBehavior = (u: UserFull) => {
+    const daysInApp = daysSince(u.created_at) || 1;
+    const daysSinceLastContrib = u.last_contribution_at ? daysSince(u.last_contribution_at) : daysInApp;
+    const contribFreq = u.total_contributions / daysInApp; // contributions per day
+    const userContribs = allContributions.filter(c => c.user_id === u.id && c.type === 'deposit');
+    const totalDeposited = userContribs.reduce((s: number, c: any) => s + Number(c.amount), 0);
+    const avgContribValue = u.total_contributions > 0 ? totalDeposited / u.total_contributions : 0;
+
+    // Average days between contributions
+    const contribDates = userContribs
+      .map((c: any) => new Date(c.created_at).getTime())
+      .sort((a: number, b: number) => a - b);
+    let avgGapDays = 0;
+    if (contribDates.length > 1) {
+      const gaps = contribDates.slice(1).map((d: number, i: number) => (d - contribDates[i]) / (1000 * 60 * 60 * 24));
+      avgGapDays = gaps.reduce((s: number, g: number) => s + g, 0) / gaps.length;
+    }
+
+    // Engagement score (0-100)
+    const streakScore = Math.min(u.current_streak / 30, 1) * 30;
+    const freqScore = Math.min(contribFreq * 7, 1) * 30; // at least 1/week = max
+    const recencyScore = Math.max(0, 1 - daysSinceLastContrib / 30) * 25;
+    const levelScore = Math.min(u.level / 10, 1) * 15;
+    const engagement = Math.round(streakScore + freqScore + recencyScore + levelScore);
+
+    // Status label
+    let status = '🔴 Inativo';
+    if (daysSinceLastContrib <= 1) status = '🟢 Ativo hoje';
+    else if (daysSinceLastContrib <= 3) status = '🟢 Ativo';
+    else if (daysSinceLastContrib <= 7) status = '🟡 Regular';
+    else if (daysSinceLastContrib <= 30) status = '🟠 Esfriando';
+
+    return { daysInApp, daysSinceLastContrib, contribFreq, avgContribValue, avgGapDays, engagement, status, totalDeposited };
+  };
+
+  // Platform-wide behavioral stats
+  const platformStats = useMemo(() => {
+    const activeToday = users.filter(u => u.last_contribution_at && daysSince(u.last_contribution_at) <= 1).length;
+    const activeWeek = users.filter(u => u.last_contribution_at && daysSince(u.last_contribution_at) <= 7).length;
+    const activeMonth = users.filter(u => u.last_contribution_at && daysSince(u.last_contribution_at) <= 30).length;
+    const inactive = users.filter(u => !u.last_contribution_at || daysSince(u.last_contribution_at) > 30).length;
+    const avgStreak = users.length > 0 ? (users.reduce((s, u) => s + u.current_streak, 0) / users.length).toFixed(1) : '0';
+    const avgLevel = users.length > 0 ? (users.reduce((s, u) => s + u.level, 0) / users.length).toFixed(1) : '0';
+    const avgContribs = users.length > 0 ? (users.reduce((s, u) => s + u.total_contributions, 0) / users.length).toFixed(1) : '0';
+    return { activeToday, activeWeek, activeMonth, inactive, avgStreak, avgLevel, avgContribs };
+  }, [users]);
 
   if (isAuthorized === null) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
@@ -671,6 +729,41 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {/* ==================== USERS TAB ==================== */}
           <TabsContent value="users" className="space-y-3 mt-4">
             <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={exportUsers} className="h-7 text-[10px]"><Download className="w-3 h-3 mr-1" />Excel</Button></div>
+
+            {/* Platform Behavior Summary */}
+            <div className="grid grid-cols-4 gap-2">
+              <div className="glass-card p-2 text-center">
+                <p className="text-lg font-bold text-green-500">{platformStats.activeToday}</p>
+                <p className="text-[9px] text-muted-foreground">Ativos hoje</p>
+              </div>
+              <div className="glass-card p-2 text-center">
+                <p className="text-lg font-bold text-blue-500">{platformStats.activeWeek}</p>
+                <p className="text-[9px] text-muted-foreground">Ativos 7d</p>
+              </div>
+              <div className="glass-card p-2 text-center">
+                <p className="text-lg font-bold text-amber-500">{platformStats.activeMonth}</p>
+                <p className="text-[9px] text-muted-foreground">Ativos 30d</p>
+              </div>
+              <div className="glass-card p-2 text-center">
+                <p className="text-lg font-bold text-destructive">{platformStats.inactive}</p>
+                <p className="text-[9px] text-muted-foreground">Inativos</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="glass-card p-2 text-center">
+                <p className="text-sm font-bold">{platformStats.avgStreak}</p>
+                <p className="text-[9px] text-muted-foreground">Streak médio</p>
+              </div>
+              <div className="glass-card p-2 text-center">
+                <p className="text-sm font-bold">{platformStats.avgLevel}</p>
+                <p className="text-[9px] text-muted-foreground">Nível médio</p>
+              </div>
+              <div className="glass-card p-2 text-center">
+                <p className="text-sm font-bold">{platformStats.avgContribs}</p>
+                <p className="text-[9px] text-muted-foreground">Aportes médio</p>
+              </div>
+            </div>
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder={t('adminSearchUsers')} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10 h-9" />
@@ -681,7 +774,9 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : (
               <div className="space-y-2">
-                {filteredUsers.map((u) => (
+                {filteredUsers.map((u) => {
+                  const behavior = getUserBehavior(u);
+                  return (
                   <div key={u.id} className="glass-card p-3 space-y-2">
                     {/* Header row */}
                     <div className="flex items-center gap-2" onClick={() => setExpandedUser(expandedUser === u.id ? null : u.id)} role="button">
@@ -694,14 +789,20 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                           {u.role === 'admin' && <span className="text-[9px] px-1 py-0.5 rounded bg-destructive/20 text-destructive font-medium">ADMIN</span>}
                           {u.is_premium && <span className="text-[9px] px-1 py-0.5 rounded bg-accent/20 text-accent font-medium">VIP</span>}
                         </div>
-                          <p className="text-[10px] text-muted-foreground">
-                            Nv{u.level} • {u.consistency_days}d • {u.country || '—'} • {u.currency || '—'}
-                          </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {behavior.status} • Nv{u.level} • 🔥{u.current_streak}d • {u.country || '—'}
+                        </p>
                         {userEmails[u.id] && (
                           <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                             <Mail className="w-3 h-3" />{userEmails[u.id]}
                           </p>
                         )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className={`text-xs font-bold ${behavior.engagement >= 60 ? 'text-green-500' : behavior.engagement >= 30 ? 'text-amber-500' : 'text-destructive'}`}>
+                          {behavior.engagement}%
+                        </div>
+                        <p className="text-[9px] text-muted-foreground">engajamento</p>
                       </div>
                       {expandedUser === u.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                     </div>
@@ -709,18 +810,91 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {/* Expanded details */}
                     {expandedUser === u.id && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-3 pt-2 border-t border-border">
+                        
+                        {/* Behavioral metrics */}
+                        <div>
+                          <p className="text-xs font-semibold mb-1.5 flex items-center gap-1"><Activity className="w-3 h-3" /> Comportamento</p>
+                          <div className="grid grid-cols-3 gap-1.5">
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">{behavior.daysInApp}</p>
+                              <p className="text-[9px] text-muted-foreground">Dias no app</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className={`text-sm font-bold ${behavior.daysSinceLastContrib <= 3 ? 'text-green-500' : behavior.daysSinceLastContrib <= 7 ? 'text-amber-500' : 'text-destructive'}`}>
+                                {behavior.daysSinceLastContrib}d
+                              </p>
+                              <p className="text-[9px] text-muted-foreground">Sem aporte</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">{behavior.avgGapDays.toFixed(1)}d</p>
+                              <p className="text-[9px] text-muted-foreground">Intervalo médio</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">{u.total_contributions}</p>
+                              <p className="text-[9px] text-muted-foreground">Nº aportes</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">{(behavior.contribFreq * 7).toFixed(1)}</p>
+                              <p className="text-[9px] text-muted-foreground">Aportes/sem</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">{formatCurrency(behavior.avgContribValue)}</p>
+                              <p className="text-[9px] text-muted-foreground">Valor médio</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Streaks & Level */}
+                        <div>
+                          <p className="text-xs font-semibold mb-1.5 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Gamificação</p>
+                          <div className="grid grid-cols-4 gap-1.5">
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">🔥 {u.current_streak}</p>
+                              <p className="text-[9px] text-muted-foreground">Streak atual</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">⚡ {u.best_streak}</p>
+                              <p className="text-[9px] text-muted-foreground">Melhor streak</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">Nv{u.level}</p>
+                              <p className="text-[9px] text-muted-foreground">Nível</p>
+                            </div>
+                            <div className="bg-muted/40 rounded-lg p-2 text-center">
+                              <p className="text-sm font-bold">{formatCurrency(u.max_saved)}</p>
+                              <p className="text-[9px] text-muted-foreground">Máx salvo</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Engagement bar */}
+                        <div>
+                          <div className="flex justify-between text-[10px] mb-1">
+                            <span className="text-muted-foreground">Score de engajamento</span>
+                            <span className="font-bold">{behavior.engagement}/100</span>
+                          </div>
+                          <Progress value={behavior.engagement} className="h-2" />
+                        </div>
+
+                        {/* Financial summary */}
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <div className="bg-primary/10 rounded-lg p-2 text-center">
+                            <p className="text-sm font-bold text-primary">{formatCurrency(behavior.totalDeposited)}</p>
+                            <p className="text-[9px] text-muted-foreground">Total depositado</p>
+                          </div>
+                          <div className="bg-muted/40 rounded-lg p-2 text-center">
+                            <p className="text-sm font-bold">{formatCurrency(behavior.totalDeposited / behavior.daysInApp * 30)}</p>
+                            <p className="text-[9px] text-muted-foreground">Projeção/mês</p>
+                          </div>
+                        </div>
+
                         {/* Profile details */}
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div><span className="text-muted-foreground">{t('adminCity')}:</span> {u.city || '—'}</div>
                           <div><span className="text-muted-foreground">{t('adminPhone')}:</span> {u.phone || '—'}</div>
                           <div><span className="text-muted-foreground">{t('adminLanguage')}:</span> {u.language || '—'}</div>
                           <div><span className="text-muted-foreground">{t('adminCurrency')}:</span> {u.currency || '—'}</div>
-                          <div><span className="text-muted-foreground">{t('adminCurrentStreak')}:</span> {u.current_streak}d</div>
-                          <div><span className="text-muted-foreground">{t('adminBestStreak')}:</span> {u.best_streak}d</div>
-                          <div><span className="text-muted-foreground">{t('adminMaxSaved')}:</span> {formatCurrency(u.max_saved)}</div>
-                          <div><span className="text-muted-foreground">{t('adminTotalDeposits')}:</span> {u.total_contributions}</div>
                           <div><span className="text-muted-foreground">{t('adminRegistration')}:</span> {u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy') : '—'}</div>
-                          <div><span className="text-muted-foreground">{t('adminDaysInApp')}:</span> {daysSince(u.created_at)}</div>
                           <div><span className="text-muted-foreground">{t('adminLastContribution')}:</span> {u.last_contribution_at ? format(new Date(u.last_contribution_at), 'dd/MM/yy') : '—'}</div>
                         </div>
 
@@ -763,7 +937,8 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                       </motion.div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
                 {filteredUsers.length === 0 && <p className="text-center py-8 text-muted-foreground">{t('adminNoUsersFound')}</p>}
               </div>
             )}
