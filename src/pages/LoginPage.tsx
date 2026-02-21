@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowRight, Loader2, Mail, UserPlus, Shield, TrendingUp, Users, Trophy } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { ArrowRight, Loader2, Mail, UserPlus, Shield, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,11 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { lovable } from '@/integrations/lovable';
 import { Link } from 'react-router-dom';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 
 type ViewMode = 'initial' | 'login' | 'signup';
@@ -65,13 +64,6 @@ const countriesList = [
   { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
 ];
 
-const featureKeys = [
-  { icon: TrendingUp, titleKey: 'featureTrackTitle', descKey: 'featureTrackDesc' },
-  { icon: Users, titleKey: 'featureSaveTogetherTitle', descKey: 'featureSaveTogetherDesc' },
-  { icon: Trophy, titleKey: 'featureStreaksTitle', descKey: 'featureStreaksDesc' },
-  { icon: Shield, titleKey: 'featureSecureTitle', descKey: 'featureSecureDesc' },
-];
-
 const LoginPage: React.FC = () => {
   const { t, setLanguage, setCurrency, language, currency } = useApp();
   const { signUp, signIn } = useAuthContext();
@@ -79,36 +71,28 @@ const LoginPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('initial');
   const [googleLoading, setGoogleLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const authRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    city: '',
-    password: '',
-    country: 'CA',
-    gender: '' as 'M' | 'F' | 'O' | '',
+    name: '', email: '', phone: '', city: '', password: '', country: 'CA', gender: '' as 'M' | 'F' | 'O' | '',
   });
 
   const validateFullName = (name: string): boolean => {
-    const trimmed = name.trim();
-    const words = trimmed.split(/\s+/).filter(word => word.length > 0);
+    const words = name.trim().split(/\s+/).filter(w => w.length > 0);
     return words.length >= 2;
+  };
+
+  const scrollToAuth = () => {
+    authRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast({ title: t('error'), description: result.error.message, variant: 'destructive' });
-      }
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      if (result.error) toast({ title: t('error'), description: result.error.message, variant: 'destructive' });
     } catch (err) {
       toast({ title: t('error'), description: err instanceof Error ? err.message : 'Google sign in failed', variant: 'destructive' });
-    } finally {
-      setGoogleLoading(false);
-    }
+    } finally { setGoogleLoading(false); }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -116,79 +100,69 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       const { error } = await signIn(formData.email, formData.password);
-      if (error) {
-        toast({ title: t('error'), description: error.message, variant: 'destructive' });
-      }
-    } finally {
-      setLoading(false);
-    }
+      if (error) toast({ title: t('error'), description: error.message, variant: 'destructive' });
+    } finally { setLoading(false); }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     if (!validateFullName(formData.name)) {
-      toast({ title: t('error'), description: t('fullNameRequired') || 'Please enter your full name (first and last name)', variant: 'destructive' });
-      setLoading(false);
-      return;
+      toast({ title: t('error'), description: t('fullNameRequired') || 'Please enter your full name', variant: 'destructive' });
+      setLoading(false); return;
     }
     try {
       const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone, formData.country, formData.city, language, currency);
-      if (error) {
-        toast({ title: t('error'), description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: '✉️ ' + t('checkEmail'), description: t('confirmationSent') });
-      }
-    } finally {
-      setLoading(false);
-    }
+      if (error) toast({ title: t('error'), description: error.message, variant: 'destructive' });
+      else toast({ title: '✉️ ' + t('checkEmail'), description: t('confirmationSent') });
+    } finally { setLoading(false); }
   };
 
-  const renderAuthForm = () => {
-    if (viewMode === 'login') return renderLoginForm();
-    if (viewMode === 'signup') return renderSignupForm();
-    return renderInitialView();
-  };
+  const featureKeys = [
+    { icon: TrendingUp, titleKey: 'featureTrackTitle', descKey: 'featureTrackDesc' },
+    { icon: Users, titleKey: 'featureSaveTogetherTitle', descKey: 'featureSaveTogetherDesc' },
+    { icon: Trophy, titleKey: 'featureStreaksTitle', descKey: 'featureStreaksDesc' },
+    { icon: Shield, titleKey: 'featureSecureTitle', descKey: 'featureSecureDesc' },
+  ];
+
+  const steps = [
+    { icon: UserPlus, titleKey: 'landingStep1Title', descKey: 'landingStep1Desc', num: '01' },
+    { icon: Target, titleKey: 'landingStep2Title', descKey: 'landingStep2Desc', num: '02' },
+    { icon: Flame, titleKey: 'landingStep3Title', descKey: 'landingStep3Desc', num: '03' },
+    { icon: Award, titleKey: 'landingStep4Title', descKey: 'landingStep4Desc', num: '04' },
+  ];
+
+  const faqItems = [
+    { q: 'faqQ1', a: 'faqA1' },
+    { q: 'faqQ2', a: 'faqA2' },
+    { q: 'faqQ3', a: 'faqA3' },
+    { q: 'faqQ4', a: 'faqA4' },
+    { q: 'faqQ5', a: 'faqA5' },
+  ];
 
   const renderInitialView = () => (
     <div className="w-full space-y-5">
       <div className="space-y-3">
         <h2 className="text-xl font-bold text-foreground">{t('login')}</h2>
-        <Button
-          type="button"
-          onClick={() => setViewMode('login')}
-          variant="outline"
-          className="w-full h-12 rounded-xl border-border bg-card hover:bg-secondary flex items-center justify-center gap-3 text-foreground font-medium"
-        >
-          <Mail className="w-5 h-5" />
-          {t('continueWithEmail') || 'Continue with e-mail'}
+        <Button type="button" onClick={() => setViewMode('login')} variant="outline"
+          className="w-full h-12 rounded-xl border-border bg-card hover:bg-secondary flex items-center justify-center gap-3 text-foreground font-medium">
+          <Mail className="w-5 h-5" />{t('continueWithEmail')}
         </Button>
-        <Button
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={googleLoading}
-          variant="outline"
-          className="w-full h-12 rounded-xl border-border bg-card hover:bg-secondary flex items-center justify-center gap-3 text-foreground font-medium"
-        >
+        <Button type="button" onClick={handleGoogleSignIn} disabled={googleLoading} variant="outline"
+          className="w-full h-12 rounded-xl border-border bg-card hover:bg-secondary flex items-center justify-center gap-3 text-foreground font-medium">
           {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><GoogleIcon /> {t('continueWithGoogle')}</>}
         </Button>
       </div>
-
       <div className="relative flex items-center">
         <div className="flex-grow border-t border-border" />
         <span className="flex-shrink mx-4 text-muted-foreground text-sm">{t('or')}</span>
         <div className="flex-grow border-t border-border" />
       </div>
-
       <div className="space-y-3">
-        <h2 className="text-xl font-bold text-foreground">{t('createAccount') || 'Create Account'}</h2>
-        <Button
-          type="button"
-          onClick={() => setViewMode('signup')}
-          className="w-full h-12 rounded-xl btn-primary text-primary-foreground font-semibold flex items-center justify-center gap-3"
-        >
-          <UserPlus className="w-5 h-5" />
-          {t('signUpNow') || 'Sign up now'}
+        <h2 className="text-xl font-bold text-foreground">{t('createAccount')}</h2>
+        <Button type="button" onClick={() => setViewMode('signup')}
+          className="w-full h-12 rounded-xl btn-primary text-primary-foreground font-semibold flex items-center justify-center gap-3">
+          <UserPlus className="w-5 h-5" />{t('signUpNow')}
         </Button>
       </div>
     </div>
@@ -198,11 +172,8 @@ const LoginPage: React.FC = () => {
     <form onSubmit={handleLogin} className="w-full space-y-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-bold text-foreground">{t('login')}</h2>
-        <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">
-          ← {t('back') || 'Back'}
-        </button>
+        <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">← {t('back')}</button>
       </div>
-
       <div className="space-y-3">
         <div className="space-y-1.5">
           <Label htmlFor="email">{t('email')}</Label>
@@ -215,22 +186,16 @@ const LoginPage: React.FC = () => {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="h-11 bg-card border-border rounded-xl" required minLength={6} />
         </div>
       </div>
-
       <Button type="submit" disabled={loading} className="w-full h-12 btn-primary text-primary-foreground font-semibold rounded-xl">
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>{t('login')} <ArrowRight className="w-5 h-5 ml-2" /></>}
       </Button>
-
       <div className="relative flex items-center py-1">
-        <div className="flex-grow border-t border-border" />
-        <span className="flex-shrink mx-4 text-muted-foreground text-sm">{t('or')}</span>
-        <div className="flex-grow border-t border-border" />
+        <div className="flex-grow border-t border-border" /><span className="flex-shrink mx-4 text-muted-foreground text-sm">{t('or')}</span><div className="flex-grow border-t border-border" />
       </div>
-
       <Button type="button" variant="outline" onClick={handleGoogleSignIn} disabled={googleLoading}
         className="w-full h-11 bg-card hover:bg-secondary text-foreground font-medium rounded-xl border-border flex items-center justify-center gap-3">
         {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><GoogleIcon /> {t('continueWithGoogle')}</>}
       </Button>
-
       <button type="button" onClick={() => setViewMode('signup')} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
         {t('noAccount')} <span className="text-primary font-medium">{t('signUpNow')}</span>
       </button>
@@ -241,46 +206,37 @@ const LoginPage: React.FC = () => {
     <form onSubmit={handleSignup} className="w-full space-y-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-bold text-foreground">{t('signup')}</h2>
-        <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">
-          ← {t('back') || 'Back'}
-        </button>
+        <button type="button" onClick={() => setViewMode('initial')} className="text-sm text-muted-foreground hover:text-foreground">← {t('back')}</button>
       </div>
-
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <Label htmlFor="name">{t('fullName') || 'Full Name'}</Label>
-          <Input id="name" placeholder={t('enterFullName') || 'Enter your full name'} value={formData.name}
+          <Label htmlFor="name">{t('fullName')}</Label>
+          <Input id="name" placeholder={t('enterFullName')} value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
-          <p className="text-xs text-muted-foreground">{t('fullNameHint') || 'Please enter first and last name'}</p>
+          <p className="text-xs text-muted-foreground">{t('fullNameHint')}</p>
         </div>
-
         <div className="space-y-1.5">
           <Label htmlFor="phone">{t('phone')}</Label>
           <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
         </div>
-
         <div className="space-y-1.5">
           <Label htmlFor="signup-email">{t('email')}</Label>
           <Input id="signup-email" type="email" placeholder={t('enterEmail')} value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
         </div>
-
         <div className="space-y-1.5">
           <Label htmlFor="signup-password">{t('password')}</Label>
           <Input id="signup-password" type="password" placeholder="••••••••" value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="h-11 bg-card border-border rounded-xl" required minLength={6} />
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label>{t('country')}</Label>
-            <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
+            <Select value={formData.country} onValueChange={(v) => setFormData({ ...formData, country: v })}>
               <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue placeholder={t('selectCountry')} /></SelectTrigger>
               <SelectContent className="max-h-60">
-                {countriesList.map((country) => (
-                  <SelectItem key={country.code} value={country.code}>{country.flag} {country.name}</SelectItem>
-                ))}
+                {countriesList.map((c) => <SelectItem key={c.code} value={c.code}>{c.flag} {c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -290,10 +246,9 @@ const LoginPage: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="h-11 bg-card border-border rounded-xl" required />
           </div>
         </div>
-
         <div className="space-y-1.5">
           <Label>{t('gender')}</Label>
-          <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value as 'M' | 'F' | 'O' })}>
+          <Select value={formData.gender} onValueChange={(v) => setFormData({ ...formData, gender: v as 'M' | 'F' | 'O' })}>
             <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue placeholder="Gender" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="M">{t('male')}</SelectItem>
@@ -302,11 +257,10 @@ const LoginPage: React.FC = () => {
             </SelectContent>
           </Select>
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label>{t('language')}</Label>
-            <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+            <Select value={language} onValueChange={(v) => setLanguage(v as any)}>
               <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="en">🇨🇦 English</SelectItem>
@@ -320,7 +274,7 @@ const LoginPage: React.FC = () => {
           </div>
           <div className="space-y-1.5">
             <Label>{t('currency')}</Label>
-            <Select value={currency} onValueChange={(value) => setCurrency(value as any)}>
+            <Select value={currency} onValueChange={(v) => setCurrency(v as any)}>
               <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent className="max-h-60">
                 <SelectItem value="CAD">CA$ CAD</SelectItem>
@@ -352,109 +306,171 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-
       <Button type="submit" disabled={loading} className="w-full h-12 btn-primary text-primary-foreground font-semibold rounded-xl">
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>{t('signup')} <ArrowRight className="w-5 h-5 ml-2" /></>}
       </Button>
-
       <p className="text-xs text-center text-muted-foreground">
-        {t('agreeToTerms') || 'By signing up, you agree to our'}{' '}
-        <Link to="/privacy" className="text-primary hover:underline">{t('privacyPolicy') || 'Privacy Policy'}</Link>
+        {t('agreeToTerms')}{' '}<Link to="/privacy" className="text-primary hover:underline">{t('privacyPolicy')}</Link>
       </p>
-
       <button type="button" onClick={() => setViewMode('login')} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
         {t('hasAccount')} <span className="text-primary font-medium">{t('signInNow')}</span>
       </button>
     </form>
   );
 
+  const renderAuthForm = () => {
+    if (viewMode === 'login') return renderLoginForm();
+    if (viewMode === 'signup') return renderSignupForm();
+    return renderInitialView();
+  };
+
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
-      {/* Left Hero — Desktop */}
-      <div className="hidden lg:flex lg:w-[55%] flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-primary">
-        {/* Decorative blobs */}
-        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-white/5 rounded-full blur-[140px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[120px]" />
-
-        {/* Top: Logo + headline */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12">
-            <BilliLogo size={52} />
-            <span className="text-3xl font-black text-white tracking-tight">Billi</span>
+    <div className="min-h-screen bg-background">
+      {/* Sticky Navbar */}
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
+          <div className="flex items-center gap-2">
+            <BilliLogo size={36} />
+            <span className="text-xl font-black text-foreground tracking-tight">Billi</span>
           </div>
-
-          <h1 className="text-4xl xl:text-5xl font-black text-white leading-[1.15] max-w-lg">
-            {t('saveTogetherShort')}
-          </h1>
-          <p className="text-xl text-white/80 mt-4 max-w-md italic font-medium">
-            {t('romanticizeYourSavings')}
-          </p>
-          <p className="text-white/50 mt-2 max-w-md text-sm">
-            {t('gamifiedSocialFinance')}
-          </p>
-        </div>
-
-        {/* Features grid */}
-        <div className="relative z-10 grid grid-cols-2 gap-5 mt-12">
-          {featureKeys.map((f, i) => (
-            <div key={i} className="flex gap-3 items-start">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <f.icon className="w-5 h-5 text-white/90" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-white">{t(f.titleKey)}</h3>
-                <p className="text-xs text-white/60 leading-relaxed mt-0.5">{t(f.descKey)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div className="relative z-10 flex items-center gap-4 text-white/40 text-xs mt-8">
-          <span>© {new Date().getFullYear()} Billi</span>
-          <Link to="/privacy" className="hover:text-white/70 transition-colors">{t('privacyPolicy') || 'Privacy Policy'}</Link>
-        </div>
-      </div>
-
-      {/* Right: Auth form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 lg:px-12 xl:px-20 overflow-y-auto relative">
-        {/* Mobile hero */}
-        <div className="lg:hidden text-center mb-8 w-full">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/10 rounded-full blur-[100px]" />
-          <div className="relative z-10">
-            <div className="mx-auto mb-3 flex items-center justify-center">
-              <BilliLogo size={72} />
-            </div>
-            <h1 className="text-3xl font-black text-foreground mb-1">Billi</h1>
-            <p className="text-sm font-semibold text-foreground/80 italic">{t('saveTogetherShort')}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t('romanticizeYourSavings')}</p>
+          <div className="flex items-center gap-3">
+            <button onClick={scrollToAuth} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              {t('landingSignIn')}
+            </button>
+            <Button onClick={() => { scrollToAuth(); setViewMode('signup'); }} size="sm" className="rounded-full btn-primary text-primary-foreground font-semibold px-5">
+              {t('landingGetStarted')}
+            </Button>
           </div>
         </div>
+      </nav>
 
-        {/* Form container */}
-        <div className="relative z-10 w-full max-w-md">
-          {/* Desktop sub-header */}
-          <div className="hidden lg:block mb-6">
+      {/* Hero Section — Split layout like Plinq */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/3" />
+        <div className="relative max-w-6xl mx-auto px-6 py-16 lg:py-24">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+            {/* Left: Text content */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
+                <Flame className="w-4 h-4 text-primary" />
+                <span className="text-xs font-semibold text-primary uppercase tracking-wider">{t('saveTogetherShort')}</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl xl:text-6xl font-black text-foreground leading-[1.1] mb-5">
+                {t('landingHeroTitle')}
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-3">
+                {t('landingHeroSubtitle')}
+              </p>
+              <p className="text-base italic font-medium text-primary/80 mb-8">
+                {t('romanticizeYourSavings')}
+              </p>
+              <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
+                <Button onClick={() => { scrollToAuth(); setViewMode('signup'); }} size="lg" className="rounded-full btn-primary text-primary-foreground font-bold px-8 h-13 text-base">
+                  {t('landingGetStarted')} <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                <button onClick={scrollToAuth} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  {t('landingAlreadyHaveAccount')} <span className="text-primary font-semibold">{t('landingSignIn')}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Feature cards — Plinq style */}
+            <div className="flex-1 w-full max-w-md">
+              <div className="space-y-4">
+                {featureKeys.map((f, i) => (
+                  <div key={i} className="flex items-start gap-4 p-5 rounded-2xl bg-card border border-border/60 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <f.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">{t(f.titleKey)}</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">{t(f.descKey)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What is Billi */}
+      <section className="py-16 lg:py-24 bg-secondary/30">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-black text-foreground mb-6">{t('landingWhatIsBilli')}</h2>
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            {t('landingWhatIsBilliDesc')}
+          </p>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-16 lg:py-24">
+        <div className="max-w-5xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-14">{t('landingHowItWorks')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((s, i) => (
+              <div key={i} className="text-center">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 relative">
+                  <s.icon className="w-7 h-7 text-primary" />
+                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-black flex items-center justify-center">{s.num}</span>
+                </div>
+                <h3 className="text-base font-bold text-foreground mb-2">{t(s.titleKey)}</h3>
+                <p className="text-sm text-muted-foreground">{t(s.descKey)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 lg:py-24 bg-secondary/30">
+        <div className="max-w-3xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-12">{t('landingFAQ')}</h2>
+          <Accordion type="single" collapsible className="space-y-3">
+            {faqItems.map((faq, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="border border-border/60 rounded-2xl bg-card px-6 overflow-hidden">
+                <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-5">
+                  {t(faq.q)}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
+                  {t(faq.a)}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Auth Section */}
+      <section ref={authRef} className="py-16 lg:py-24">
+        <div className="max-w-md mx-auto px-6">
+          <div className="text-center mb-8">
+            <BilliLogo size={56} className="mx-auto mb-4 justify-center" />
             <h2 className="text-2xl font-bold text-foreground">
-              {viewMode === 'signup' ? (t('createAccount') || 'Create your account') : (t('welcomeBack') || 'Welcome back')}
+              {viewMode === 'signup' ? t('createAccount') : t('welcomeBack')}
             </h2>
             <p className="text-muted-foreground text-sm mt-1">
-              {viewMode === 'signup'
-                ? (t('signUpDescription') || 'Start building your financial discipline today.')
-                : (t('loginDescription') || 'Sign in to continue your journey.')}
+              {viewMode === 'signup' ? t('signUpDescription') : t('loginDescription')}
             </p>
           </div>
-
-          {renderAuthForm()}
-
-          {/* Mobile footer */}
-          <div className="lg:hidden text-center mt-8">
-            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              {t('privacyPolicy') || 'Privacy Policy'}
-            </Link>
+          <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-sm">
+            {renderAuthForm()}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50 py-8">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <BilliLogo size={24} />
+            <span className="font-semibold text-foreground">Billi</span>
+            <span>© {new Date().getFullYear()} {t('landingFooterRights')}</span>
+          </div>
+          <Link to="/privacy" className="hover:text-foreground transition-colors">{t('privacyPolicy')}</Link>
+        </div>
+      </footer>
     </div>
   );
 };
