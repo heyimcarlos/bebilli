@@ -84,6 +84,31 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const [editingUsername, setEditingUsername] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
   const [usernameLoading, setUsernameLoading] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameChecking, setUsernameChecking] = useState(false);
+  const usernameCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Real-time username availability check
+  useEffect(() => {
+    const clean = usernameInput.trim().toLowerCase().replace(/[^a-z0-9._]/g, '');
+    if (clean.length < 3 || clean === (profile as any)?.username) {
+      setUsernameAvailable(null);
+      return;
+    }
+    setUsernameChecking(true);
+    if (usernameCheckTimer.current) clearTimeout(usernameCheckTimer.current);
+    usernameCheckTimer.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', clean)
+        .neq('id', user?.id || '')
+        .limit(1);
+      setUsernameAvailable(!data || data.length === 0);
+      setUsernameChecking(false);
+    }, 400);
+    return () => { if (usernameCheckTimer.current) clearTimeout(usernameCheckTimer.current); };
+  }, [usernameInput, user?.id, profile]);
   const [showFollowsTab, setShowFollowsTab] = useState<'followers' | 'following' | 'requests' | null>(null);
   const [followers, setFollowers] = useState<FollowUser[]>([]);
   const [following, setFollowing] = useState<FollowUser[]>([]);
@@ -151,14 +176,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
     if (!user || !usernameInput.trim()) return;
     const clean = usernameInput.trim().toLowerCase().replace(/[^a-z0-9._]/g, '');
     if (clean.length < 3) { toast({ title: t('error'), description: 'Min 3 characters', variant: 'destructive' }); return; }
+    if (usernameAvailable === false) { toast({ title: t('error'), description: t('usernameTaken') || 'Username already taken', variant: 'destructive' }); return; }
     setUsernameLoading(true);
     const { error } = await updateProfile({ username: clean } as any);
     setUsernameLoading(false);
     if (error) {
-      toast({ title: t('error'), description: error.message?.includes('unique') ? 'Username taken' : error.message, variant: 'destructive' });
+      toast({ title: t('error'), description: error.message?.includes('unique') ? (t('usernameTaken') || 'Username already taken') : error.message, variant: 'destructive' });
     } else {
-      toast({ title: '✨', description: `@${clean} is yours!` });
+      toast({ title: '✨', description: `@${clean} ${t('isYours') || 'is yours'}!` });
       setEditingUsername(false);
+      setUsernameAvailable(null);
     }
   };
 
@@ -209,17 +236,24 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
 
           {/* Username */}
           {editingUsername ? (
-            <div className="flex items-center justify-center gap-2 mt-1">
-              <div className="relative">
-                <AtSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input value={usernameInput} onChange={e => setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, ''))} className="h-7 pl-7 pr-2 text-xs w-36 bg-secondary" placeholder="username" maxLength={20} />
+            <div className="flex flex-col items-center gap-1 mt-1">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <AtSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input value={usernameInput} onChange={e => setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, ''))} className={`h-7 pl-7 pr-2 text-xs w-36 bg-secondary ${usernameAvailable === false ? 'border-destructive' : usernameAvailable === true ? 'border-green-500' : ''}`} placeholder="username" maxLength={20} />
+                </div>
+                <Button size="sm" onClick={handleSaveUsername} disabled={usernameLoading || usernameAvailable === false || usernameChecking} className="h-7 px-2">
+                  {usernameLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => { setEditingUsername(false); setUsernameAvailable(null); }} className="h-7 px-2">
+                  <X className="w-3 h-3" />
+                </Button>
               </div>
-              <Button size="sm" onClick={handleSaveUsername} disabled={usernameLoading} className="h-7 px-2">
-                {usernameLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditingUsername(false)} className="h-7 px-2">
-                <X className="w-3 h-3" />
-              </Button>
+              {usernameInput.trim().length >= 3 && (
+                <span className={`text-[10px] font-medium ${usernameChecking ? 'text-muted-foreground' : usernameAvailable === true ? 'text-green-500' : usernameAvailable === false ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  {usernameChecking ? (t('checking') || 'Checking...') : usernameAvailable === true ? (t('usernameAvailable') || '✓ Available') : usernameAvailable === false ? (t('usernameTaken') || '✗ Already taken') : ''}
+                </span>
+              )}
             </div>
           ) : (
             <button onClick={() => { setUsernameInput((profile as any)?.username || ''); setEditingUsername(true); }} className="text-xs text-primary font-medium hover:underline">
