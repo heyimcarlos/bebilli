@@ -106,7 +106,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
       const uploadedUrl = await uploadGroupImage(selectedImage, user.id);
       if (uploadedUrl) imageUrl = uploadedUrl;
     }
-    const { error } = await createGroup(newGroup.name, goalAmount, imageUrl, newGroup.description || undefined);
+    const { error } = await createGroup(newGroup.name, goalAmount, imageUrl, newGroup.description || undefined, newGroup.type);
     setCreating(false);
     if (error) {
       toast({ title: t('error'), description: error.message, variant: 'destructive' });
@@ -304,9 +304,12 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
             </motion.div>
           ) : (
             <div className="space-y-3">
-              {sortedGroups.map((group, index) => (
-                <EnhancedGroupCard key={group.id} id={group.id} name={group.name} image={group.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'} goal={group.goal_amount} current={group.current_amount} membersCount={group.members.length} onClick={() => onGroupClick(group.id)} rank={index + 1} />
-              ))}
+              {sortedGroups.map((group, index) => {
+                const isPending = (group as any).group_type === 'shared' && group.members.length < 2;
+                return (
+                  <EnhancedGroupCard key={group.id} id={group.id} name={group.name} image={group.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'} goal={group.goal_amount} current={group.current_amount} membersCount={group.members.length} onClick={() => onGroupClick(group.id)} rank={index + 1} groupType={(group as any).group_type || 'shared'} isPending={isPending} />
+                );
+              })}
             </div>
           )}
         </div>

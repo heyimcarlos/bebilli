@@ -13,7 +13,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<any>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<any>;
-  createGroup: (name: string, goalAmount: number, imageUrl?: string, description?: string) => Promise<any>;
+  createGroup: (name: string, goalAmount: number, imageUrl?: string, description?: string, groupType?: 'individual' | 'shared') => Promise<any>;
   joinGroupByCode: (inviteCode: string) => Promise<any>;
   addContribution: (groupId: string, amount: number, note?: string) => Promise<any>;
   addWithdrawal: (groupId: string, amount: number, note?: string) => Promise<any>;

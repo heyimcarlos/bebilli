@@ -12,6 +12,8 @@ interface EnhancedGroupCardProps {
   membersCount: number;
   onClick: () => void;
   rank?: number;
+  groupType?: 'individual' | 'shared';
+  isPending?: boolean;
 }
 
 const EnhancedGroupCard: React.FC<EnhancedGroupCardProps> = ({
@@ -22,6 +24,8 @@ const EnhancedGroupCard: React.FC<EnhancedGroupCardProps> = ({
   membersCount,
   onClick,
   rank,
+  groupType = 'shared',
+  isPending = false,
 }) => {
   const { formatCurrency, t } = useApp();
   const progress = Math.min((current / goal) * 100, 100);
@@ -44,8 +48,13 @@ const EnhancedGroupCard: React.FC<EnhancedGroupCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
-      className={`w-full rounded-2xl p-3.5 border transition-all duration-200 text-left relative overflow-hidden ${quest.accent}`}
+      className={`w-full rounded-2xl p-3.5 border transition-all duration-200 text-left relative overflow-hidden ${isPending ? 'border-amber-500/30 bg-amber-500/5 opacity-80' : quest.accent}`}
     >
+      {isPending && (
+        <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30">
+          <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400">{t('pendingActivation')}</span>
+        </div>
+      )}
       <div className="flex gap-3.5">
         {/* Image with rank overlay */}
         <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
