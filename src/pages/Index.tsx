@@ -16,11 +16,13 @@ import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
 import PremiumModal from '@/components/PremiumModal';
+import VIPCard from '@/components/VIPCard';
 import SideDrawer from '@/components/SideDrawer';
 import UserSearchModal from '@/components/UserSearchModal';
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
+import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import GoalCelebration from '@/components/GoalCelebration';
 import { Loader2, Menu } from 'lucide-react';
@@ -33,12 +35,14 @@ const AppContent: React.FC = () => {
   const { toast } = useToast();
   const { requestPermission, sendMilestoneNotification, permission, isSupported } = usePushNotifications();
   const { summary, shouldShow: showWeeklySummary, markSummaryShown } = useWeeklySummary(user?.id);
+  const { isPremium } = usePremiumCheck(user?.id);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHiddenGroups, setShowHiddenGroups] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showVIPPanel, setShowVIPPanel] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showSideDrawer, setShowSideDrawer] = useState(false);
   const [showUserSearch, setShowUserSearch] = useState(false);
@@ -50,6 +54,14 @@ const AppContent: React.FC = () => {
   }>({ show: false, milestone: 0, groupName: '' });
   const [goalCelebration, setGoalCelebration] = useState<{ show: boolean; groupName: string }>({ show: false, groupName: '' });
   const [showSupportForm, setShowSupportForm] = useState(false);
+
+  const handlePremiumClick = () => {
+    if (isPremium) {
+      setShowVIPPanel(true);
+    } else {
+      setShowPremiumModal(true);
+    }
+  };
 
   useEffect(() => {
     if (user && isSupported && permission === 'default') {
@@ -191,12 +203,13 @@ const AppContent: React.FC = () => {
         isOpen={showSideDrawer}
         onClose={() => setShowSideDrawer(false)}
         onProfile={() => setActiveTab('profile')}
-        onPremium={() => setShowPremiumModal(true)}
+        onPremium={handlePremiumClick}
         onHiddenGroups={() => setShowHiddenGroups(true)}
         onHelp={() => setShowSupportForm(true)}
         onSearch={() => setShowUserSearch(true)}
       />
       <UserSearchModal isOpen={showUserSearch} onClose={() => setShowUserSearch(false)} />
+      {isPremium && <VIPCard isOpen={showVIPPanel} onClose={() => setShowVIPPanel(false)} />}
     </>
   );
 };
