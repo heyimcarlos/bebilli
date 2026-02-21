@@ -175,7 +175,7 @@ const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({ community, on
                       <AvatarFallback className="bg-primary p-0"><DefaultAvatar name={post.profile.name} size={36} /></AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <span className="text-sm font-medium">{post.profile.name}</span>
+                      <span className="text-sm font-medium">{post.profile.username ? `@${post.profile.username}` : post.profile.name}</span>
                       <span className="text-xs text-muted-foreground ml-2">{formatTime(post.created_at)}</span>
                     </div>
                     {isOwn && (

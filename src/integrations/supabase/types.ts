@@ -891,6 +891,7 @@ export type Database = {
           level: number | null
           max_saved: number | null
           name: string | null
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -901,6 +902,7 @@ export type Database = {
           level?: number | null
           max_saved?: number | null
           name?: string | null
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -911,6 +913,7 @@ export type Database = {
           level?: number | null
           max_saved?: number | null
           name?: string | null
+          username?: string | null
         }
         Relationships: []
       }

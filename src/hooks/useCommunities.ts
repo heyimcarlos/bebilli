@@ -21,6 +21,7 @@ export interface CommunityPost {
   created_at: string;
   profile: {
     name: string;
+    username: string | null;
     avatar_url: string | null;
   };
 }
@@ -171,17 +172,17 @@ export const useCommunityPosts = (communityId: string, userId?: string) => {
       // Use profiles_public view to exclude sensitive PII (phone, country, city)
       const { data: profiles } = await supabase
         .from('profiles_public')
-        .select('id, name, avatar_url')
+        .select('id, name, username, avatar_url')
         .in('id', userIds);
 
-      const profileMap: Record<string, { name: string; avatar_url: string | null }> = {};
+      const profileMap: Record<string, { name: string; username: string | null; avatar_url: string | null }> = {};
       profiles?.forEach(p => {
-        profileMap[p.id] = { name: p.name, avatar_url: p.avatar_url };
+        profileMap[p.id] = { name: p.name || 'Unknown', username: (p as any).username || null, avatar_url: p.avatar_url };
       });
 
       const postsWithProfiles: CommunityPost[] = (data || []).map(p => ({
         ...p,
-        profile: profileMap[p.user_id] || { name: 'Unknown', avatar_url: null },
+        profile: profileMap[p.user_id] || { name: 'Unknown', username: null, avatar_url: null },
       }));
 
       setPosts(postsWithProfiles);
