@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera, Loader2, Compass, TrendingUp, Users, Lightbulb, Upload, Car, Home, GraduationCap, Laptop, Heart, Shield, Sunset, Sparkles } from 'lucide-react';
+import { X, Camera, Loader2, Compass, TrendingUp, Users, Lightbulb, Upload, Car, Home, GraduationCap, Laptop, Heart, Shield, Sunset, Sparkles, Lock, Unlock } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 interface CreateCommunityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; description: string; category: string; image_url?: string }) => Promise<void>;
+  onSubmit: (data: { name: string; description: string; category: string; image_url?: string; is_open?: boolean }) => Promise<void>;
 }
 
 const categories = [
@@ -51,6 +51,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
   const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [communityIsOpen, setCommunityIsOpen] = useState(true);
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,6 +82,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
         description: description.trim(),
         category,
         image_url: imageUrl || undefined,
+        is_open: communityIsOpen,
       });
       // Reset form
       setName('');
@@ -219,6 +221,26 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOpen, onC
                     </Badge>
                   ))}
                 </div>
+              </div>
+
+              {/* Open / Closed toggle */}
+              <div className="space-y-2">
+                <Label>{t('communityType') || 'Community Type'}</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => setCommunityIsOpen(true)}
+                    className={`p-3 rounded-xl border text-center text-sm transition-all flex items-center justify-center gap-2 ${communityIsOpen ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground'}`}>
+                    <Unlock className="w-4 h-4" />
+                    {t('openCommunity') || 'Open'}
+                  </button>
+                  <button type="button" onClick={() => setCommunityIsOpen(false)}
+                    className={`p-3 rounded-xl border text-center text-sm transition-all flex items-center justify-center gap-2 ${!communityIsOpen ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground'}`}>
+                    <Lock className="w-4 h-4" />
+                    {t('closedCommunity') || 'Closed'}
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {communityIsOpen ? (t('openCommunityDesc') || 'Anyone can join') : (t('closedCommunityDesc') || 'Approval required to join')}
+                </p>
               </div>
 
               {/* Submit */}
