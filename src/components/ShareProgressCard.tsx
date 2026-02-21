@@ -44,7 +44,7 @@ const ShareProgressCard: React.FC<ShareProgressCardProps> = ({ isOpen, onClose, 
     return phrases[Math.floor(Math.random() * phrases.length)];
   };
 
-  const shareText = `🎯 Minhas conquistas na Billi!\n\n💰 Já economizei: ${formatCurrency(stats.totalSaved)}\n⭐ Nível: ${stats.level} - ${getLevelTitle(stats.level)}\n🔥 Sequência: ${stats.streak} dias\n👥 Grupos: ${stats.groupsCount}\n\n${getMotivationalPhrase()}\n\nBaixe a Billi e comece a economizar com amigos!`;
+  const shareText = `🎯 Minhas conquistas na Billi!\n\n⭐ Nível: ${stats.level} - ${getLevelTitle(stats.level)}\n🔥 Sequência: ${stats.streak} dias\n👥 Grupos: ${stats.groupsCount}\n\n${getMotivationalPhrase()}\n\nBuild your billion. 🚀\n${window.location.origin}`;
 
   const handleShare = async () => {
     if (navigator.share) {

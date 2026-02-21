@@ -387,11 +387,14 @@ const LoginPage: React.FC = () => {
         <div className="relative z-10 max-w-md text-center">
           <BilliLogo size={120} />
           <h1 className="text-5xl font-black text-white mt-6 mb-4">Billi</h1>
-          <p className="text-xl text-white/80 leading-relaxed">
-            {t('gamifiedSocialFinance') || 'Gamified Social Finance'}
+          <p className="text-2xl font-bold text-white/90 leading-relaxed italic">
+            Build your billion.
           </p>
-          <p className="text-white/60 mt-4 text-sm">
-            {t('saveTogetherShort') || 'Save Together'}
+          <p className="text-lg text-white/70 mt-3">
+            {t('romanticizeYourSavings') || 'Romanticize your savings.'}
+          </p>
+          <p className="text-white/50 mt-4 text-sm">
+            {t('gamifiedSocialFinance')}
           </p>
         </div>
       </div>
@@ -406,8 +409,9 @@ const LoginPage: React.FC = () => {
               <BilliLogo size={80} />
             </div>
             <h1 className="text-3xl font-black text-foreground mb-1">Billi</h1>
+            <p className="text-sm font-semibold text-foreground/80 italic mt-1">Build your billion.</p>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mt-2">
-              <span className="text-xs text-primary font-medium">{t('saveTogetherShort')}</span>
+              <span className="text-xs text-primary font-medium">{t('romanticizeYourSavings') || 'Romanticize your savings.'}</span>
             </div>
           </div>
         </div>
@@ -419,8 +423,8 @@ const LoginPage: React.FC = () => {
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
             {viewMode === 'signup'
-              ? (t('signUpDescription') || 'Join thousands saving together')
-              : (t('loginDescription') || 'Continue your savings journey')}
+              ? (t('signUpDescription'))
+              : (t('loginDescription'))}
           </p>
         </div>
 
