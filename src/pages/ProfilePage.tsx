@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette, Shield, Users, AtSign, Check, X, Zap } from 'lucide-react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette, Shield, Users, AtSign, Check, X, Zap, HelpCircle, MessageSquare, Mail, ExternalLink } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -404,8 +404,34 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
           </div>
         </div>
 
+        {/* Help & Feedback */}
+        <div className="flex items-center gap-2 mb-2 mt-4">
+          <HelpCircle className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t('needHelp') || 'Help'}</h2>
+        </div>
+        <div className="glass-card p-3 space-y-2.5 text-sm">
+          <a href="mailto:contact@bebilli.com" className="flex items-center justify-between group">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-muted-foreground" />
+              <span>{t('needHelp') || 'Need help?'}</span>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
+              <span>contact@bebilli.com</span>
+              <ExternalLink className="w-3 h-3" />
+            </div>
+          </a>
+          <div className="h-px bg-border" />
+          <a href="mailto:contact@bebilli.com?subject=Feedback%20Billi" className="flex items-center justify-between group">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-muted-foreground" />
+              <span>{t('feedback') || 'Send Feedback'}</span>
+            </div>
+            <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
+          </a>
+        </div>
+
         {isAdmin && (
-          <Button onClick={() => navigate('/admin')} variant="outline" className="w-full mt-2 h-10 border-primary text-primary hover:bg-primary/10 rounded-xl font-bold text-sm">
+          <Button onClick={() => navigate('/admin')} variant="outline" className="w-full mt-3 h-10 border-primary text-primary hover:bg-primary/10 rounded-xl font-bold text-sm">
             <Shield className="w-4 h-4 mr-2" />
             {t('adminPanel') || 'Admin Panel'}
           </Button>
