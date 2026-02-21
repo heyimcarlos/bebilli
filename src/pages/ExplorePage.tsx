@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Compass, Search, Users, MessageCircle, Lightbulb, TrendingUp, Loader2, Check, Plus, Car, Home, GraduationCap, Laptop, Heart, Shield, Sunset, Sparkles } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Compass, Search, Users, MessageCircle, Loader2, Check, Plus, Car, Home, GraduationCap, Laptop, Heart, TrendingUp, Shield, Sunset, Sparkles, ChevronDown, ChevronRight } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useCommunities, Community } from '@/hooks/useCommunities';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import CommunityDetailPage from './CommunityDetailPage';
 import CreateCommunityModal from '@/components/CreateCommunityModal';
+
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  Travel: Compass, Vehicle: Car, 'Real Estate': Home, Education: GraduationCap,
+  Technology: Laptop, Health: Heart, Investment: TrendingUp, Emergency: Shield,
+  Wedding: Heart, Retirement: Sunset, Family: Users, Hobby: Sparkles,
+  Business: TrendingUp, Fashion: Sparkles, Sports: Heart, Entertainment: Sparkles,
+  Pets: Heart, Food: Sparkles, Art: Sparkles, Music: Sparkles,
+};
 
 const ExplorePage: React.FC = () => {
   const { t } = useApp();
@@ -17,43 +24,49 @@ const ExplorePage: React.FC = () => {
   const { communities, loading, createCommunity, joinCommunity, leaveCommunity, refreshCommunities } = useCommunities(user?.id);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
-  // Categories for filtering - expanded list
-  const categories = [
-    { id: 'all', label: t('all'), icon: Compass },
-    { id: 'Travel', label: t('travel'), icon: Compass },
-    { id: 'Vehicle', label: t('vehicle'), icon: Car },
-    { id: 'Real Estate', label: t('realEstate'), icon: Home },
-    { id: 'Education', label: t('education'), icon: GraduationCap },
-    { id: 'Technology', label: t('technology') || 'Technology', icon: Laptop },
-    { id: 'Health', label: t('health') || 'Health', icon: Heart },
-    { id: 'Investment', label: t('investment') || 'Investment', icon: TrendingUp },
-    { id: 'Emergency', label: t('emergency') || 'Emergency', icon: Shield },
-    { id: 'Wedding', label: t('wedding') || 'Wedding', icon: Heart },
-    { id: 'Retirement', label: t('retirement') || 'Retirement', icon: Sunset },
-    { id: 'Family', label: t('family') || 'Family', icon: Users },
-    { id: 'Hobby', label: t('hobby') || 'Hobby', icon: Sparkles },
-    { id: 'Business', label: t('business') || 'Business', icon: TrendingUp },
-    { id: 'Fashion', label: t('fashion') || 'Fashion', icon: Sparkles },
-    { id: 'Sports', label: t('sports') || 'Sports', icon: Heart },
-    { id: 'Entertainment', label: t('entertainment') || 'Entertainment', icon: Sparkles },
-    { id: 'Pets', label: t('pets') || 'Pets', icon: Heart },
-    { id: 'Food', label: t('food') || 'Food', icon: Sparkles },
-    { id: 'Art', label: t('art') || 'Art', icon: Sparkles },
-    { id: 'Music', label: t('music') || 'Music', icon: Sparkles },
-  ];
+  // Split communities
+  const myCommunities = useMemo(() => communities.filter(c => c.is_member), [communities]);
+  const otherCommunities = useMemo(() => communities.filter(c => !c.is_member), [communities]);
 
-  // Filter communities
-  const filteredCommunities = communities.filter(community => {
-    const matchesSearch = community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (community.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    const matchesCategory = !selectedCategory || selectedCategory === 'all' || community.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Group others by category
+  const categorizedOthers = useMemo(() => {
+    const map: Record<string, Community[]> = {};
+    otherCommunities.forEach(c => {
+      const cat = c.category || 'Other';
+      if (!map[cat]) map[cat] = [];
+      map[cat].push(c);
+    });
+    // Sort categories by count desc
+    return Object.entries(map).sort((a, b) => b[1].length - a[1].length);
+  }, [otherCommunities]);
+
+  // Search filter
+  const matchesSearch = (c: Community) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return c.name.toLowerCase().includes(q) || (c.description?.toLowerCase().includes(q) ?? false);
+  };
+
+  const filteredMy = useMemo(() => myCommunities.filter(matchesSearch), [myCommunities, searchQuery]);
+  const filteredCategorized = useMemo(() =>
+    categorizedOthers
+      .map(([cat, list]) => [cat, list.filter(matchesSearch)] as [string, Community[]])
+      .filter(([, list]) => list.length > 0),
+    [categorizedOthers, searchQuery]
+  );
+
+  const toggleCategory = (cat: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      next.has(cat) ? next.delete(cat) : next.add(cat);
+      return next;
+    });
+  };
 
   const handleJoinOrEnter = async (community: Community) => {
     if (community.is_member) {
@@ -62,19 +75,13 @@ const ExplorePage: React.FC = () => {
       setJoiningId(community.id);
       const { error } = await joinCommunity(community.id);
       setJoiningId(null);
-
       if (error) {
-        toast({
-          title: t('error'),
-          description: error.message,
-          variant: 'destructive',
-        });
+        toast({ title: t('error'), description: error.message, variant: 'destructive' });
       } else {
         toast({
           title: '🎉 ' + (t('joinedCommunity') || 'Joined!'),
           description: `${t('welcomeTo') || 'Welcome to'} ${community.name}!`,
         });
-        // Enter the community after joining
         await refreshCommunities();
         setSelectedCommunity({ ...community, is_member: true });
       }
@@ -83,15 +90,9 @@ const ExplorePage: React.FC = () => {
 
   const handleLeaveCommunity = async () => {
     if (!selectedCommunity) return;
-
     const { error } = await leaveCommunity(selectedCommunity.id);
-
     if (error) {
-      toast({
-        title: t('error'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: t('error'), description: error.message, variant: 'destructive' });
     } else {
       toast({
         title: t('leftCommunity') || 'Left community',
@@ -103,13 +104,8 @@ const ExplorePage: React.FC = () => {
 
   const handleCreateCommunity = async (data: { name: string; description: string; category: string; image_url?: string }) => {
     const { error } = await createCommunity(data);
-
     if (error) {
-      toast({
-        title: t('error'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: t('error'), description: error.message, variant: 'destructive' });
     } else {
       toast({
         title: '🎉 ' + (t('communityCreated') || 'Community created!'),
@@ -118,32 +114,18 @@ const ExplorePage: React.FC = () => {
     }
   };
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
-
-  // Show community detail if selected
   if (selectedCommunity) {
     return (
       <CommunityDetailPage
         community={selectedCommunity}
-        onBack={() => {
-          setSelectedCommunity(null);
-          refreshCommunities();
-        }}
+        onBack={() => { setSelectedCommunity(null); refreshCommunities(); }}
         onLeave={handleLeaveCommunity}
       />
     );
   }
+
+  const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+  const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -156,22 +138,16 @@ const ExplorePage: React.FC = () => {
             </div>
             <h1 className="text-2xl font-bold">{t('exploreCommunities')}</h1>
           </div>
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            size="sm"
-            className="btn-primary"
-          >
+          <Button onClick={() => setShowCreateModal(true)} size="sm" className="btn-primary">
             <Plus className="w-4 h-4 mr-1" />
             {t('create')}
           </Button>
         </div>
-        <p className="text-muted-foreground text-sm ml-13">
-          {t('exploreDescription')}
-        </p>
+        <p className="text-muted-foreground text-sm ml-13">{t('exploreDescription')}</p>
       </div>
 
       {/* Search */}
-      <div className="px-6 mb-4">
+      <div className="px-6 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
@@ -183,143 +159,165 @@ const ExplorePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="px-6 mb-6">
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((category) => (
-            <Badge
-              key={category.id}
-              variant={selectedCategory === category.id || (!selectedCategory && category.id === 'all') ? 'default' : 'outline'}
-              className={`cursor-pointer whitespace-nowrap px-4 py-2 ${
-                selectedCategory === category.id || (!selectedCategory && category.id === 'all')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary hover:bg-secondary/80'
-              }`}
-              onClick={() => setSelectedCategory(category.id === 'all' ? null : category.id)}
-            >
-              <category.icon className="w-3 h-3 mr-1" />
-              {category.label}
-            </Badge>
-          ))}
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
-      </div>
-
-      {/* Featured Section */}
-      <div className="px-6 mb-6">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-4 border-primary/30"
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+      ) : (
+        <>
+          {/* ── My Communities Feed ── */}
+          <div className="px-6 mb-8">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <MessageCircle className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold mb-1">{t('shareTipsTitle')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t('shareTipsDescription')}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+              {t('myCommunities') || 'My Communities'}
+            </h2>
 
-      {/* Communities Grid */}
-      <div className="px-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-primary" />
-          {t('popularCommunities')}
-        </h2>
-
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : filteredCommunities.length === 0 ? (
-          <motion.div 
-            className="glass-card p-8 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="font-semibold mb-2">{t('noCommunitiesFound')}</h3>
-            <p className="text-sm text-muted-foreground">
-              {t('tryDifferentSearch')}
-            </p>
-          </motion.div>
-        ) : (
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid gap-4"
-          >
-            {filteredCommunities.map((community) => (
-              <motion.div key={community.id} variants={item}>
-                <div className="glass-card overflow-hidden group">
-                  <div className="relative h-40">
-                    <img
-                      src={community.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'}
-                      alt={community.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                    <div className="absolute top-3 left-3">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary backdrop-blur-sm border border-primary/30">
-                        {community.category}
-                      </span>
-                    </div>
-                    {community.is_member && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-success/20 text-success backdrop-blur-sm border border-success/30 flex items-center gap-1">
-                          <Check className="w-3 h-3" />
-                          {t('member') || 'Member'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-4 -mt-8 relative">
-                    <h3 className="font-bold text-lg text-foreground mb-1">{community.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{community.description}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>{community.members_count.toLocaleString()} {t('members')}</span>
-                      </div>
-                      
-                      <Button
-                        onClick={() => handleJoinOrEnter(community)}
-                        size="sm"
-                        disabled={joiningId === community.id}
-                        className={community.is_member 
-                          ? "bg-secondary text-foreground hover:bg-secondary/80 font-semibold px-4"
-                          : "btn-primary text-primary-foreground font-semibold px-4"
-                        }
-                      >
-                        {joiningId === community.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : community.is_member ? (
-                          <>
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            {t('enter') || 'Enter'}
-                          </>
-                        ) : (
-                          t('join')
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+            {filteredMy.length === 0 ? (
+              <motion.div
+                className="glass-card p-6 text-center"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Users className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                <h3 className="font-semibold mb-1 text-sm">{t('noCommunitiesYet') || 'No communities yet'}</h3>
+                <p className="text-xs text-muted-foreground">{t('joinCommunityPrompt') || 'Explore categories below and join one!'}</p>
               </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </div>
+            ) : (
+              <motion.div variants={container} initial="hidden" animate="show" className="grid gap-3">
+                {filteredMy.map((community) => (
+                  <motion.div key={community.id} variants={item}>
+                    <div
+                      onClick={() => setSelectedCommunity(community)}
+                      className="glass-card p-4 flex items-center gap-4 cursor-pointer hover:border-primary/40 transition-colors active:scale-[0.98]"
+                    >
+                      <img
+                        src={community.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=200'}
+                        alt={community.name}
+                        className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-foreground truncate">{community.name}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{community.description}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {community.members_count}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+                            {community.category}
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </div>
 
-      {/* Create Community Modal */}
+          {/* ── Explore by Category ── */}
+          <div className="px-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Compass className="w-5 h-5 text-primary" />
+              {t('exploreByCategory') || 'Explore by Category'}
+            </h2>
+
+            {filteredCategorized.length === 0 ? (
+              <motion.div
+                className="glass-card p-6 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <Search className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">{t('noCommunitiesFound')}</p>
+              </motion.div>
+            ) : (
+              <div className="space-y-3">
+                {filteredCategorized.map(([category, list]) => {
+                  const isExpanded = expandedCategories.has(category);
+                  const Icon = CATEGORY_ICONS[category] || Sparkles;
+                  return (
+                    <div key={category} className="glass-card overflow-hidden">
+                      {/* Category Header */}
+                      <button
+                        onClick={() => toggleCategory(category)}
+                        className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Icon className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-foreground">{category}</h3>
+                            <p className="text-xs text-muted-foreground">
+                              {list.length} {list.length === 1 ? (t('community') || 'community') : (t('communitiesCount') || 'communities')}
+                            </p>
+                          </div>
+                        </div>
+                        <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                        </motion.div>
+                      </button>
+
+                      {/* Expanded Community List */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 space-y-3">
+                              {list.map((community) => (
+                                <div key={community.id} className="rounded-xl border border-border bg-background/50 overflow-hidden">
+                                  <div className="relative h-32">
+                                    <img
+                                      src={community.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'}
+                                      alt={community.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                                  </div>
+                                  <div className="p-3 -mt-6 relative">
+                                    <h4 className="font-bold text-foreground mb-0.5">{community.name}</h4>
+                                    <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{community.description}</p>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                        <Users className="w-3 h-3" />
+                                        {community.members_count.toLocaleString()} {t('members')}
+                                      </span>
+                                      <Button
+                                        onClick={() => handleJoinOrEnter(community)}
+                                        size="sm"
+                                        disabled={joiningId === community.id}
+                                        className="btn-primary text-primary-foreground font-semibold px-4 h-8 text-xs"
+                                      >
+                                        {joiningId === community.id ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          t('join')
+                                        )}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
       <CreateCommunityModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
