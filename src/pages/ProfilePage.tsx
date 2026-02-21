@@ -314,17 +314,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <Globe className="w-4 h-4 text-muted-foreground" />
               <span>{t('language')}</span>
             </div>
-            <Select value={language} onValueChange={(v) => setLanguage(v as any)}>
-              <SelectTrigger className="w-32 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">🇨🇦 English</SelectItem>
-                <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                <SelectItem value="pt">🇧🇷 Português</SelectItem>
-                <SelectItem value="es">🇪🇸 Español</SelectItem>
-                <SelectItem value="it">🇮🇹 Italiano</SelectItem>
-                <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
-              </SelectContent>
-            </Select>
+            <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-md">
+              {language === 'pt' ? '🇧🇷 Português' : language === 'en' ? '🇨🇦 English' : language === 'fr' ? '🇫🇷 Français' : language === 'es' ? '🇪🇸 Español' : language === 'it' ? '🇮🇹 Italiano' : '🇩🇪 Deutsch'}
+            </span>
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
@@ -332,25 +324,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <DollarSign className="w-4 h-4 text-muted-foreground" />
               <span>{t('currency')}</span>
             </div>
-            <Select value={currency} onValueChange={(v) => setCurrency(v as any)}>
-              <SelectTrigger className="w-32 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent className="max-h-60">
-                <SelectItem value="CAD">CA$ CAD</SelectItem>
-                <SelectItem value="USD">US$ USD</SelectItem>
-                <SelectItem value="EUR">€ EUR</SelectItem>
-                <SelectItem value="GBP">£ GBP</SelectItem>
-                <SelectItem value="BRL">R$ BRL</SelectItem>
-                <SelectItem value="MXN">MX$ MXN</SelectItem>
-                <SelectItem value="CHF">CHF</SelectItem>
-                <SelectItem value="AUD">A$ AUD</SelectItem>
-                <SelectItem value="JPY">¥ JPY</SelectItem>
-                <SelectItem value="CNY">¥ CNY</SelectItem>
-                <SelectItem value="INR">₹ INR</SelectItem>
-                <SelectItem value="KRW">₩ KRW</SelectItem>
-                <SelectItem value="SGD">S$ SGD</SelectItem>
-                <SelectItem value="NZD">NZ$ NZD</SelectItem>
-              </SelectContent>
-            </Select>
+            <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-md">
+              {currency}
+            </span>
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
