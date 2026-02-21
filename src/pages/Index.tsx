@@ -16,14 +16,14 @@ import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
 import PremiumModal from '@/components/PremiumModal';
-// Timeline removed
+import SideDrawer from '@/components/SideDrawer';
+import UserSearchModal from '@/components/UserSearchModal';
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import GoalCelebration from '@/components/GoalCelebration';
-import { Loader2, User, EyeOff, Crown, HelpCircle } from 'lucide-react';
-import VIPCard from '@/components/VIPCard';
+import { Loader2, Menu } from 'lucide-react';
 import SupportFormModal from '@/components/SupportFormModal';
 
 const AppContent: React.FC = () => {
@@ -40,6 +40,8 @@ const AppContent: React.FC = () => {
   const [showHiddenGroups, setShowHiddenGroups] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showSideDrawer, setShowSideDrawer] = useState(false);
+  const [showUserSearch, setShowUserSearch] = useState(false);
   const [milestoneData, setMilestoneData] = useState<{
     show: boolean;
     milestone: number;
@@ -49,13 +51,9 @@ const AppContent: React.FC = () => {
   const [goalCelebration, setGoalCelebration] = useState<{ show: boolean; groupName: string }>({ show: false, groupName: '' });
   const [showSupportForm, setShowSupportForm] = useState(false);
 
-  // Request notification permission when user logs in
   useEffect(() => {
     if (user && isSupported && permission === 'default') {
-      // Delay the permission request slightly for better UX
-      const timer = setTimeout(() => {
-        requestPermission();
-      }, 3000);
+      const timer = setTimeout(() => { requestPermission(); }, 3000);
       return () => clearTimeout(timer);
     }
   }, [user, isSupported, permission, requestPermission]);
@@ -92,23 +90,14 @@ const AppContent: React.FC = () => {
   };
 
   const handleScanSuccess = async (amount: number) => {
-    const group = selectedGroupId
-      ? groups.find(g => g.id === selectedGroupId)
-      : groups[0];
-
+    const group = selectedGroupId ? groups.find(g => g.id === selectedGroupId) : groups[0];
     if (group) {
       const oldProgress = (group.current_amount / group.goal_amount) * 100;
       const { error } = await addContribution(group.id, amount);
-
-      if (error) {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-        return;
-      }
-
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
       const newProgress = ((group.current_amount + amount) / group.goal_amount) * 100;
       toast({ title: '🚀 Contribution recorded!', description: `Your contribution of ${formatCurrency(amount)} has been confirmed.` });
       checkMilestone(oldProgress, newProgress, group.name);
-
       addNotification({
         type: 'contribution',
         title: `${t('newContribution')} 💰`,
@@ -119,11 +108,9 @@ const AppContent: React.FC = () => {
         amount,
       });
     }
-
     setTimeout(() => { setShowScanner(false); }, 1000);
   };
 
-  // Show loading while checking auth
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -132,10 +119,7 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // Show login if not authenticated
-  if (!user) {
-    return <LoginPage />;
-  }
+  if (!user) return <LoginPage />;
 
   if (showScanner) {
     return (
@@ -161,49 +145,21 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {/* Floating Top Right Icons */}
+      {/* Top bar: notification + hamburger */}
       <motion.div
         className="fixed top-14 right-4 z-50 flex items-center gap-2"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 0.3 }}
       >
-        {/* Help icon */}
-        <motion.button
-          onClick={() => setShowSupportForm(true)}
-          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-card transition-all"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          title={t('needHelp') || 'Need help?'}
-        >
-          <HelpCircle className="w-4.5 h-4.5" />
-        </motion.button>
-        {/* Crown / VIP */}
-        <motion.button
-          onClick={() => setShowPremiumModal(true)}
-          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-amber-500 hover:bg-card transition-all"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Crown className="w-4.5 h-4.5" />
-        </motion.button>
-        <motion.button
-          onClick={() => setShowHiddenGroups(true)}
-          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card transition-all"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          title={t('hiddenGroups') || 'Hidden Groups'}
-        >
-          <EyeOff className="w-4.5 h-4.5" />
-        </motion.button>
         <NotificationBell onClick={() => setShowNotifications(true)} />
         <motion.button
-          onClick={() => setActiveTab('profile')}
+          onClick={() => setShowSideDrawer(true)}
           className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card transition-all"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          <User className="w-4.5 h-4.5" />
+          <Menu className="w-4.5 h-4.5" />
         </motion.button>
       </motion.div>
 
@@ -231,16 +187,24 @@ const AppContent: React.FC = () => {
       <WeeklySummaryModal isOpen={showWeeklySummary && !!summary} onClose={markSummaryShown} totalSaved={summary?.totalSavedThisWeek || 0} contributionCount={summary?.contributionCount || 0} topGroup={summary?.topGroup || null} groupProgress={summary?.groupProgress || []} formatCurrency={formatCurrency} />
       <InstallPWA />
       <SupportFormModal isOpen={showSupportForm} onClose={() => setShowSupportForm(false)} />
+      <SideDrawer
+        isOpen={showSideDrawer}
+        onClose={() => setShowSideDrawer(false)}
+        onProfile={() => setActiveTab('profile')}
+        onPremium={() => setShowPremiumModal(true)}
+        onHiddenGroups={() => setShowHiddenGroups(true)}
+        onHelp={() => setShowSupportForm(true)}
+        onSearch={() => setShowUserSearch(true)}
+      />
+      <UserSearchModal isOpen={showUserSearch} onClose={() => setShowUserSearch(false)} />
     </>
   );
 };
 
-const Index: React.FC = () => {
-  return (
-    <NotificationProvider>
-      <AppContent />
-    </NotificationProvider>
-  );
-};
+const Index: React.FC = () => (
+  <NotificationProvider>
+    <AppContent />
+  </NotificationProvider>
+);
 
 export default Index;
