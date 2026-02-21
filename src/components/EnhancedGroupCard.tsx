@@ -27,11 +27,11 @@ const EnhancedGroupCard: React.FC<EnhancedGroupCardProps> = ({
   const progress = Math.min((current / goal) * 100, 100);
 
   const getQuestStatus = () => {
-    if (progress >= 100) return { label: 'COMPLETE', emoji: '🏆', accent: 'border-accent/40 bg-accent/5' };
+    if (progress >= 100) return { label: t('questComplete'), emoji: '🏆', accent: 'border-accent/40 bg-accent/5' };
     if (progress >= 75) return { label: '75%', emoji: '🔥', accent: 'border-primary/30 bg-primary/5' };
     if (progress >= 50) return { label: '50%', emoji: '⚡', accent: 'border-blue-500/30 bg-blue-500/5' };
     if (progress >= 25) return { label: '25%', emoji: '📈', accent: 'border-green-500/30 bg-green-500/5' };
-    return { label: 'NEW', emoji: '🎯', accent: 'border-border bg-card/60' };
+    return { label: t('questNew'), emoji: '🎯', accent: 'border-border bg-card/60' };
   };
 
   const quest = getQuestStatus();
