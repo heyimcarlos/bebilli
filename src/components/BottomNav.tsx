@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Scan, Compass, Globe } from 'lucide-react';
+import { Home, Scan, Compass } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import BilliLogo from '@/components/BilliLogo';
 
@@ -16,7 +16,6 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
     { id: 'home', icon: Home, label: t('home') },
     { id: 'explore', icon: Compass, label: t('explore') },
     { id: 'scan', icon: Scan, label: 'Scan', special: true },
-    { id: 'timeline', icon: Globe, label: t('timelineFeed') || 'Timeline' },
   ];
 
   return (

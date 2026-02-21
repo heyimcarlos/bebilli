@@ -15,10 +15,40 @@ interface PremiumModalProps {
 type PlanType = 'monthly' | 'annual';
 
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = 'group_limit' }) => {
-  const { t, formatPremiumPrice } = useApp();
-  const PREMIUM_PRICE_CAD = 5.90;
-  const ANNUAL_PRICE_CAD = PREMIUM_PRICE_CAD * 12 * 0.9; // 10% discount
-  const ANNUAL_MONTHLY_CAD = ANNUAL_PRICE_CAD / 12;
+  const { t, currency, formatCurrency: fmtCurr } = useApp();
+  
+  // Fixed regional pricing (not converted from CAD)
+  const regionalPricing: Record<string, { monthly: number; symbol: string }> = {
+    CAD: { monthly: 9.90, symbol: 'CA$' },
+    USD: { monthly: 9.99, symbol: 'US$' },
+    EUR: { monthly: 7.99, symbol: '€' },
+    GBP: { monthly: 7.99, symbol: '£' },
+    BRL: { monthly: 9.90, symbol: 'R$' },
+    MXN: { monthly: 99.00, symbol: 'MX$' },
+    AUD: { monthly: 12.99, symbol: 'A$' },
+    CHF: { monthly: 8.99, symbol: 'CHF' },
+    JPY: { monthly: 980, symbol: '¥' },
+    CNY: { monthly: 39.90, symbol: '¥' },
+    INR: { monthly: 299, symbol: '₹' },
+    KRW: { monthly: 9900, symbol: '₩' },
+    SGD: { monthly: 9.90, symbol: 'S$' },
+    HKD: { monthly: 49.90, symbol: 'HK$' },
+    NZD: { monthly: 12.99, symbol: 'NZ$' },
+    SEK: { monthly: 79, symbol: 'kr' },
+    NOK: { monthly: 79, symbol: 'kr' },
+    DKK: { monthly: 59, symbol: 'kr' },
+    PLN: { monthly: 29.90, symbol: 'zł' },
+    ZAR: { monthly: 99.90, symbol: 'R' },
+    AED: { monthly: 29.90, symbol: 'د.إ' },
+    THB: { monthly: 199, symbol: '฿' },
+    MYR: { monthly: 29.90, symbol: 'RM' },
+    PHP: { monthly: 299, symbol: '₱' },
+  };
+  
+  const pricing = regionalPricing[currency] || regionalPricing.USD;
+  const MONTHLY_PRICE = pricing.monthly;
+  const ANNUAL_PRICE = MONTHLY_PRICE * 12 * 0.9;
+  const ANNUAL_MONTHLY = ANNUAL_PRICE / 12;
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('annual');
   const [couponCode, setCouponCode] = useState('');
   const [couponError, setCouponError] = useState('');
@@ -46,8 +76,10 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
     setCouponError('');
   };
 
-  const basePrice = selectedPlan === 'monthly' ? PREMIUM_PRICE_CAD : ANNUAL_MONTHLY_CAD;
-  const totalPrice = selectedPlan === 'annual' ? ANNUAL_PRICE_CAD : PREMIUM_PRICE_CAD;
+  const formatPrice = (value: number) => `${pricing.symbol} ${value.toLocaleString(undefined, { minimumFractionDigits: currency === 'JPY' || currency === 'KRW' ? 0 : 2, maximumFractionDigits: currency === 'JPY' || currency === 'KRW' ? 0 : 2 })}`;
+  
+  const basePrice = selectedPlan === 'monthly' ? MONTHLY_PRICE : ANNUAL_MONTHLY;
+  const totalPrice = selectedPlan === 'annual' ? ANNUAL_PRICE : MONTHLY_PRICE;
   const finalMonthly = calculateDiscount(basePrice);
   const finalTotal = calculateDiscount(totalPrice);
   const hasDiscount = appliedCoupon?.valid && finalMonthly < basePrice;
@@ -125,7 +157,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
                 }`}
               >
                 <p className="text-sm font-semibold">{t('monthly') || 'Monthly'}</p>
-                <p className="text-lg font-bold text-primary">{formatPremiumPrice(PREMIUM_PRICE_CAD)}</p>
+                <p className="text-lg font-bold text-primary">{formatPrice(MONTHLY_PRICE)}</p>
                 <p className="text-xs text-muted-foreground">/{t('month') || 'month'}</p>
               </button>
               <button
@@ -140,7 +172,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
                   -10%
                 </span>
                 <p className="text-sm font-semibold">{t('annual') || 'Annual'}</p>
-                <p className="text-lg font-bold text-primary">{formatPremiumPrice(ANNUAL_MONTHLY_CAD)}</p>
+                <p className="text-lg font-bold text-primary">{formatPrice(ANNUAL_MONTHLY)}</p>
                 <p className="text-xs text-muted-foreground">/{t('month') || 'month'}</p>
               </button>
             </div>
@@ -245,17 +277,17 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
               <div className="flex items-baseline justify-center gap-2">
                 {(hasDiscount || selectedPlan === 'annual') && (
                   <span className="text-xl text-muted-foreground line-through">
-                    {formatPremiumPrice(PREMIUM_PRICE_CAD)}
+                    {formatPrice(MONTHLY_PRICE)}
                   </span>
                 )}
                 <span className={`text-4xl font-bold ${hasDiscount ? 'text-green-500' : 'text-primary'}`}>
-                  {formatPremiumPrice(finalMonthly)}
+                  {formatPrice(finalMonthly)}
                 </span>
                 <span className="text-muted-foreground">/{t('month') || 'month'}</span>
               </div>
               {selectedPlan === 'annual' && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  {formatPremiumPrice(finalTotal)} /{t('year') || 'year'}
+                  {formatPrice(finalTotal)} /{t('year') || 'year'}
                 </p>
               )}
               {hasDiscount && (
@@ -264,7 +296,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
                   animate={{ opacity: 1 }}
                   className="text-sm text-green-500 font-medium mt-1"
                 >
-                  🎉 {t('youSave') || 'You save'} {formatPremiumPrice(basePrice - finalMonthly)}/{t('month') || 'month'}!
+                  🎉 {t('youSave') || 'You save'} {formatPrice(basePrice - finalMonthly)}/{t('month') || 'month'}!
                 </motion.p>
               )}
               <p className="text-xs text-muted-foreground mt-1">

@@ -16,7 +16,7 @@ import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
 import PremiumModal from '@/components/PremiumModal';
-import TimelinePage from '@/pages/TimelinePage';
+// Timeline removed
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
@@ -217,7 +217,6 @@ const AppContent: React.FC = () => {
         >
           {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
           {activeTab === 'explore' && <ExplorePage />}
-          {activeTab === 'timeline' && <TimelinePage />}
           {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
         </motion.div>
       </AnimatePresence>
