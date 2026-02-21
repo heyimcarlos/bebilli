@@ -155,38 +155,42 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="relative px-6 pt-12 pb-6">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
+      <div className="relative px-6 pt-12 pb-4">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/8 rounded-full blur-[100px] pointer-events-none" />
         <div className="relative z-10">
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
+          <motion.div initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-5">
             <div>
-              <p className="text-muted-foreground text-sm">{t('hello')}, Billionaire</p>
-              <h1 className="text-2xl font-bold">{profile?.name || 'Billionaire'}</h1>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{t('hello')}</p>
+              <h1 className="text-xl font-black text-foreground">{profile?.name || 'Billionaire'}</h1>
             </div>
-            <motion.div animate={{ rotate: [0, -5, 5, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
-              <BilliLogo size={48} />
+            <motion.div animate={{ rotate: [0, -3, 3, 0] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 5 }}>
+              <BilliLogo size={42} />
             </motion.div>
           </motion.div>
 
-          {/* Balance Card */}
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="glass-card p-6 glow-primary mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-muted-foreground text-sm">{t('totalBalance')}</span>
-              <button onClick={() => setShowBalance(!showBalance)} className="text-muted-foreground hover:text-foreground transition-colors">
-                {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          {/* Balance Card - cleaner */}
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="rounded-2xl p-5 bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-muted-foreground uppercase tracking-widest font-medium">{t('totalBalance')}</span>
+              <button onClick={() => setShowBalance(!showBalance)} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+                {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <div className="flex items-baseline gap-2">
-              <AnimatePresence mode="wait">
-                <motion.span key={showBalance ? 'visible' : 'hidden'} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-4xl font-black gradient-text">
-                  {showBalance ? formatCurrency(totalBalance) : '••••••'}
-                </motion.span>
-              </AnimatePresence>
+            <AnimatePresence mode="wait">
+              <motion.span key={showBalance ? 'visible' : 'hidden'} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="text-3xl font-black gradient-text block">
+                {showBalance ? formatCurrency(totalBalance) : '••••••'}
+              </motion.span>
+            </AnimatePresence>
+            <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+              <TrendingUp className="w-3.5 h-3.5 text-success" />
+              <span>{groups.length} {t('activeGroups')}</span>
+              {totalGoal > 0 && (
+                <>
+                  <span className="opacity-30">•</span>
+                  <span>{((totalBalance / totalGoal) * 100).toFixed(0)}% {t('of')} {t('adminGoal') || 'goal'}</span>
+                </>
+              )}
             </div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-2 mt-3 text-success text-sm">
-              <TrendingUp className="w-4 h-4" />
-              <span>+{groups.length} {t('activeGroups')}</span>
-            </motion.div>
           </motion.div>
         </div>
       </div>
