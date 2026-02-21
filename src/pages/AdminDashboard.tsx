@@ -4,8 +4,9 @@ import {
   ArrowLeft, Users, Target, Key, Copy, RefreshCw, Loader2, Search, 
   TrendingUp, Crown, Shield, UserCog, Ticket, Mail, ToggleLeft, ToggleRight,
   ChevronDown, ChevronUp, DollarSign, Calendar, Filter, BarChart3, Eye,
-  Activity, Globe, Coins, CreditCard, Receipt, Download
+  Activity, Globe, Coins, CreditCard, Receipt, Download, PieChart
 } from 'lucide-react';
+import AdminAnalyticsTab from '@/components/AdminAnalyticsTab';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,6 +63,8 @@ interface GroupFull {
   total_deposits: number;
   total_withdrawals: number;
   members: GroupMemberInfo[];
+  category: string;
+  group_type: string;
 }
 
 interface GroupMemberInfo {
@@ -285,7 +288,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const fetchGroups = async () => {
     setGroupsLoading(true);
     const [groupsRes, membershipsRes, contributionsRes] = await Promise.all([
-      supabase.from('groups').select('id, name, description, image_url, goal_amount, invite_code, created_at').order('created_at', { ascending: false }),
+      supabase.from('groups').select('id, name, description, image_url, goal_amount, invite_code, created_at, category, group_type').order('created_at', { ascending: false }),
       supabase.from('group_memberships').select('group_id, user_id, role'),
       supabase.from('contributions').select('group_id, user_id, amount, type'),
     ]);
@@ -314,7 +317,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         };
       });
 
-      return { ...g, member_count: gMembers.length, total_deposits: totalDeposits, total_withdrawals: totalWithdrawals, members };
+      return { ...g, member_count: gMembers.length, total_deposits: totalDeposits, total_withdrawals: totalWithdrawals, members, category: (g as any).category || 'other', group_type: (g as any).group_type || 'shared' };
     });
 
     setGroups(result);
@@ -460,9 +463,12 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   };
 
   const exportGroups = () => {
+    const catLabels: Record<string, string> = { travel: 'Viagem', real_estate: 'Imóveis', investment: 'Investimento', education: 'Educação', credit_card: 'Cartão', other: 'Outro' };
     const rows = filteredGroups.map(g => ({
       [t('name')]: g.name,
       [t('description')]: g.description || '',
+      'Segmento': catLabels[g.category] || g.category,
+      'Tipo': g.group_type === 'individual' ? 'Individual' : 'Compartilhado',
       [t('adminCode')]: g.invite_code,
       [t('adminMembers')]: g.member_count,
       [t('adminDepositsLabel')]: g.total_deposits,
@@ -718,9 +724,10 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-5 h-9">
+          <TabsList className="w-full grid grid-cols-6 h-9">
             <TabsTrigger value="users" className="text-[10px] px-1"><UserCog className="w-3 h-3 mr-0.5" />{t('adminUsers')}</TabsTrigger>
             <TabsTrigger value="groups" className="text-[10px] px-1"><Target className="w-3 h-3 mr-0.5" />{t('adminGroups')}</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-[10px] px-1"><PieChart className="w-3 h-3 mr-0.5" />Analytics</TabsTrigger>
             <TabsTrigger value="financial" className="text-[10px] px-1"><BarChart3 className="w-3 h-3 mr-0.5" />{t('adminFinancial')}</TabsTrigger>
             <TabsTrigger value="subscriptions" className="text-[10px] px-1"><CreditCard className="w-3 h-3 mr-0.5" />{t('adminSubscriptions')}</TabsTrigger>
             <TabsTrigger value="coupons" className="text-[10px] px-1"><Ticket className="w-3 h-3 mr-0.5" />{t('adminCoupons')}</TabsTrigger>
@@ -1019,6 +1026,15 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {filteredGroups.length === 0 && <p className="text-center py-8 text-muted-foreground">{t('adminNoGroupsFound')}</p>}
               </div>
             )}
+          </TabsContent>
+
+          {/* ==================== ANALYTICS TAB ==================== */}
+          <TabsContent value="analytics" className="space-y-4 mt-4">
+            <AdminAnalyticsTab 
+              groups={groups} 
+              contributions={allContributions} 
+              loading={groupsLoading} 
+            />
           </TabsContent>
 
           {/* ==================== FINANCIAL TAB ==================== */}

@@ -341,6 +341,7 @@ export type Database = {
       }
       groups: {
         Row: {
+          category: string
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -353,6 +354,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          category?: string
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -365,6 +367,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          category?: string
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -802,6 +805,7 @@ export type Database = {
     Views: {
       groups_member_view: {
         Row: {
+          category: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -813,6 +817,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -824,6 +829,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -838,6 +844,7 @@ export type Database = {
       }
       groups_public: {
         Row: {
+          category: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -849,6 +856,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -860,6 +868,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -919,6 +928,17 @@ export type Database = {
           }
         | {
             Args: {
+              group_description?: string
+              group_goal_amount: number
+              group_image_url?: string
+              group_name: string
+              group_type?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              group_category?: string
               group_description?: string
               group_goal_amount: number
               group_image_url?: string
