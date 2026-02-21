@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Star } from 'lucide-react';
 import { Compass, Search, Users, MessageCircle, Loader2, Check, Plus, Car, Home, GraduationCap, Laptop, Heart, TrendingUp, Shield, Sunset, Sparkles, ChevronDown, ChevronRight } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -32,6 +33,12 @@ const ExplorePage: React.FC = () => {
   // Split communities
   const myCommunities = useMemo(() => communities.filter(c => c.is_member), [communities]);
   const otherCommunities = useMemo(() => communities.filter(c => !c.is_member), [communities]);
+
+  // Featured: top 3 by members (from non-joined)
+  const featuredCommunities = useMemo(() =>
+    [...otherCommunities].sort((a, b) => b.members_count - a.members_count).slice(0, 3),
+    [otherCommunities]
+  );
 
   // Group others by category
   const categorizedOthers = useMemo(() => {
@@ -158,6 +165,58 @@ const ExplorePage: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* ── Featured Communities ── */}
+      {!loading && !searchQuery && featuredCommunities.length > 0 && (
+        <div className="px-6 mb-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+            {t('featuredCommunities') || 'Featured Communities'}
+          </h2>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {featuredCommunities.map((community) => (
+              <motion.div
+                key={community.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="min-w-[200px] max-w-[200px] flex-shrink-0"
+              >
+                <div className="glass-card overflow-hidden group cursor-pointer" onClick={() => handleJoinOrEnter(community)}>
+                  <div className="relative h-28">
+                    <img
+                      src={community.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400'}
+                      alt={community.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+                    <div className="absolute top-2 left-2">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow" />
+                    </div>
+                  </div>
+                  <div className="p-3 -mt-4 relative">
+                    <h4 className="font-bold text-sm text-foreground truncate">{community.name}</h4>
+                    <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{community.description}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {community.members_count}
+                      </span>
+                      <Button
+                        size="sm"
+                        disabled={joiningId === community.id}
+                        className="btn-primary h-6 px-3 text-[10px]"
+                        onClick={(e) => { e.stopPropagation(); handleJoinOrEnter(community); }}
+                      >
+                        {joiningId === community.id ? <Loader2 className="w-3 h-3 animate-spin" /> : (t('join'))}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12">
