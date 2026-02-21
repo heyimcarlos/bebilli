@@ -14,6 +14,7 @@ import BilliLogo from '@/components/BilliLogo';
 import JoinGroupModal from '@/components/JoinGroupModal';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
@@ -34,6 +35,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const { isPremium, canCreateOrJoinGroup, getRemainingFreeSlots, freeLimit, refresh: refreshPremium } = usePremiumCheck(user?.id);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showBalance, setShowBalance] = useState(true);
+  const [userBalance, setUserBalance] = useState<number | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
@@ -68,7 +70,24 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     }
   }, [user, inviteCode]);
 
-  const totalBalance = groups.reduce((sum, g) => sum + g.current_amount, 0);
+  // Fetch user's personal balance (their deposits - withdrawals)
+  useEffect(() => {
+    const fetchUserBalance = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('contributions')
+        .select('amount, type')
+        .eq('user_id', user.id);
+      if (data) {
+        const deposits = data.filter(c => c.type === 'deposit').reduce((s, c) => s + c.amount, 0);
+        const withdrawals = data.filter(c => c.type === 'withdrawal').reduce((s, c) => s + c.amount, 0);
+        setUserBalance(deposits - withdrawals);
+      }
+    };
+    fetchUserBalance();
+  }, [user, groups]); // re-fetch when groups change (new contribution)
+
+  const totalBalance = userBalance ?? 0;
 
   const totalGoal = groups.reduce((sum, g) => sum + g.goal_amount, 0);
 
