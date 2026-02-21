@@ -553,7 +553,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Invite to Billi
     inviteToBilli: 'Convidar para a Billi',
     inviteToBilliDesc: 'Convide amigos para construir o bilhão juntos!',
-    inviteMessage: '🚀 Build your billion. Junte-se à Billi — onde disciplina financeira vira identidade. Romanticize your savings.',
+    inviteMessage: '🚀 Construa seu bilhão. Junte-se à Billi — onde disciplina financeira vira identidade. Romantize suas economias.',
     // Admin Coupon Types
     premiumCoupons: 'Cupons Premium',
     partnerCoupons: 'Cupons de Parceiros',
@@ -1690,7 +1690,7 @@ const translations: Record<Language, Record<string, string>> = {
     unknown: 'Inconnu',
     inviteToBilli: 'Inviter sur Billi',
     inviteToBilliDesc: 'Invitez des amis à construire leur milliard!',
-    inviteMessage: '🚀 Build your billion. Rejoignez Billi — où la discipline financière devient identité. Romanticize your savings.',
+    inviteMessage: '🚀 Construisez votre milliard. Rejoignez Billi — où la discipline financière devient identité. Romantisez vos économies.',
     premiumCoupons: 'Coupons Premium',
     partnerCoupons: 'Coupons Partenaires',
     premiumCouponDesc: 'Coupons de réduction pour l\'abonnement Premium',
@@ -2188,7 +2188,7 @@ const translations: Record<Language, Record<string, string>> = {
     unknown: 'Desconocido',
     inviteToBilli: 'Invitar a Billi',
     inviteToBilliDesc: '¡Invita amigos a construir su billón!',
-    inviteMessage: '🚀 Build your billion. Únete a Billi — donde la disciplina financiera se convierte en identidad. Romanticize your savings.',
+    inviteMessage: '🚀 Construye tu billón. Únete a Billi — donde la disciplina financiera se convierte en identidad. Romantiza tus ahorros.',
     premiumCoupons: 'Cupones Premium',
     partnerCoupons: 'Cupones de Socios',
     premiumCouponDesc: 'Cupones de descuento para suscripción Premium',
@@ -2686,7 +2686,7 @@ const translations: Record<Language, Record<string, string>> = {
     unknown: 'Sconosciuto',
     inviteToBilli: 'Invita su Billi',
     inviteToBilliDesc: 'Invita amici a costruire il loro miliardo!',
-    inviteMessage: '🚀 Build your billion. Unisciti a Billi — dove la disciplina finanziaria diventa identità. Romanticize your savings.',
+    inviteMessage: '🚀 Costruisci il tuo miliardo. Unisciti a Billi — dove la disciplina finanziaria diventa identità. Romantizza i tuoi risparmi.',
     premiumCoupons: 'Coupon Premium',
     partnerCoupons: 'Coupon Partner',
     premiumCouponDesc: 'Coupon sconto per abbonamento Premium',
@@ -3184,7 +3184,7 @@ const translations: Record<Language, Record<string, string>> = {
     unknown: 'Unbekannt',
     inviteToBilli: 'Zu Billi einladen',
     inviteToBilliDesc: 'Lade Freunde ein, ihre Milliarde zu bauen!',
-    inviteMessage: '🚀 Build your billion. Tritt Billi bei — wo finanzielle Disziplin zur Identität wird. Romanticize your savings.',
+    inviteMessage: '🚀 Baue deine Milliarde. Tritt Billi bei — wo finanzielle Disziplin zur Identität wird. Romantisiere deine Ersparnisse.',
     premiumCoupons: 'Premium-Gutscheine',
     partnerCoupons: 'Partner-Gutscheine',
     premiumCouponDesc: 'Rabattgutscheine für Premium-Abonnement',
@@ -3388,6 +3388,30 @@ const currencyDecimals: Record<Currency, number> = {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// Detect language from browser locale
+const getLocaleLanguage = (): Language => {
+  const browserLang = navigator.language?.split('-')[0]?.toLowerCase();
+  const supported: Language[] = ['pt', 'en', 'fr', 'es', 'it', 'de'];
+  return supported.includes(browserLang as Language) ? (browserLang as Language) : 'en';
+};
+
+// Detect currency from browser locale
+const getLocaleCurrency = (): Currency => {
+  const lang = navigator.language?.toLowerCase() || '';
+  if (lang.startsWith('pt-br') || lang === 'pt') return 'BRL';
+  if (lang.startsWith('en-ca') || lang.startsWith('fr-ca')) return 'CAD';
+  if (lang.startsWith('en-us')) return 'USD';
+  if (lang.startsWith('en-gb')) return 'GBP';
+  if (lang.startsWith('en-au')) return 'AUD';
+  if (lang.startsWith('fr')) return 'EUR';
+  if (lang.startsWith('es-mx')) return 'MXN';
+  if (lang.startsWith('es')) return 'EUR';
+  if (lang.startsWith('it')) return 'EUR';
+  if (lang.startsWith('de')) return 'EUR';
+  if (lang.startsWith('ja')) return 'JPY';
+  return 'CAD';
+};
+
 // Helper to safely get from localStorage
 const getStoredValue = <T,>(key: string, defaultValue: T): T => {
   if (typeof window === 'undefined') return defaultValue;
@@ -3401,10 +3425,10 @@ const getStoredValue = <T,>(key: string, defaultValue: T): T => {
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => 
-    getStoredValue<Language>(STORAGE_KEY_LANGUAGE, 'en')
+    getStoredValue<Language>(STORAGE_KEY_LANGUAGE, getLocaleLanguage())
   );
   const [currency, setCurrencyState] = useState<Currency>(() => 
-    getStoredValue<Currency>(STORAGE_KEY_CURRENCY, 'CAD')
+    getStoredValue<Currency>(STORAGE_KEY_CURRENCY, getLocaleCurrency())
   );
   const [user, setUser] = useState<User | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
