@@ -19,12 +19,14 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({
 }) => {
   const { formatCurrency, t } = useApp();
 
-  // XP system: contributions = XP, level thresholds grow exponentially
-  const getXPForLevel = (lvl: number) => Math.floor(Math.pow(lvl, 1.8) * 5);
-  const currentLevelXP = getXPForLevel(level);
-  const nextLevelXP = getXPForLevel(level + 1);
-  const xpProgress = Math.min(((totalContributions - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100, 100);
-  const xpNeeded = Math.max(nextLevelXP - totalContributions, 0);
+  // Level system: Lv1=15, Lv2=25, Lv3=35... (+10 each level)
+  const getDepositsForLevel = (lvl: number) => lvl <= 0 ? 0 : 15 + (lvl - 1) * 10;
+  const currentLevelThreshold = getDepositsForLevel(level);
+  const nextLevelThreshold = getDepositsForLevel(level + 1);
+  const depositsInLevel = totalContributions - currentLevelThreshold;
+  const depositsNeededForNext = nextLevelThreshold - currentLevelThreshold;
+  const xpProgress = Math.min(Math.max((depositsInLevel / depositsNeededForNext) * 100, 0), 100);
+  const xpNeeded = Math.max(nextLevelThreshold - totalContributions, 0);
 
   const getRankInfo = (lvl: number) => {
     if (lvl >= 10) return { title: t('billionaireLegend'), emoji: '👑', ring: 'from-amber-400 via-yellow-300 to-amber-500' };
