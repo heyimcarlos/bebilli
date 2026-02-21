@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ArrowRight, Loader2, Mail, UserPlus, Shield, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award } from 'lucide-react';
+import { ArrowRight, Loader2, Mail, UserPlus, Shield, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award, Quote } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -311,6 +311,7 @@ const LoginPage: React.FC = () => {
       </Button>
       <p className="text-xs text-center text-muted-foreground">
         {t('agreeToTerms')}{' '}<Link to="/privacy" className="text-primary hover:underline">{t('privacyPolicy')}</Link>
+        {' & '}<Link to="/terms" className="text-primary hover:underline">{t('termsOfUse')}</Link>
       </p>
       <button type="button" onClick={() => setViewMode('login')} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
         {t('hasAccount')} <span className="text-primary font-medium">{t('signInNow')}</span>
@@ -423,8 +424,34 @@ const LoginPage: React.FC = () => {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* Testimonials */}
       <section className="py-16 lg:py-24 bg-secondary/30">
+        <div className="max-w-5xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-12">{t('landingTestimonials')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="p-6 rounded-2xl bg-card border border-border/60 shadow-sm relative">
+                <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5 italic">
+                  "{t(`testimonial${i}Text`)}"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">{t(`testimonial${i}Name`).charAt(0)}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{t(`testimonial${i}Name`)}</p>
+                    <p className="text-xs text-muted-foreground">{t(`testimonial${i}Role`)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 lg:py-24">
         <div className="max-w-3xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-12">{t('landingFAQ')}</h2>
           <Accordion type="single" collapsible className="space-y-3">
@@ -468,7 +495,11 @@ const LoginPage: React.FC = () => {
             <span className="font-semibold text-foreground">Billi</span>
             <span>© {new Date().getFullYear()} {t('landingFooterRights')}</span>
           </div>
-          <Link to="/privacy" className="hover:text-foreground transition-colors">{t('privacyPolicy')}</Link>
+          <div className="flex items-center gap-3">
+            <Link to="/privacy" className="hover:text-foreground transition-colors">{t('privacyPolicy')}</Link>
+            <span>·</span>
+            <Link to="/terms" className="hover:text-foreground transition-colors">{t('termsOfUse')}</Link>
+          </div>
         </div>
       </footer>
     </div>

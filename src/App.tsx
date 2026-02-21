@@ -15,6 +15,7 @@ import AdminGroupsPage from "./pages/AdminGroupsPage";
 import AdminCouponsPage from "./pages/AdminCouponsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfUsePage from "./pages/TermsOfUsePage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/callback" element={<OAuthCallback />} />
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms" element={<TermsOfUsePage />} />
                 <Route path="/admin/partners" element={<AdminPartnersPage onBack={() => window.history.back()} />} />
                 <Route path="/admin/groups" element={<AdminGroupsPage onBack={() => window.history.back()} />} />
                 <Route path="/admin/coupons" element={<AdminCouponsPage onBack={() => window.history.back()} />} />
