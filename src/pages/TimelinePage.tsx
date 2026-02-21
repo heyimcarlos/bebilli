@@ -1,171 +1,160 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Clock, Users, Loader2, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Flame, Trophy, TrendingUp, Star, Zap, Globe, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useContributions } from '@/hooks/useContributions';
-import { formatDistanceToNow } from 'date-fns';
-import DefaultAvatar from '@/components/DefaultAvatar';
+import { supabase } from '@/integrations/supabase/client';
 
-interface TimelinePageProps {
-  onGroupClick?: (groupId: string) => void;
+interface TimelineEvent {
+  id: string;
+  user_id: string;
+  event_type: string;
+  event_data: Record<string, any>;
+  is_anonymous: boolean;
+  created_at: string;
+  username?: string;
 }
 
-const TimelinePage: React.FC<TimelinePageProps> = ({ onGroupClick }) => {
-  const { formatCurrency, t } = useApp();
+const TimelinePage: React.FC = () => {
+  const { t } = useApp();
   const { user } = useAuthContext();
-  const { contributions, loading } = useContributions(user?.id);
+  const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05 }
+  const fetchEvents = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('timeline_events' as any)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (!error && data) {
+      const typedData = data as any[];
+      const nonAnonIds = typedData.filter((e: any) => !e.is_anonymous).map((e: any) => e.user_id);
+      let usernameMap: Record<string, string> = {};
+      if (nonAnonIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', nonAnonIds);
+        (profiles as any[])?.forEach((p: any) => {
+          usernameMap[p.id] = p.username || p.name;
+        });
+      }
+
+      setEvents(typedData.map((e: any) => ({
+        ...e,
+        event_data: (e.event_data as Record<string, any>) || {},
+        username: e.is_anonymous ? undefined : usernameMap[e.user_id],
+      })));
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchEvents();
+    const channel = supabase
+      .channel('timeline-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'timeline_events' }, () => fetchEvents())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const getEventIcon = (type: string) => {
+    switch (type) {
+      case 'streak_milestone': return <Flame className="w-5 h-5 text-orange-500" />;
+      case 'goal_completed': return <Trophy className="w-5 h-5 text-accent" />;
+      case 'level_up': return <Star className="w-5 h-5 text-primary" />;
+      case 'consistency_top': return <TrendingUp className="w-5 h-5 text-success" />;
+      case 'check_in_milestone': return <Zap className="w-5 h-5 text-primary" />;
+      default: return <Star className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
-  const item = {
-    hidden: { opacity: 0, x: -20 },
-    show: { opacity: 1, x: 0 }
+  const getEventMessage = (event: TimelineEvent) => {
+    const actor = event.is_anonymous
+      ? (t('aBillionaire') || 'A Billionaire')
+      : `@${event.username || 'Billionaire'}`;
+    const data = event.event_data;
+
+    switch (event.event_type) {
+      case 'streak_milestone':
+        return `${actor} ${t('reached') || 'reached'} ${data.days || 0} ${t('daysOfDiscipline') || 'days of discipline'}.`;
+      case 'goal_completed':
+        return `${actor} ${t('completedGoal') || 'completed a goal'}: ${data.category || '🎯'}`;
+      case 'level_up':
+        return `${actor} ${t('reachedLevel') || 'reached level'} ${data.level || 0} — ${data.title || 'Builder'}`;
+      case 'consistency_top':
+        return `${actor} ${t('enteredTop') || 'entered the Top'} ${data.percentage || 10}% ${t('inConsistency') || 'in consistency'}.`;
+      case 'check_in_milestone':
+        return `${actor} ${t('completedCheckins') || 'completed'} ${data.count || 0} check-ins.`;
+      default:
+        return `${actor} ${t('achievedSomething') || 'achieved something great!'}`;
+    }
   };
 
-  // Group contributions by date
-  const groupedByDate = contributions.reduce((acc, contribution) => {
-    const date = new Date(contribution.created_at).toLocaleDateString();
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(contribution);
-    return acc;
-  }, {} as Record<string, typeof contributions>);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffMins < 1) return t('justNow') || 'Just now';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    if (diffDays < 7) return `${diffDays}d`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <div className="px-6 pt-12 pb-6">
+      <div className="px-6 pt-12 pb-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-            <Clock className="w-5 h-5 text-primary" />
+            <Globe className="w-5 h-5 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">{t('timeline')}</h1>
+          <div>
+            <h1 className="text-2xl font-bold">{t('timelineFeed') || 'Timeline'}</h1>
+            <p className="text-muted-foreground text-sm">{t('timelineDesc') || 'Anonymous achievements from the community'}</p>
+          </div>
         </div>
-        <p className="text-muted-foreground text-sm ml-13">
-          Recent activity from your groups
-        </p>
       </div>
 
-      {/* Timeline */}
       <div className="px-6">
-        {contributions.length === 0 ? (
-          <motion.div 
-            className="glass-card p-8 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="font-semibold mb-2">No contributions yet</h3>
-            <p className="text-sm text-muted-foreground">
-              Join a group and start contributing to see activity here!
-            </p>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : events.length === 0 ? (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-8 text-center">
+            <Globe className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-semibold mb-2">{t('noEventsYet') || 'No achievements yet'}</h3>
+            <p className="text-sm text-muted-foreground">{t('beFirstAchievement') || 'Start your streak to appear here!'}</p>
           </motion.div>
         ) : (
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="space-y-6"
-          >
-            {Object.entries(groupedByDate).map(([date, dayContributions]) => (
-              <div key={date}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-px flex-1 bg-border" />
-                  <span className="text-xs text-muted-foreground font-medium px-2">
-                    {date === new Date().toLocaleDateString() ? 'Today' : date}
-                  </span>
-                  <div className="h-px flex-1 bg-border" />
-                </div>
-
-                <div className="space-y-3">
-                  {dayContributions.map((contribution) => {
-                    const isWithdrawal = contribution.type === 'withdrawal';
-                    return (
-                    <motion.div
-                      key={contribution.id}
-                      variants={item}
-                      className="glass-card p-4 cursor-pointer hover:border-primary/30 transition-colors"
-                      onClick={() => onGroupClick?.(contribution.group_id)}
-                      whileHover={{ scale: 1.01, x: 4 }}
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* Avatar */}
-                        <div className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 ${isWithdrawal ? 'bg-warning/20' : 'bg-primary'}`}>
-                          {contribution.profile.avatar_url ? (
-                            <img 
-                              src={contribution.profile.avatar_url} 
-                              alt={contribution.profile.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <DefaultAvatar name={contribution.profile.name} size={40} className="w-full h-full" />
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <p className="font-medium truncate">{contribution.profile.name}</p>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {formatDistanceToNow(new Date(contribution.created_at), { addSuffix: true })}
-                            </span>
-                          </div>
-                          
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {isWithdrawal ? (
-                              <>
-                                {t('withdrawal') || 'withdrew from'} <span className="text-foreground font-medium">{contribution.group.name}</span>
-                              </>
-                            ) : (
-                              <>
-                                {t('contributedTo') || 'contributed to'} <span className="text-foreground font-medium">{contribution.group.name}</span>
-                              </>
-                            )}
-                          </p>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                              {isWithdrawal ? (
-                                <ArrowDownLeft className="w-4 h-4 text-warning" />
-                              ) : (
-                                <ArrowUpRight className="w-4 h-4 text-success" />
-                              )}
-                              <span className={`text-lg font-bold ${isWithdrawal ? 'text-warning' : 'gradient-text'}`}>
-                                {isWithdrawal ? '-' : '+'}{formatCurrency(contribution.amount)}
-                              </span>
-                            </div>
-                            
-                            {contribution.note && (
-                              <span className="text-xs text-muted-foreground italic truncate max-w-[150px]">
-                                "{contribution.note}"
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </motion.div>
+          <div className="space-y-3">
+            <AnimatePresence initial={false}>
+              {events.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="glass-card p-4 flex items-start gap-3"
+                >
+                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                    {getEventIcon(event.event_type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{getEventMessage(event)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{formatTime(event.created_at)}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         )}
       </div>
     </div>

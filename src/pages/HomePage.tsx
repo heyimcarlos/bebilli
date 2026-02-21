@@ -7,7 +7,7 @@ import { validateGoalAmount } from '@/lib/validation';
 import EnhancedGroupCard from '@/components/EnhancedGroupCard';
 import UserStatsCard from '@/components/UserStatsCard';
 import MotivationalBanner from '@/components/MotivationalBanner';
-import DailyChallenge from '@/components/DailyChallenge';
+import BillionaireCheckin from '@/components/BillionaireCheckin';
 import PremiumModal from '@/components/PremiumModal';
 import { Button } from '@/components/ui/button';
 import BilliLogo from '@/components/BilliLogo';
@@ -39,7 +39,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [initialCode, setInitialCode] = useState('');
   const [creating, setCreating] = useState(false);
-  const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '' });
+  const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '', category: 'other' });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -113,7 +113,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     } else {
       toast({ title: '🎉 ' + t('groupCreated'), description: `${newGroup.name} ${t('groupCreatedDesc')}` });
       setCreateModalOpen(false);
-      setNewGroup({ name: '', goal: '', description: '' });
+      setNewGroup({ name: '', goal: '', description: '', category: 'other' });
       clearImage();
       refreshPremium();
     }
@@ -197,7 +197,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
           <UserStatsCard currentStreak={profile.current_streak || 0} bestStreak={profile.best_streak || 0} totalContributions={profile.total_contributions || 0} level={profile.level || 1} maxSaved={profile.max_saved || 0} />
         )}
         <MotivationalBanner />
-        <DailyChallenge hasContributedToday={hasContributedToday} onContribute={handleDailyChallengeContribute} totalGoal={totalGoal} userName={profile?.name} groups={groups.map(g => ({ id: g.id, name: g.name, goal_amount: g.goal_amount }))} />
+        <BillionaireCheckin hasCheckedInToday={hasContributedToday} onCheckin={handleDailyChallengeContribute} totalGoal={totalGoal} userName={profile?.name} groups={groups.map(g => ({ id: g.id, name: g.name, goal_amount: g.goal_amount }))} />
 
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3 mb-6">
@@ -235,6 +235,25 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                   )}
                 </div>
                 <div className="space-y-2"><Label>{t('groupName')}</Label><Input placeholder={t('groupNamePlaceholder')} className="bg-secondary" value={newGroup.name} onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })} /></div>
+                <div className="space-y-2">
+                  <Label>{t('goalCategory') || 'Goal Category'}</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'travel', icon: '✈️', label: t('travel') || 'Travel' },
+                      { id: 'real_estate', icon: '🏠', label: t('realEstate') || 'Real Estate' },
+                      { id: 'investment', icon: '📈', label: t('investment') || 'Investment' },
+                      { id: 'education', icon: '🎓', label: t('education') || 'Education' },
+                      { id: 'credit_card', icon: '💳', label: t('creditCard') || 'Credit Card' },
+                      { id: 'other', icon: '🎁', label: t('other') || 'Other' },
+                    ].map(cat => (
+                      <button key={cat.id} type="button" onClick={() => setNewGroup({ ...newGroup, category: cat.id })}
+                        className={`p-2 rounded-xl border text-center text-sm transition-all ${newGroup.category === cat.id ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground hover:border-primary/50'}`}>
+                        <span className="text-lg block">{cat.icon}</span>
+                        <span className="text-xs">{cat.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="space-y-2"><Label>{t('goalAmount')} ($)</Label><Input type="number" placeholder="50000" className="bg-secondary" value={newGroup.goal} onChange={(e) => setNewGroup({ ...newGroup, goal: e.target.value })} /></div>
                 <div className="space-y-2"><Label>{t('descriptionOptional')}</Label><Textarea placeholder={t('descriptionPlaceholder')} className="bg-secondary resize-none" rows={3} value={newGroup.description} onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })} /></div>
                 <Button onClick={handleCreateGroup} disabled={creating || uploading || !newGroup.name || !newGroup.goal} className="w-full btn-primary text-primary-foreground">
