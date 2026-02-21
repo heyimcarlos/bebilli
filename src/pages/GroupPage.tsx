@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -365,6 +365,36 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         </div>
       </motion.div>
 
+      {/* Pending Shared Group Banner */}
+      {isSharedPending && (
+        <motion.div
+          className="px-6 mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <div className="rounded-2xl p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <UserPlus className="w-5 h-5 text-amber-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-bold text-foreground mb-1">{t('pendingBannerTitle')}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-3">{t('pendingBannerDesc')}</p>
+                <Button
+                  size="sm"
+                  onClick={() => setShowInviteModal(true)}
+                  className="rounded-full btn-primary text-primary-foreground font-semibold px-5 h-9"
+                >
+                  <Share2 className="w-4 h-4 mr-1.5" />
+                  {t('inviteMembers')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Tabs */}
       <div className="px-6">
         <Tabs defaultValue="ranking" className="w-full">
@@ -519,11 +549,17 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             {t('withdraw')}
           </motion.button>
           <motion.button
-            onClick={() => setShowContributeModal(true)}
-            className="flex-[2] h-14 btn-primary text-primary-foreground font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg"
+            onClick={() => {
+              if (isSharedPending) {
+                setShowInviteModal(true);
+              } else {
+                setShowContributeModal(true);
+              }
+            }}
+            className={`flex-[2] h-14 font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg ${isSharedPending ? 'bg-amber-500 text-white' : 'btn-primary text-primary-foreground'}`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            animate={{
+            animate={isSharedPending ? {} : {
               boxShadow: [
                 '0 0 20px hsl(var(--primary) / 0.3)',
                 '0 0 40px hsl(var(--primary) / 0.5)',
@@ -534,8 +570,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               boxShadow: { duration: 2, repeat: Infinity },
             }}
           >
-            <Plus className="w-5 h-5" />
-            {t('addContribution')}
+            {isSharedPending ? (
+              <><UserPlus className="w-5 h-5" />{t('inviteMembers')}</>
+            ) : (
+              <><Plus className="w-5 h-5" />{t('addContribution')}</>
+            )}
           </motion.button>
         </div>
       </motion.div>
