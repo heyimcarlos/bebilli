@@ -65,11 +65,11 @@ const countriesList = [
   { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
 ];
 
-const features = [
-  { icon: TrendingUp, title: 'Track your savings', desc: 'Monitor every contribution and watch your wealth grow in real time.' },
-  { icon: Users, title: 'Save together', desc: 'Join groups with friends, family or coworkers and build accountability.' },
-  { icon: Trophy, title: 'Earn streaks & badges', desc: 'Stay consistent and climb the leaderboard. Your discipline is your status.' },
-  { icon: Shield, title: 'Private & secure', desc: 'Your financial data stays yours. Bank-level encryption, always.' },
+const featureKeys = [
+  { icon: TrendingUp, titleKey: 'featureTrackTitle', descKey: 'featureTrackDesc' },
+  { icon: Users, titleKey: 'featureSaveTogetherTitle', descKey: 'featureSaveTogetherDesc' },
+  { icon: Trophy, titleKey: 'featureStreaksTitle', descKey: 'featureStreaksDesc' },
+  { icon: Shield, titleKey: 'featureSecureTitle', descKey: 'featureSecureDesc' },
 ];
 
 const LoginPage: React.FC = () => {
@@ -396,14 +396,14 @@ const LoginPage: React.FC = () => {
 
         {/* Features grid */}
         <div className="relative z-10 grid grid-cols-2 gap-5 mt-12">
-          {features.map((f, i) => (
+          {featureKeys.map((f, i) => (
             <div key={i} className="flex gap-3 items-start">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
                 <f.icon className="w-5 h-5 text-white/90" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white">{f.title}</h3>
-                <p className="text-xs text-white/60 leading-relaxed mt-0.5">{f.desc}</p>
+                <h3 className="text-sm font-semibold text-white">{t(f.titleKey)}</h3>
+                <p className="text-xs text-white/60 leading-relaxed mt-0.5">{t(f.descKey)}</p>
               </div>
             </div>
           ))}
