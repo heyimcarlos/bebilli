@@ -384,10 +384,10 @@ const LoginPage: React.FC = () => {
           </div>
 
           <h1 className="text-4xl xl:text-5xl font-black text-white leading-[1.15] max-w-lg">
-            Build your billion.
+            {t('saveTogetherShort')}
           </h1>
           <p className="text-xl text-white/80 mt-4 max-w-md italic font-medium">
-            {t('romanticizeYourSavings') || 'Romanticize your savings.'}
+            {t('romanticizeYourSavings')}
           </p>
           <p className="text-white/50 mt-2 max-w-md text-sm">
             {t('gamifiedSocialFinance')}
@@ -426,8 +426,8 @@ const LoginPage: React.FC = () => {
               <BilliLogo size={72} />
             </div>
             <h1 className="text-3xl font-black text-foreground mb-1">Billi</h1>
-            <p className="text-sm font-semibold text-foreground/80 italic">Build your billion.</p>
-            <p className="text-xs text-muted-foreground mt-1">{t('romanticizeYourSavings') || 'Romanticize your savings.'}</p>
+            <p className="text-sm font-semibold text-foreground/80 italic">{t('saveTogetherShort')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('romanticizeYourSavings')}</p>
           </div>
         </div>
 
