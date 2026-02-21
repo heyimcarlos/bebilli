@@ -652,6 +652,7 @@ export type Database = {
           description: string | null
           discount_amount: number | null
           discount_percentage: number | null
+          grants_vip: boolean
           id: string
           is_active: boolean
           max_uses: number | null
@@ -666,6 +667,7 @@ export type Database = {
           description?: string | null
           discount_amount?: number | null
           discount_percentage?: number | null
+          grants_vip?: boolean
           id?: string
           is_active?: boolean
           max_uses?: number | null
@@ -680,6 +682,7 @@ export type Database = {
           description?: string | null
           discount_amount?: number | null
           discount_percentage?: number | null
+          grants_vip?: boolean
           id?: string
           is_active?: boolean
           max_uses?: number | null

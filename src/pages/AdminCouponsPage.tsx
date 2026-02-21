@@ -29,6 +29,7 @@ interface SubscriptionCoupon {
   valid_from: string;
   valid_until: string | null;
   created_at: string;
+  grants_vip: boolean;
 }
 
 interface PartnerCoupon {
@@ -69,7 +70,8 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
   // Premium coupon form
   const [showPremiumForm, setShowPremiumForm] = useState(false);
   const [premiumForm, setPremiumForm] = useState({
-    code: '', description: '', discountType: 'percentage' as 'percentage' | 'amount',
+    code: '', description: '', couponType: 'discount' as 'discount' | 'free_vip',
+    discountType: 'percentage' as 'percentage' | 'amount',
     discountValue: '', maxUses: '', validUntil: '',
   });
 
@@ -104,7 +106,11 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
   };
 
   const handleCreatePremiumCoupon = async () => {
-    if (!premiumForm.code || !premiumForm.discountValue) {
+    if (!premiumForm.code) {
+      toast({ title: t('error'), description: t('fillRequiredFields'), variant: 'destructive' });
+      return;
+    }
+    if (premiumForm.couponType === 'discount' && !premiumForm.discountValue) {
       toast({ title: t('error'), description: t('fillRequiredFields'), variant: 'destructive' });
       return;
     }
@@ -113,9 +119,15 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
       code: premiumForm.code.toUpperCase(),
       description: premiumForm.description || null,
       created_by: user?.id,
+      grants_vip: premiumForm.couponType === 'free_vip',
     };
-    if (premiumForm.discountType === 'percentage') data.discount_percentage = parseInt(premiumForm.discountValue);
-    else data.discount_amount = parseFloat(premiumForm.discountValue);
+    if (premiumForm.couponType === 'discount') {
+      if (premiumForm.discountType === 'percentage') data.discount_percentage = parseInt(premiumForm.discountValue);
+      else data.discount_amount = parseFloat(premiumForm.discountValue);
+    } else {
+      // Free VIP: 100% discount
+      data.discount_percentage = 100;
+    }
     if (premiumForm.maxUses) data.max_uses = parseInt(premiumForm.maxUses);
     if (premiumForm.validUntil) data.valid_until = new Date(premiumForm.validUntil).toISOString();
 
@@ -126,7 +138,7 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
     } else {
       toast({ title: '🎉 ' + t('couponCreated'), description: t('couponCreatedDesc') });
       setShowPremiumForm(false);
-      setPremiumForm({ code: '', description: '', discountType: 'percentage', discountValue: '', maxUses: '', validUntil: '' });
+      setPremiumForm({ code: '', description: '', couponType: 'discount', discountType: 'percentage', discountValue: '', maxUses: '', validUntil: '' });
       fetchData();
     }
   };
@@ -216,6 +228,20 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
               </div>
             )}
 
+            {type === 'premium' && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('couponPurpose') || 'Tipo do Cupom'} *</label>
+                <div className="flex gap-2">
+                  <Button type="button" variant={(form as typeof premiumForm).couponType === 'discount' ? 'default' : 'outline'} onClick={() => (setForm as typeof setPremiumForm)(prev => ({ ...prev, couponType: 'discount' }))} className="flex-1 gap-2">
+                    <Percent className="w-4 h-4" /> {t('discountCoupon') || 'Desconto'}
+                  </Button>
+                  <Button type="button" variant={(form as typeof premiumForm).couponType === 'free_vip' ? 'default' : 'outline'} onClick={() => (setForm as typeof setPremiumForm)(prev => ({ ...prev, couponType: 'free_vip' }))} className="flex-1 gap-2">
+                    <Crown className="w-4 h-4" /> {t('freeVipCoupon') || 'VIP Grátis'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('couponCode')} *</label>
@@ -230,23 +256,35 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t('discountType')} *</label>
-                <div className="flex gap-2">
-                  <Button type="button" variant={form.discountType === 'percentage' ? 'default' : 'outline'} onClick={() => setForm((prev: any) => ({ ...prev, discountType: 'percentage' }))} className="flex-1 gap-2">
-                    <Percent className="w-4 h-4" /> {t('percentage')}
-                  </Button>
-                  <Button type="button" variant={form.discountType === 'amount' ? 'default' : 'outline'} onClick={() => setForm((prev: any) => ({ ...prev, discountType: 'amount' }))} className="flex-1 gap-2">
-                    <DollarSign className="w-4 h-4" /> {t('fixedAmount')}
-                  </Button>
+            {/* Only show discount fields if not free_vip */}
+            {(type === 'partner' || (type === 'premium' && (form as typeof premiumForm).couponType === 'discount')) && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('discountType')} *</label>
+                  <div className="flex gap-2">
+                    <Button type="button" variant={form.discountType === 'percentage' ? 'default' : 'outline'} onClick={() => setForm((prev: any) => ({ ...prev, discountType: 'percentage' }))} className="flex-1 gap-2">
+                      <Percent className="w-4 h-4" /> {t('percentage')}
+                    </Button>
+                    <Button type="button" variant={form.discountType === 'amount' ? 'default' : 'outline'} onClick={() => setForm((prev: any) => ({ ...prev, discountType: 'amount' }))} className="flex-1 gap-2">
+                      <DollarSign className="w-4 h-4" /> {t('fixedAmount')}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{form.discountType === 'percentage' ? t('discountPercent') : t('discountAmount')} *</label>
+                  <Input type="number" value={form.discountValue} onChange={(e) => setForm((prev: any) => ({ ...prev, discountValue: e.target.value }))} placeholder={form.discountType === 'percentage' ? '20' : '2.00'} min={form.discountType === 'percentage' ? 1 : 0.01} max={form.discountType === 'percentage' ? 100 : undefined} />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{form.discountType === 'percentage' ? t('discountPercent') : t('discountAmount')} *</label>
-                <Input type="number" value={form.discountValue} onChange={(e) => setForm((prev: any) => ({ ...prev, discountValue: e.target.value }))} placeholder={form.discountType === 'percentage' ? '20' : '2.00'} min={form.discountType === 'percentage' ? 1 : 0.01} max={form.discountType === 'percentage' ? 100 : undefined} />
+            )}
+
+            {type === 'premium' && (form as typeof premiumForm).couponType === 'free_vip' && (
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm">
+                <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400 mb-1">
+                  <Crown className="w-4 h-4" /> {t('freeVipInfo') || 'VIP Grátis'}
+                </div>
+                <p className="text-muted-foreground">{t('freeVipDescription') || 'Este cupom concede acesso VIP gratuito. O usuário receberá Premium sem pagar.'}</p>
               </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -291,13 +329,13 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
     );
   };
 
-  const renderCouponCard = (coupon: { id: string; code: string; description: string | null; discount_percentage: number | null; discount_amount: number | null; is_active: boolean; current_uses: number; max_uses: number | null; valid_until: string | null }, onToggle: () => void, onDelete: () => void, index: number, extra?: React.ReactNode) => (
+  const renderCouponCard = (coupon: { id: string; code: string; description: string | null; discount_percentage: number | null; discount_amount: number | null; is_active: boolean; current_uses: number; max_uses: number | null; valid_until: string | null; grants_vip?: boolean }, onToggle: () => void, onDelete: () => void, index: number, extra?: React.ReactNode) => (
     <motion.div key={coupon.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
       <Card className={!coupon.is_active ? 'opacity-60' : ''}>
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${coupon.discount_percentage ? 'bg-primary/10' : 'bg-green-500/10'}`}>
-              {coupon.discount_percentage ? <Percent className="w-6 h-6 text-primary" /> : <DollarSign className="w-6 h-6 text-green-500" />}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${coupon.grants_vip ? 'bg-amber-500/10' : coupon.discount_percentage ? 'bg-primary/10' : 'bg-green-500/10'}`}>
+              {coupon.grants_vip ? <Crown className="w-6 h-6 text-amber-500" /> : coupon.discount_percentage ? <Percent className="w-6 h-6 text-primary" /> : <DollarSign className="w-6 h-6 text-green-500" />}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
@@ -305,12 +343,13 @@ const AdminCouponsPage: React.FC<AdminCouponsPageProps> = ({ onBack }) => {
                 <button onClick={() => copyCode(coupon.code, coupon.id)} className="p-1 rounded hover:bg-secondary transition-colors">
                   {copiedId === coupon.id ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
                 </button>
+                {coupon.grants_vip && <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1"><Crown className="w-3 h-3" /> VIP</span>}
                 {!coupon.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">{t('inactive')}</span>}
                 {extra}
               </div>
               <p className="text-sm text-muted-foreground">{coupon.description || t('noDescription')}</p>
               <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">{coupon.discount_percentage ? `${coupon.discount_percentage}% OFF` : `$${coupon.discount_amount} OFF`}</span>
+                <span className="font-semibold text-foreground">{coupon.grants_vip ? 'VIP Grátis' : coupon.discount_percentage ? `${coupon.discount_percentage}% OFF` : `$${coupon.discount_amount} OFF`}</span>
                 <span className="flex items-center gap-1"><Users className="w-3 h-3" />{coupon.current_uses}{coupon.max_uses ? `/${coupon.max_uses}` : ''} {t('uses')}</span>
                 {coupon.valid_until && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(coupon.valid_until).toLocaleDateString()}</span>}
               </div>
