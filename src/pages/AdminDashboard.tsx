@@ -361,20 +361,27 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   // ===== ACTIONS =====
   const togglePremium = async (userId: string, current: boolean) => {
-    await supabase.from('profiles').update({ is_premium: !current }).eq('id', userId);
+    const { error } = await supabase.from('profiles').update({ is_premium: !current }).eq('id', userId);
+    if (error) { toast({ title: t('error'), description: error.message, variant: 'destructive' }); return; }
     toast({ title: current ? t('adminPremiumDeactivated') : t('adminPremiumActivated') });
     fetchUsers();
   };
 
   const toggleAdmin = async (userId: string, currentRole: string) => {
-    if (currentRole === 'admin') {
-      await supabase.from('user_roles').delete().eq('user_id', userId).eq('role', 'admin');
-      toast({ title: t('adminAdminRemoved') });
-    } else {
-      await supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any });
-      toast({ title: t('adminAdminAdded') });
+    try {
+      if (currentRole === 'admin') {
+        const { error } = await supabase.from('user_roles').delete().eq('user_id', userId).eq('role', 'admin');
+        if (error) throw error;
+        toast({ title: t('adminAdminRemoved') });
+      } else {
+        const { error } = await supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any });
+        if (error) throw error;
+        toast({ title: t('adminAdminAdded') });
+      }
+      fetchUsers();
+    } catch (err: any) {
+      toast({ title: t('error'), description: err.message || 'Failed to update role', variant: 'destructive' });
     }
-    fetchUsers();
   };
 
   const handleCopyCode = (code: string) => {
