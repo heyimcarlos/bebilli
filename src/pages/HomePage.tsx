@@ -97,7 +97,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     if (!canCreateOrJoinGroup()) { setCreateModalOpen(false); setPremiumModalOpen(true); return; }
     const goalAmount = validateGoalAmount(newGroup.goal);
     if (goalAmount === null) {
-      toast({ title: t('error'), description: 'Please enter a valid goal amount between $1 and $1,000,000,000', variant: 'destructive' });
+      toast({ title: t('error'), description: t('invalidAmountError'), variant: 'destructive' });
       return;
     }
     setCreating(true);
@@ -210,9 +210,9 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
               className="col-span-2 flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 mb-2">
               <div className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-amber-500" />
-                <span className="text-sm font-medium">{getRemainingFreeSlots()} {t('freeGroupsRemaining') || 'free groups remaining'}</span>
+                <span className="text-sm font-medium">{getRemainingFreeSlots()} {t('freeGroupsRemaining')}</span>
               </div>
-              <span className="text-xs text-amber-500 font-semibold">{t('goPremium') || 'Go Premium'} →</span>
+              <span className="text-xs text-amber-500 font-semibold">{t('goPremium')} →</span>
             </motion.button>
           )}
           <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
@@ -240,15 +240,15 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                 </div>
                 <div className="space-y-2"><Label>{t('groupName')}</Label><Input placeholder={t('groupNamePlaceholder')} className="bg-secondary" value={newGroup.name} onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })} /></div>
                 <div className="space-y-2">
-                  <Label>{t('goalCategory') || 'Goal Category'}</Label>
+                  <Label>{t('goalCategory')}</Label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'travel', icon: '✈️', label: t('travel') || 'Travel' },
-                      { id: 'real_estate', icon: '🏠', label: t('realEstate') || 'Real Estate' },
-                      { id: 'investment', icon: '📈', label: t('investment') || 'Investment' },
-                      { id: 'education', icon: '🎓', label: t('education') || 'Education' },
-                      { id: 'credit_card', icon: '💳', label: t('creditCard') || 'Credit Card' },
-                      { id: 'other', icon: '🎁', label: t('other') || 'Other' },
+                      { id: 'travel', icon: '✈️', label: t('travel') },
+                      { id: 'real_estate', icon: '🏠', label: t('realEstate') },
+                      { id: 'investment', icon: '📈', label: t('investment') },
+                      { id: 'education', icon: '🎓', label: t('education') },
+                      { id: 'credit_card', icon: '💳', label: t('creditCard') },
+                      { id: 'other', icon: '🎁', label: t('other') },
                     ].map(cat => (
                       <button key={cat.id} type="button" onClick={() => setNewGroup({ ...newGroup, category: cat.id })}
                         className={`p-2 rounded-xl border text-center text-sm transition-all ${newGroup.category === cat.id ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground hover:border-primary/50'}`}>

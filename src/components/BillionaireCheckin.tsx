@@ -95,7 +95,7 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                {t('dailyMission') || 'MISSÃO DIÁRIA'}
+                {t('dailyMission')}
               </span>
               {hasCheckedInToday && (
                 <motion.span
@@ -103,12 +103,12 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
                   animate={{ scale: 1 }}
                   className="text-[9px] font-bold uppercase tracking-wider text-success bg-success/15 px-1.5 py-0.5 rounded"
                 >
-                  ✓ {t('complete') || 'COMPLETA'}
+                  ✓ {t('complete')}
                 </motion.span>
               )}
             </div>
             <p className="text-sm font-bold text-foreground">
-              {t('billionaireCheckin') || 'Billionaire Check-in'}
+              {t('billionaireCheckin')}
             </p>
           </div>
 
@@ -134,7 +134,7 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
           >
             <span className="text-base">🔥</span>
             <p className="text-xs font-semibold text-success">
-              {t('checkinComplete') || 'Missão concluída! Volte amanhã.'}
+              {t('checkinComplete')}
             </p>
           </motion.div>
         ) : (
@@ -144,7 +144,7 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
               className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:brightness-110 text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/25 text-sm tracking-wide transition-all"
             >
               <Swords className="w-4 h-4 mr-2" />
-              {t('contributeNow') || 'Contribuir agora'}
+              {t('contributeNow')}
               <span className="ml-2 text-primary-foreground/70">→</span>
             </Button>
           </motion.div>

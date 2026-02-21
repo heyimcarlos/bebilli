@@ -25,11 +25,11 @@ const SideDrawer: React.FC<SideDrawerProps> = ({
   const { t } = useApp();
 
   const items = [
-    { icon: User, label: t('profile') || 'Profile', action: onProfile },
-    { icon: Search, label: t('searchUsers') || 'Search Users', action: onSearch },
+    { icon: User, label: t('profile'), action: onProfile },
+    { icon: Search, label: t('searchUsers'), action: onSearch },
     { icon: Crown, label: 'VIP / Premium', action: onPremium, accent: true },
-    { icon: EyeOff, label: t('hiddenGroups') || 'Hidden Groups', action: onHiddenGroups },
-    { icon: HelpCircle, label: t('needHelp') || 'Help', action: onHelp },
+    { icon: EyeOff, label: t('hiddenGroups'), action: onHiddenGroups },
+    { icon: HelpCircle, label: t('needHelp'), action: onHelp },
   ];
 
   return (
@@ -51,7 +51,7 @@ const SideDrawer: React.FC<SideDrawerProps> = ({
             className="fixed top-0 right-0 bottom-0 z-50 w-64 bg-card border-l border-border shadow-2xl"
           >
             <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="font-bold text-lg">{t('menu') || 'Menu'}</h2>
+              <h2 className="font-bold text-lg">{t('menu')}</h2>
               <button onClick={onClose} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
                 <X className="w-4 h-4" />
               </button>

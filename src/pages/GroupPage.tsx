@@ -77,7 +77,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     if (amount === null) {
       toast({
         title: t('error'),
-        description: 'Please enter a valid amount between $0.01 and $10,000,000',
+        description: t('invalidAmountError'),
         variant: 'destructive',
       });
       return;
@@ -89,7 +89,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
     if (error) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -114,7 +114,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     if (amount === null) {
       toast({
         title: t('error'),
-        description: t('invalidAmountError') || 'Please enter a valid amount between $0.01 and $10,000,000',
+        description: t('invalidAmountError'),
         variant: 'destructive',
       });
       return;
@@ -123,7 +123,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     if (amount > group.user_contribution) {
       toast({
         title: t('error'),
-        description: t('insufficientBalance') || 'Insufficient balance for withdrawal',
+        description: t('insufficientBalance'),
         variant: 'destructive',
       });
       return;
@@ -135,7 +135,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
     if (error) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -144,8 +144,8 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       setWithdrawalAmount('');
       
       toast({
-        title: '💸 ' + (t('withdrawalSuccess') || 'Withdrawal successful!'),
-        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup') || 'withdrawn from group'}`,
+        title: '💸 ' + t('withdrawalSuccess'),
+        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup')}`,
       });
       
       await refreshGroups();
@@ -156,7 +156,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     if (amount > group.user_contribution) {
       toast({
         title: t('error'),
-        description: t('insufficientBalance') || 'Insufficient balance for withdrawal',
+        description: t('insufficientBalance'),
         variant: 'destructive',
       });
       return;
@@ -168,7 +168,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
     if (error) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -176,8 +176,8 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       setShowWithdrawModal(false);
       
       toast({
-        title: '💸 ' + (t('withdrawalSuccess') || 'Withdrawal successful!'),
-        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup') || 'withdrawn from group'}`,
+        title: '💸 ' + t('withdrawalSuccess'),
+        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup')}`,
       });
       
       await refreshGroups();
@@ -191,7 +191,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
     if (error) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -363,7 +363,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         <Tabs defaultValue="ranking" className="w-full">
           <TabsList className="w-full bg-secondary mb-4">
             <TabsTrigger value="ranking" className="flex-1">{t('ranking')}</TabsTrigger>
-            <TabsTrigger value="consistency" className="flex-1">{t('consistency') || 'Consistência'}</TabsTrigger>
+            <TabsTrigger value="consistency" className="flex-1">{t('consistency')}</TabsTrigger>
             <TabsTrigger value="chat" className="flex-1">{t('chat')}</TabsTrigger>
             <TabsTrigger value="dream" className="flex-1">{t('dreamPanel')}</TabsTrigger>
           </TabsList>
@@ -464,7 +464,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             <div className="flex gap-2">
               <AudioRecorder onAudioReady={(blob) => setPendingAudio(blob)} disabled={false} />
               <Input
-                placeholder={t('typeMessage') || 'Type your message...'}
+                placeholder={t('typeMessage')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -509,7 +509,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             whileTap={{ scale: group.user_contribution > 0 ? 0.98 : 1 }}
           >
             <Minus className="w-5 h-5" />
-            {t('withdraw') || 'Withdraw'}
+            {t('withdraw')}
           </motion.button>
           <motion.button
             onClick={() => setShowContributeModal(true)}
@@ -528,7 +528,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             }}
           >
             <Plus className="w-5 h-5" />
-            {t('addContribution') || 'Add Contribution'}
+            {t('addContribution')}
           </motion.button>
         </div>
       </motion.div>
@@ -539,13 +539,13 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="w-5 h-5 text-success" />
-              {t('addContribution') || 'Add Contribution'}
+              {t('addContribution')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {/* Quick amounts */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('quickAmounts') || 'Quick amounts'}</p>
+               <p className="text-sm text-muted-foreground">{t('quickAmounts')}</p>
               <div className="flex flex-wrap gap-2">
                 {QUICK_AMOUNTS.map((amount) => (
                   <motion.button
@@ -564,11 +564,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
             {/* Custom amount */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('customAmount') || 'Or enter custom amount'}</p>
+               <p className="text-sm text-muted-foreground">{t('customAmount')}</p>
               <div className="flex gap-2">
                 <Input
                   type="number"
-                  placeholder={t('enterAmount') || 'Enter amount'}
+                   placeholder={t('enterAmount')}
                   value={contributionAmount}
                   onChange={(e) => setContributionAmount(e.target.value)}
                   className="bg-secondary"
@@ -596,19 +596,19 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Minus className="w-5 h-5 text-warning" />
-              {t('withdraw') || 'Withdraw'}
+              {t('withdraw')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {/* Available balance */}
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">{t('availableBalance') || 'Available balance'}</p>
+              <p className="text-sm text-muted-foreground mb-1">{t('availableBalance')}</p>
               <p className="text-2xl font-bold text-success">{formatCurrency(group.user_contribution)}</p>
             </div>
 
             {/* Quick amounts */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('quickAmounts') || 'Quick amounts'}</p>
+              <p className="text-sm text-muted-foreground">{t('quickAmounts')}</p>
               <div className="flex flex-wrap gap-2">
                 {QUICK_AMOUNTS.filter(amount => amount <= group.user_contribution).map((amount) => (
                   <motion.button
@@ -630,7 +630,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {t('withdrawAll') || 'All'}
+                    {t('withdrawAll')}
                   </motion.button>
                 )}
               </div>
@@ -638,11 +638,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
             {/* Custom amount */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('customAmount') || 'Or enter custom amount'}</p>
+              <p className="text-sm text-muted-foreground">{t('customAmount')}</p>
               <div className="flex gap-2">
                 <Input
                   type="number"
-                  placeholder={t('enterAmount') || 'Enter amount'}
+                  placeholder={t('enterAmount')}
                   value={withdrawalAmount}
                   onChange={(e) => setWithdrawalAmount(e.target.value)}
                   max={group.user_contribution}
@@ -663,7 +663,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              {t('withdrawWarning') || 'Withdrawals reduce your contribution to the group goal'}
+              {t('withdrawWarning')}
             </p>
           </div>
         </DialogContent>

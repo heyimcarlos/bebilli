@@ -27,21 +27,21 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({
   const xpNeeded = Math.max(nextLevelXP - totalContributions, 0);
 
   const getRankInfo = (lvl: number) => {
-    if (lvl >= 10) return { title: 'Billionaire Legend', emoji: '👑', ring: 'from-amber-400 via-yellow-300 to-amber-500' };
-    if (lvl >= 8) return { title: 'Money Master', emoji: '💎', ring: 'from-purple-400 via-pink-400 to-purple-500' };
-    if (lvl >= 6) return { title: 'Savings Pro', emoji: '🚀', ring: 'from-blue-400 via-cyan-400 to-blue-500' };
-    if (lvl >= 4) return { title: 'Smart Saver', emoji: '⚡', ring: 'from-primary via-accent to-primary' };
-    if (lvl >= 2) return { title: 'Rising Star', emoji: '⭐', ring: 'from-green-400 via-emerald-400 to-green-500' };
-    return { title: 'Beginner', emoji: '🌱', ring: 'from-muted-foreground via-muted to-muted-foreground' };
+    if (lvl >= 10) return { title: t('billionaireLegend'), emoji: '👑', ring: 'from-amber-400 via-yellow-300 to-amber-500' };
+    if (lvl >= 8) return { title: t('moneyMaster'), emoji: '💎', ring: 'from-purple-400 via-pink-400 to-purple-500' };
+    if (lvl >= 6) return { title: t('savingsPro'), emoji: '🚀', ring: 'from-blue-400 via-cyan-400 to-blue-500' };
+    if (lvl >= 4) return { title: t('smartSaver'), emoji: '⚡', ring: 'from-primary via-accent to-primary' };
+    if (lvl >= 2) return { title: t('risingStar'), emoji: '⭐', ring: 'from-green-400 via-emerald-400 to-green-500' };
+    return { title: t('beginner'), emoji: '🌱', ring: 'from-muted-foreground via-muted to-muted-foreground' };
   };
 
   const rank = getRankInfo(level);
 
   const getStreakTier = (s: number) => {
-    if (s >= 30) return { label: 'LEGENDARY', glow: 'shadow-amber-500/40', text: 'text-amber-400', bg: 'bg-amber-500/15' };
-    if (s >= 14) return { label: 'EPIC', glow: 'shadow-purple-500/30', text: 'text-purple-400', bg: 'bg-purple-500/15' };
-    if (s >= 7) return { label: 'RARE', glow: 'shadow-blue-500/30', text: 'text-blue-400', bg: 'bg-blue-500/15' };
-    if (s >= 3) return { label: 'COMMON', glow: '', text: 'text-green-400', bg: 'bg-green-500/15' };
+    if (s >= 30) return { label: t('streakLegendary'), glow: 'shadow-amber-500/40', text: 'text-amber-400', bg: 'bg-amber-500/15' };
+    if (s >= 14) return { label: t('streakEpic'), glow: 'shadow-purple-500/30', text: 'text-purple-400', bg: 'bg-purple-500/15' };
+    if (s >= 7) return { label: t('streakRare'), glow: 'shadow-blue-500/30', text: 'text-blue-400', bg: 'bg-blue-500/15' };
+    if (s >= 3) return { label: t('streakCommon'), glow: '', text: 'text-green-400', bg: 'bg-green-500/15' };
     return { label: '', glow: '', text: 'text-muted-foreground', bg: 'bg-secondary' };
   };
 

@@ -117,8 +117,8 @@ const HiddenGroupsDrawer: React.FC<HiddenGroupsDrawerProps> = ({
       });
     } else {
       toast({
-        title: '👁️ ' + (t('groupUnhidden') || 'Group restored'),
-        description: t('groupUnhiddenDesc') || 'The group is now visible again',
+        title: '👁️ ' + t('groupUnhidden'),
+        description: t('groupUnhiddenDesc'),
       });
       setHiddenGroups(prev => prev.filter(g => g.id !== groupId));
       await refreshGroups();
@@ -154,9 +154,9 @@ const HiddenGroupsDrawer: React.FC<HiddenGroupsDrawerProps> = ({
                   <EyeOff className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <h2 className="font-semibold">{t('hiddenGroups') || 'Hidden Groups'}</h2>
+                  <h2 className="font-semibold">{t('hiddenGroups')}</h2>
                   <p className="text-xs text-muted-foreground">
-                    {hiddenGroups.length} {t('groups') || 'groups'}
+                    {hiddenGroups.length} {t('groups')}
                   </p>
                 </div>
               </div>
@@ -186,10 +186,10 @@ const HiddenGroupsDrawer: React.FC<HiddenGroupsDrawerProps> = ({
                     <Eye className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <p className="text-muted-foreground">
-                    {t('noHiddenGroups') || 'No hidden groups'}
+                    {t('noHiddenGroups')}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {t('noHiddenGroupsDesc') || 'Groups you hide will appear here'}
+                    {t('noHiddenGroupsDesc')}
                   </p>
                 </motion.div>
               ) : (
@@ -251,7 +251,7 @@ const HiddenGroupsDrawer: React.FC<HiddenGroupsDrawerProps> = ({
                         ) : (
                           <>
                             <Eye className="w-4 h-4 mr-2" />
-                            {t('showGroup') || 'Show Group'}
+                            {t('showGroup')}
                           </>
                         )}
                       </Button>

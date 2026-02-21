@@ -93,7 +93,7 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ isOpen, onClose }) =>
       setResults(prev =>
         prev.map(r => (r.id === targetId ? { ...r, followStatus: 'pending' as const } : r))
       );
-      toast({ title: '✨', description: t('followRequestSent') || 'Follow request sent!' });
+      toast({ title: '✨', description: t('followRequestSent') });
     }
   };
 
@@ -103,13 +103,13 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ isOpen, onClose }) =>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Search className="w-5 h-5 text-primary" />
-            {t('searchUsers') || 'Search Users'}
+            {t('searchUsers')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex gap-2 mb-4">
           <Input
-            placeholder={t('searchByUsername') || '@username or name'}
+            placeholder={t('searchByUsername')}
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -142,16 +142,16 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ isOpen, onClose }) =>
               </div>
               {user.followStatus === 'accepted' ? (
                 <span className="text-xs text-success flex items-center gap-1 font-medium">
-                  <Check className="w-3.5 h-3.5" /> {t('following') || 'Following'}
+                  <Check className="w-3.5 h-3.5" /> {t('following')}
                 </span>
               ) : user.followStatus === 'pending' || followingIds.has(user.id) ? (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> {t('pending') || 'Pending'}
+                  <Clock className="w-3.5 h-3.5" /> {t('pending')}
                 </span>
               ) : (
                 <Button size="sm" className="h-8 px-3" onClick={() => handleFollow(user.id)}>
                   <UserPlus className="w-3.5 h-3.5 mr-1" />
-                  {t('follow') || 'Follow'}
+                  {t('follow')}
                 </Button>
               )}
             </motion.div>
@@ -159,7 +159,7 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ isOpen, onClose }) =>
 
           {!loading && results.length === 0 && query.trim() && (
             <div className="text-center py-6 text-muted-foreground text-sm">
-              {t('noUsersFound') || 'No users found'}
+              {t('noUsersFound')}
             </div>
           )}
         </div>
