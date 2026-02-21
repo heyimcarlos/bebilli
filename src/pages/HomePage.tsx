@@ -160,8 +160,8 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
         <div className="relative z-10">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-muted-foreground text-sm">{t('hello')}, {t('billionaire')}</p>
-              <h1 className="text-2xl font-bold">{profile?.name || t('billionaire')}</h1>
+              <p className="text-muted-foreground text-sm">{t('hello')}, Billionaire</p>
+              <h1 className="text-2xl font-bold">{profile?.name || 'Billionaire'}</h1>
             </div>
             <motion.div animate={{ rotate: [0, -5, 5, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
               <BilliLogo size={48} />
