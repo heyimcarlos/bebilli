@@ -314,9 +314,20 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <Globe className="w-4 h-4 text-muted-foreground" />
               <span>{t('language')}</span>
             </div>
-            <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-md">
-              {language === 'pt' ? '🇧🇷 Português' : language === 'en' ? '🇨🇦 English' : language === 'fr' ? '🇫🇷 Français' : language === 'es' ? '🇪🇸 Español' : language === 'it' ? '🇮🇹 Italiano' : '🇩🇪 Deutsch'}
-            </span>
+            <Select value={language} onValueChange={async (val) => {
+              setLanguage(val as any);
+              if (user) await updateProfile({ language: val } as any);
+            }}>
+              <SelectTrigger className="w-36 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pt">🇧🇷 Português</SelectItem>
+                <SelectItem value="en">🇨🇦 English</SelectItem>
+                <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                <SelectItem value="es">🇪🇸 Español</SelectItem>
+                <SelectItem value="it">🇮🇹 Italiano</SelectItem>
+                <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
@@ -324,9 +335,23 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <DollarSign className="w-4 h-4 text-muted-foreground" />
               <span>{t('currency')}</span>
             </div>
-            <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-md">
-              {currency}
-            </span>
+            <Select value={currency} onValueChange={async (val) => {
+              setCurrency(val as any);
+              if (user) await updateProfile({ currency: val } as any);
+            }}>
+              <SelectTrigger className="w-36 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CAD">🇨🇦 CAD</SelectItem>
+                <SelectItem value="USD">🇺🇸 USD</SelectItem>
+                <SelectItem value="EUR">🇪🇺 EUR</SelectItem>
+                <SelectItem value="GBP">🇬🇧 GBP</SelectItem>
+                <SelectItem value="BRL">🇧🇷 BRL</SelectItem>
+                <SelectItem value="MXN">🇲🇽 MXN</SelectItem>
+                <SelectItem value="AUD">🇦🇺 AUD</SelectItem>
+                <SelectItem value="CHF">🇨🇭 CHF</SelectItem>
+                <SelectItem value="JPY">🇯🇵 JPY</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
