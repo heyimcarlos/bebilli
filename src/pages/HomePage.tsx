@@ -39,7 +39,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [initialCode, setInitialCode] = useState('');
   const [creating, setCreating] = useState(false);
-  const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '', category: 'other' });
+  const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '', category: 'other', type: 'shared' as 'individual' | 'shared' });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -113,7 +113,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     } else {
       toast({ title: '🎉 ' + t('groupCreated'), description: `${newGroup.name} ${t('groupCreatedDesc')}` });
       setCreateModalOpen(false);
-      setNewGroup({ name: '', goal: '', description: '', category: 'other' });
+      setNewGroup({ name: '', goal: '', description: '', category: 'other', type: 'shared' });
       clearImage();
       refreshPremium();
     }
@@ -224,6 +224,25 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
             <DialogContent className="bg-card border-border">
               <DialogHeader><DialogTitle>{t('createGroup')}</DialogTitle></DialogHeader>
               <div className="space-y-4 py-4">
+                {/* Group Type Selection */}
+                <div className="space-y-2">
+                  <Label>{t('groupType')}</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button type="button" onClick={() => setNewGroup({ ...newGroup, type: 'individual' })}
+                      className={`p-3 rounded-xl border text-center text-sm transition-all ${newGroup.type === 'individual' ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground hover:border-primary/50'}`}>
+                      <span className="text-lg block">👤</span>
+                      <span className="text-xs">{t('individualGroup')}</span>
+                    </button>
+                    <button type="button" onClick={() => setNewGroup({ ...newGroup, type: 'shared' })}
+                      className={`p-3 rounded-xl border text-center text-sm transition-all ${newGroup.type === 'shared' ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground hover:border-primary/50'}`}>
+                      <span className="text-lg block">👥</span>
+                      <span className="text-xs">{t('sharedGroup')}</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {newGroup.type === 'individual' ? t('individualGroupDesc') : t('sharedGroupDesc')}
+                  </p>
+                </div>
                 <div className="space-y-2">
                   <Label>{t('groupPhoto')}</Label>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
