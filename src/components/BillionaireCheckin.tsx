@@ -61,42 +61,39 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
         />
       )}
 
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-bold">{t('billionaireCheckin') || 'Billionaire Check-in'}</h3>
+        </div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
+          <Clock className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-bold text-primary">{timeLeft}</span>
+        </div>
+      </div>
+
       {hasCheckedInToday ? (
         <motion.div
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
-          className="flex items-center justify-between p-2"
+          className="flex items-center gap-3 py-1"
         >
-          <div className="flex items-center gap-3">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1, rotate: 360 }}
-              transition={{ type: 'spring', duration: 0.5 }}
-              className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center"
-            >
-              <Check className="w-5 h-5 text-success" />
-            </motion.div>
-            <div>
-              <p className="text-sm font-bold text-success">{t('checkinComplete') || 'Checked in ✓'}</p>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {timeLeft}
-              </p>
-            </div>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1, rotate: 360 }}
+            transition={{ type: 'spring', duration: 0.5 }}
+            className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center"
+          >
+            <Check className="w-5 h-5 text-success" />
+          </motion.div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-success">{t('checkinComplete') || 'Checked in ✓'}</p>
+            <p className="text-xs text-muted-foreground">{t('keepItUp') || 'Keep it up!'} 🔥</p>
           </div>
-          <span className="text-lg">🔥</span>
         </motion.div>
       ) : (
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Zap className="w-4 h-4 text-primary" />
-              <p className="text-sm font-bold">
-                {targetGroup ? targetGroup.name : (t('checkinNow') || 'Check-in')}
-              </p>
-              <span className="text-xs text-muted-foreground flex items-center gap-1 ml-auto">
-                <Clock className="w-3 h-3" /> {timeLeft}
-              </span>
-            </div>
             {!hasCheckedInToday && (
               <p className="text-[11px] text-destructive/80 font-medium">
                 ⚠️ {t('streakWarning') || 'Missing today breaks your streak'}
@@ -105,11 +102,11 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
           </div>
           <Button
             onClick={() => onCheckin(targetGroup?.id || '')}
-            className="btn-primary text-primary-foreground h-10 px-5"
+            className="h-11 px-6 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl shadow-lg shadow-amber-500/25"
             size="sm"
           >
-            <Zap className="w-4 h-4 mr-1" />
-            {t('checkinNow') || 'Check-in'}
+            <Zap className="w-4 h-4 mr-1.5" />
+            {t('makeDeposit') || 'Fazer aporte'}
           </Button>
         </div>
       )}

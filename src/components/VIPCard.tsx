@@ -5,8 +5,8 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import PremiumModal from '@/components/PremiumModal';
+import PremiumAnalytics from '@/components/PremiumAnalytics';
 
 interface VIPCardProps {
   onClick?: () => void;
@@ -18,18 +18,18 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick }) => {
   const { isPremium, groupCount } = usePremiumCheck(user?.id);
   const [showPanel, setShowPanel] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [activeSection, setActiveSection] = useState<'overview' | 'analytics'>('overview');
 
-  // Calculate personalized stats
   const totalSaved = groups.reduce((sum, g) => sum + g.current_amount, 0);
   const totalGoal = groups.reduce((sum, g) => sum + g.goal_amount, 0);
   const overallProgress = totalGoal > 0 ? (totalSaved / totalGoal) * 100 : 0;
 
   const premiumBenefits = [
-    { icon: Zap, label: t('unlimitedGroups') || 'Unlimited Groups', description: t('unlimitedGroupsDesc') || 'Create and join as many groups as you want' },
-    { icon: Star, label: t('prioritySupport') || 'Priority Support', description: t('prioritySupportDesc') || '24/7 dedicated support channel' },
-    { icon: Shield, label: t('advancedAnalytics') || 'Advanced Analytics', description: t('advancedAnalyticsDesc') || 'Detailed insights and reports' },
-    { icon: Gift, label: t('exclusiveCoupons') || 'Exclusive Coupons', description: t('exclusiveCouponsDesc') || 'Access to VIP-only partner deals' },
-    { icon: TrendingUp, label: t('earlyFeatures') || 'Early Features', description: t('earlyFeaturesDesc') || 'Be the first to try new features' },
+    { icon: Zap, label: t('unlimitedGroups') || 'Unlimited Groups' },
+    { icon: Star, label: t('prioritySupport') || 'Priority Support' },
+    { icon: Shield, label: t('advancedAnalytics') || 'Advanced Analytics' },
+    { icon: Gift, label: t('exclusiveCoupons') || 'Exclusive Coupons' },
+    { icon: TrendingUp, label: t('earlyFeatures') || 'Early Features' },
   ];
 
   if (!isPremium) {
@@ -44,10 +44,7 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick }) => {
         >
           <Crown className="w-5 h-5" />
         </motion.button>
-        <PremiumModal 
-          isOpen={showPremiumModal} 
-          onClose={() => setShowPremiumModal(false)} 
-        />
+        <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
       </>
     );
   }
@@ -72,7 +69,6 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick }) => {
       <AnimatePresence>
         {showPanel && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -80,17 +76,15 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick }) => {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
               onClick={() => setShowPanel(false)}
             />
-
-            {/* VIP Panel */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-20 right-4 w-80 max-w-[90vw] z-50"
+              className="fixed top-16 left-4 right-4 max-w-lg mx-auto z-50 max-h-[80vh] overflow-y-auto"
             >
               <Card className="overflow-hidden border-2 border-amber-500/30 bg-gradient-to-br from-card via-card to-amber-950/10">
-                {/* Header with gradient */}
+                {/* Header */}
                 <div className="relative bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 p-4 text-white">
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -99,13 +93,12 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick }) => {
                   />
                   <div className="relative flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                        <Crown className="w-6 h-6" />
+                      <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                        <Crown className="w-5 h-5" />
                       </div>
                       <div>
                         <h2 className="font-bold text-lg flex items-center gap-2">
-                          VIP Member
-                          <Sparkles className="w-4 h-4" />
+                          VIP <Sparkles className="w-4 h-4" />
                         </h2>
                         <p className="text-xs opacity-90">{profile?.name}</p>
                       </div>
@@ -121,123 +114,69 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick }) => {
                   </div>
                 </div>
 
+                {/* Tab toggle */}
+                <div className="flex gap-1 bg-secondary/50 p-1 mx-4 mt-3 rounded-lg">
+                  <button
+                    onClick={() => setActiveSection('overview')}
+                    className={`flex-1 text-xs py-2 rounded-md font-semibold transition-colors ${activeSection === 'overview' ? 'bg-amber-500 text-white' : 'text-muted-foreground'}`}
+                  >
+                    {t('overview') || 'Overview'}
+                  </button>
+                  <button
+                    onClick={() => setActiveSection('analytics')}
+                    className={`flex-1 text-xs py-2 rounded-md font-semibold transition-colors ${activeSection === 'analytics' ? 'bg-amber-500 text-white' : 'text-muted-foreground'}`}
+                  >
+                    {t('advancedAnalytics') || 'Analytics'}
+                  </button>
+                </div>
+
                 <CardContent className="p-4 space-y-4">
-                  {/* Personalized Stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-3 border border-amber-500/20"
-                    >
-                      <p className="text-xs text-muted-foreground">{t('totalSaved') || 'Total Saved'}</p>
-                      <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                        {formatCurrency(totalSaved)}
-                      </p>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.15 }}
-                      className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-3 border border-amber-500/20"
-                    >
-                      <p className="text-xs text-muted-foreground">{t('activeGroups') || 'Active Groups'}</p>
-                      <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                        {groupCount}
-                      </p>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-3 border border-amber-500/20"
-                    >
-                      <p className="text-xs text-muted-foreground">{t('level') || 'Level'}</p>
-                      <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                        {profile?.level || 1}
-                      </p>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.25 }}
-                      className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-3 border border-amber-500/20"
-                    >
-                      <p className="text-xs text-muted-foreground">{t('streak') || 'Streak'}</p>
-                      <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                        🔥 {profile?.current_streak || 0}
-                      </p>
-                    </motion.div>
-                  </div>
-
-                  {/* Overall Progress */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="space-y-2"
-                  >
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('overallProgress') || 'Overall Progress'}</span>
-                      <span className="font-semibold text-amber-600 dark:text-amber-400">{overallProgress.toFixed(1)}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(overallProgress, 100)}%` }}
-                        transition={{ delay: 0.4, duration: 0.8, ease: 'easeOut' }}
-                        className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
-                      />
-                    </div>
-                  </motion.div>
-
-                  {/* VIP Benefits */}
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <Star className="w-4 h-4 text-amber-500" />
-                      {t('yourBenefits') || 'Your Benefits'}
-                    </h3>
-                    <div className="space-y-2">
-                      {premiumBenefits.map((benefit, index) => (
-                        <motion.div
-                          key={benefit.label}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.4 + index * 0.05 }}
-                          className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-                            <benefit.icon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{benefit.label}</p>
-                            <p className="text-xs text-muted-foreground truncate">{benefit.description}</p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* VIP Badge */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.7 }}
-                    className="flex items-center justify-center p-3 bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-orange-500/10 rounded-xl border border-amber-500/20"
-                  >
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-2 mb-1">
-                        <Crown className="w-5 h-5 text-amber-500" />
-                        <span className="font-bold text-amber-600 dark:text-amber-400">
-                          {t('premiumMember') || 'Premium Member'}
-                        </span>
-                        <Crown className="w-5 h-5 text-amber-500" />
+                  {activeSection === 'overview' ? (
+                    <>
+                      {/* Stats */}
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { label: t('totalSaved') || 'Total Saved', value: formatCurrency(totalSaved) },
+                          { label: t('activeGroups') || 'Groups', value: groupCount },
+                          { label: t('level') || 'Level', value: profile?.level || 1 },
+                          { label: t('streak') || 'Streak', value: `🔥 ${profile?.current_streak || 0}` },
+                        ].map((stat, i) => (
+                          <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05 }}
+                            className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-3 border border-amber-500/20">
+                            <p className="text-xs text-muted-foreground">{stat.label}</p>
+                            <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{stat.value}</p>
+                          </motion.div>
+                        ))}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t('thankYouPremium') || 'Thank you for supporting Billi!'}
-                      </p>
-                    </div>
-                  </motion.div>
+
+                      {/* Progress */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">{t('overallProgress') || 'Overall Progress'}</span>
+                          <span className="font-semibold text-amber-600 dark:text-amber-400">{overallProgress.toFixed(1)}%</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                          <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(overallProgress, 100)}%` }} transition={{ delay: 0.4, duration: 0.8 }}
+                            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" />
+                        </div>
+                      </div>
+
+                      {/* Benefits */}
+                      <div className="space-y-1.5">
+                        {premiumBenefits.map((b, i) => (
+                          <motion.div key={b.label} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.04 }}
+                            className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50">
+                            <div className="w-7 h-7 rounded-full bg-amber-500/20 flex items-center justify-center">
+                              <b.icon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <p className="text-sm font-medium">{b.label}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <PremiumAnalytics />
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
