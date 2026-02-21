@@ -9,6 +9,7 @@ interface CouponValidation {
   description?: string;
   discount_percentage?: number;
   discount_amount?: number;
+  grants_vip?: boolean;
 }
 
 export const useSubscriptionCoupon = () => {
@@ -66,6 +67,10 @@ export const useSubscriptionCoupon = () => {
   const getDiscountLabel = (): string => {
     if (!appliedCoupon?.valid) return '';
     
+    if (appliedCoupon.grants_vip) {
+      return 'VIP GRÁTIS';
+    }
+    
     if (appliedCoupon.discount_percentage) {
       return `${appliedCoupon.discount_percentage}% OFF`;
     }
@@ -77,6 +82,10 @@ export const useSubscriptionCoupon = () => {
     return '';
   };
 
+  const isVipCoupon = (): boolean => {
+    return appliedCoupon?.valid === true && appliedCoupon?.grants_vip === true;
+  };
+
   return {
     loading,
     appliedCoupon,
@@ -84,5 +93,6 @@ export const useSubscriptionCoupon = () => {
     clearCoupon,
     calculateDiscount,
     getDiscountLabel,
+    isVipCoupon,
   };
 };
