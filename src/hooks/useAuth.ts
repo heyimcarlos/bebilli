@@ -5,6 +5,7 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 export interface UserProfile {
   id: string;
   name: string;
+  username: string | null;
   avatar_url: string | null;
   phone: string | null;
   country: string | null;

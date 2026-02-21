@@ -2777,7 +2777,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [user, setUser] = useState<User | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Load language/currency from profile when user logs in
+  // Load language/currency from profile when user logs in - DB is source of truth
   useEffect(() => {
     const loadPrefsFromProfile = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -2802,13 +2802,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     };
 
+    // Always load on mount
+    loadPrefsFromProfile();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user && !profileLoaded) {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
         loadPrefsFromProfile();
       }
+      if (event === 'SIGNED_OUT') {
+        setProfileLoaded(false);
+      }
     });
-
-    loadPrefsFromProfile();
 
     return () => subscription.unsubscribe();
   }, []);

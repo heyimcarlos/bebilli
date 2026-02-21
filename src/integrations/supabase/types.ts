@@ -597,6 +597,7 @@ export type Database = {
           phone: string | null
           total_contributions: number | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -617,6 +618,7 @@ export type Database = {
           phone?: string | null
           total_contributions?: number | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -637,6 +639,7 @@ export type Database = {
           phone?: string | null
           total_contributions?: number | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -682,6 +685,33 @@ export type Database = {
           max_uses?: number | null
           valid_from?: string
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
