@@ -221,7 +221,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                 <Button className="w-full h-14 btn-primary text-primary-foreground font-semibold rounded-xl"><Plus className="w-5 h-5 mr-2" />{t('createGroup')}</Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="bg-card border-border">
+            <DialogContent className="bg-card border-border max-h-[85vh] overflow-y-auto">
               <DialogHeader><DialogTitle>{t('createGroup')}</DialogTitle></DialogHeader>
               <div className="space-y-4 py-4">
                 {/* Group Type Selection */}
