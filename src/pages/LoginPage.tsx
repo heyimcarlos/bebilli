@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowRight, Loader2, Mail, UserPlus, Shield, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award, Quote } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -350,7 +351,7 @@ const LoginPage: React.FC = () => {
         <div className="relative max-w-6xl mx-auto px-6 py-16 lg:py-24">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             {/* Left: Text content */}
-            <div className="flex-1 text-center lg:text-left">
+            <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.7, ease: 'easeOut' }} className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
                 <Flame className="w-4 h-4 text-primary" />
                 <span className="text-xs font-semibold text-primary uppercase tracking-wider">{t('saveTogetherShort')}</span>
@@ -372,13 +373,14 @@ const LoginPage: React.FC = () => {
                   {t('landingAlreadyHaveAccount')} <span className="text-primary font-semibold">{t('landingSignIn')}</span>
                 </button>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Right: Feature cards — Plinq style */}
-            <div className="flex-1 w-full max-w-md">
+            {/* Right: Feature cards */}
+            <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }} className="flex-1 w-full max-w-md">
               <div className="space-y-4">
                 {featureKeys.map((f, i) => (
-                  <div key={i} className="flex items-start gap-4 p-5 rounded-2xl bg-card border border-border/60 shadow-sm hover:shadow-md transition-shadow">
+                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 * i + 0.3 }}
+                    className="flex items-start gap-4 p-5 rounded-2xl bg-card border border-border/60 shadow-sm hover:shadow-md transition-shadow">
                     <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <f.icon className="w-5 h-5 text-primary" />
                     </div>
@@ -386,38 +388,38 @@ const LoginPage: React.FC = () => {
                       <h3 className="text-sm font-bold text-foreground">{t(f.titleKey)}</h3>
                       <p className="text-xs text-muted-foreground leading-relaxed mt-1">{t(f.descKey)}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* What is Billi */}
       <section className="py-16 lg:py-24 bg-secondary/30">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6 }} className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-black text-foreground mb-6">{t('landingWhatIsBilli')}</h2>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
             {t('landingWhatIsBilliDesc')}
           </p>
-        </div>
+        </motion.div>
       </section>
 
       {/* How it works */}
       <section className="py-16 lg:py-24">
         <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-14">{t('landingHowItWorks')}</h2>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-3xl md:text-4xl font-black text-foreground text-center mb-14">{t('landingHowItWorks')}</motion.h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((s, i) => (
-              <div key={i} className="text-center">
+              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.15 * i }} className="text-center">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 relative">
                   <s.icon className="w-7 h-7 text-primary" />
                   <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-black flex items-center justify-center">{s.num}</span>
                 </div>
                 <h3 className="text-base font-bold text-foreground mb-2">{t(s.titleKey)}</h3>
                 <p className="text-sm text-muted-foreground">{t(s.descKey)}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -426,10 +428,11 @@ const LoginPage: React.FC = () => {
       {/* Testimonials */}
       <section className="py-16 lg:py-24 bg-secondary/30">
         <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-12">{t('landingTestimonials')}</h2>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-3xl md:text-4xl font-black text-foreground text-center mb-12">{t('landingTestimonials')}</motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-6 rounded-2xl bg-card border border-border/60 shadow-sm relative">
+              <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.12 * i }}
+                className="p-6 rounded-2xl bg-card border border-border/60 shadow-sm relative">
                 <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5 italic">
                   "{t(`testimonial${i}Text`)}"
@@ -443,7 +446,7 @@ const LoginPage: React.FC = () => {
                     <p className="text-xs text-muted-foreground">{t(`testimonial${i}Role`)}</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -451,7 +454,7 @@ const LoginPage: React.FC = () => {
 
       {/* FAQ */}
       <section className="py-16 lg:py-24">
-        <div className="max-w-3xl mx-auto px-6">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }} className="max-w-3xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-12">{t('landingFAQ')}</h2>
           <Accordion type="single" collapsible className="space-y-3">
             {faqItems.map((faq, i) => (
@@ -465,12 +468,12 @@ const LoginPage: React.FC = () => {
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
+        </motion.div>
       </section>
 
       {/* Auth Section */}
       <section ref={authRef} className="py-16 lg:py-24">
-        <div className="max-w-md mx-auto px-6">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }} className="max-w-md mx-auto px-6">
           <div className="text-center mb-8">
             <BilliLogo size={56} className="mx-auto mb-4 justify-center" />
             <h2 className="text-2xl font-bold text-foreground">
@@ -483,7 +486,7 @@ const LoginPage: React.FC = () => {
           <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-sm">
             {renderAuthForm()}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Footer */}
