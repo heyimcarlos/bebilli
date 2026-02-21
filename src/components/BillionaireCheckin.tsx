@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Clock, Zap } from 'lucide-react';
+import { Check, Clock, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
 
@@ -22,7 +22,7 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
   groups = [],
 }) => {
   const { t } = useApp();
-  const [timeLeft, setTimeLeft] = useState('');
+  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
 
   const today = new Date();
   const dayOfYear = Math.floor(
@@ -37,79 +37,107 @@ const BillionaireCheckin: React.FC<BillionaireCheckinProps> = ({
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
       const diff = tomorrow.getTime() - now.getTime();
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      setTimeLeft(`${hours}h ${minutes}m`);
+      setTimeLeft({
+        hours: Math.floor(diff / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+      });
     };
     updateCountdown();
-    const interval = setInterval(updateCountdown, 60000);
+    const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card p-4 mb-4 relative overflow-hidden"
+      className="relative rounded-2xl overflow-hidden mb-4"
     >
-      {/* Shimmer */}
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent" />
+      
+      {/* Shimmer effect when not checked in */}
       {!hasCheckedInToday && (
         <motion.div
           animate={{ x: ['-100%', '200%'] }}
-          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-          className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12"
+          transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 4 }}
+          className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-amber-400/10 to-transparent skew-x-12 pointer-events-none"
         />
       )}
 
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold">{t('billionaireCheckin') || 'Billionaire Check-in'}</h3>
+      <div className="relative p-5">
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+              <Rocket className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-sm font-bold tracking-wide">
+              {t('billionaireCheckin') || 'Billionaire Check-in'}
+            </span>
+          </div>
+          
+          {hasCheckedInToday && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+              className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center"
+            >
+              <Check className="w-4 h-4 text-white" strokeWidth={3} />
+            </motion.div>
+          )}
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
-          <Clock className="w-3.5 h-3.5 text-primary" />
-          <span className="text-xs font-bold text-primary">{timeLeft}</span>
-        </div>
-      </div>
 
-      {hasCheckedInToday ? (
-        <motion.div
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          className="flex items-center gap-3 py-1"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1, rotate: 360 }}
-            transition={{ type: 'spring', duration: 0.5 }}
-            className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center"
-          >
-            <Check className="w-5 h-5 text-success" />
-          </motion.div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-success">{t('checkinComplete') || 'Checked in ✓'}</p>
-            <p className="text-xs text-muted-foreground">{t('keepItUp') || 'Keep it up!'} 🔥</p>
+        {/* Countdown timer - always visible */}
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="flex items-center gap-1">
+            {[
+              { value: pad(timeLeft.hours), label: 'h' },
+              { value: pad(timeLeft.minutes), label: 'm' },
+              { value: pad(timeLeft.seconds), label: 's' },
+            ].map((unit, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="text-muted-foreground/50 text-xs font-mono">:</span>}
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-sm font-mono font-bold text-foreground tabular-nums">
+                    {unit.value}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">{unit.label}</span>
+                </div>
+              </React.Fragment>
+            ))}
           </div>
-        </motion.div>
-      ) : (
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            {!hasCheckedInToday && (
-              <p className="text-[11px] text-destructive/80 font-medium">
-                ⚠️ {t('streakWarning') || 'Missing today breaks your streak'}
-              </p>
-            )}
-          </div>
-          <Button
-            onClick={() => onCheckin(targetGroup?.id || '')}
-            className="h-11 px-6 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl shadow-lg shadow-amber-500/25"
-            size="sm"
-          >
-            <Zap className="w-4 h-4 mr-1.5" />
-            {t('makeDeposit') || 'Fazer aporte'}
-          </Button>
         </div>
-      )}
+
+        {/* Action area */}
+        {hasCheckedInToday ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
+          >
+            <span className="text-lg">🔥</span>
+            <p className="text-sm font-semibold text-emerald-500">
+              {t('checkinComplete') || 'Check-in feito!'} 
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              onClick={() => onCheckin(targetGroup?.id || '')}
+              className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl shadow-lg shadow-amber-500/20 text-sm tracking-wide"
+            >
+              <Rocket className="w-4 h-4 mr-2" />
+              {t('contributeNow') || 'Contribuir agora'} 🚀
+            </Button>
+          </motion.div>
+        )}
+      </div>
     </motion.div>
   );
 };
