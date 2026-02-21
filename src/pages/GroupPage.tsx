@@ -64,6 +64,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   
   // Check if current user is admin
   const isAdmin = group.members.some(m => m.user_id === profile?.id && m.role === 'admin');
+  
+  // Check if shared group is pending (needs at least 2 members)
+  const isSharedPending = (group as any).group_type === 'shared' && group.members.length < 2;
 
   const partners = [
     { name: 'Expedia', logo: '✈️', discount: '15% OFF', unlockAt: 25 },
@@ -73,6 +76,10 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   ];
 
   const handleContribute = async () => {
+    if (isSharedPending) {
+      toast({ title: t('error'), description: t('sharedGroupDesc'), variant: 'destructive' });
+      return;
+    }
     const amount = validateContributionAmount(contributionAmount);
     if (amount === null) {
       toast({

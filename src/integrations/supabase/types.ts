@@ -345,6 +345,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           goal_amount: number
+          group_type: string
           id: string
           image_url: string | null
           invite_code: string
@@ -356,6 +357,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           goal_amount?: number
+          group_type?: string
           id?: string
           image_url?: string | null
           invite_code?: string
@@ -367,6 +369,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           goal_amount?: number
+          group_type?: string
           id?: string
           image_url?: string | null
           invite_code?: string
@@ -803,6 +806,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           goal_amount: number | null
+          group_type: string | null
           id: string | null
           image_url: string | null
           name: string | null
@@ -813,6 +817,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           goal_amount?: number | null
+          group_type?: string | null
           id?: string | null
           image_url?: string | null
           name?: string | null
@@ -823,6 +828,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           goal_amount?: number | null
+          group_type?: string | null
           id?: string | null
           image_url?: string | null
           name?: string | null
@@ -836,6 +842,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           goal_amount: number | null
+          group_type: string | null
           id: string | null
           image_url: string | null
           name: string | null
@@ -846,6 +853,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           goal_amount?: number | null
+          group_type?: string | null
           id?: string | null
           image_url?: string | null
           name?: string | null
@@ -856,6 +864,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           goal_amount?: number | null
+          group_type?: string | null
           id?: string | null
           image_url?: string | null
           name?: string | null
@@ -898,15 +907,26 @@ export type Database = {
       }
     }
     Functions: {
-      create_group_with_admin: {
-        Args: {
-          group_description?: string
-          group_goal_amount: number
-          group_image_url?: string
-          group_name: string
-        }
-        Returns: Json
-      }
+      create_group_with_admin:
+        | {
+            Args: {
+              group_description?: string
+              group_goal_amount: number
+              group_image_url?: string
+              group_name: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              group_description?: string
+              group_goal_amount: number
+              group_image_url?: string
+              group_name: string
+              group_type?: string
+            }
+            Returns: Json
+          }
       get_group_invite_code: { Args: { group_uuid: string }; Returns: string }
       has_role: {
         Args: {

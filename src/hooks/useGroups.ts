@@ -12,6 +12,7 @@ export interface Group {
   invite_code: string | null;
   created_by: string | null;
   created_at: string | null;
+  group_type: 'individual' | 'shared';
 }
 
 export interface GroupMembership {
@@ -96,7 +97,7 @@ export const useGroups = (userId: string | undefined) => {
     }
 
     // Filter out any groups with null ids (shouldn't happen but TypeScript needs this)
-    const validGroups = groupsData.filter((g): g is typeof g & { id: string; name: string; description: string | null; goal_amount: number; invite_code: string | null; created_by: string | null; created_at: string | null } => 
+    const validGroups = groupsData.filter((g): g is typeof g & { id: string; name: string; description: string | null; goal_amount: number; invite_code: string | null; created_by: string | null; created_at: string | null; group_type: 'individual' | 'shared' } => 
       g.id !== null && g.name !== null && g.goal_amount !== null
     );
 
@@ -227,7 +228,7 @@ export const useGroups = (userId: string | undefined) => {
     };
   }, [fetchGroups, userId]);
 
-  const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string) => {
+  const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string, groupType: 'individual' | 'shared' = 'shared') => {
     if (!userId) return { error: new Error('Not authenticated') };
 
     // Use the secure database function to create group atomically
@@ -236,6 +237,7 @@ export const useGroups = (userId: string | undefined) => {
       group_goal_amount: goalAmount,
       group_image_url: imageUrl || null,
       group_description: description || null,
+      group_type: groupType,
     });
 
     if (error) {
