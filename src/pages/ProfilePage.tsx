@@ -9,7 +9,6 @@ import { useGroups } from '@/hooks/useGroups';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import DefaultAvatar from '@/components/DefaultAvatar';
 import ShareProgressCard from '@/components/ShareProgressCard';
@@ -71,7 +70,7 @@ interface FollowUser {
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
-  const { t, language, setLanguage, currency, setCurrency, formatCurrency } = useApp();
+  const { t, language, setLanguage, currency, setCurrency } = useApp();
   const { profile, user, updateProfile } = useAuthContext();
   const { groups } = useGroups(user?.id);
   const { uploadAvatar, uploading } = useImageUpload();
@@ -228,7 +227,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
             </button>
           )}
 
-          {/* Level + Premium badge inline */}
+          {/* Level + Premium badge */}
           <div className="flex items-center justify-center gap-2 mt-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-bold text-primary">
               <Zap className="w-3 h-3" /> {levelTitle}
