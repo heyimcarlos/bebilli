@@ -17,6 +17,7 @@ import DefaultAvatar from '@/components/DefaultAvatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useGroupChat } from '@/hooks/useGroupChat';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
+import ConsistencyRanking from '@/components/ConsistencyRanking';
 import {
   Dialog,
   DialogContent,
@@ -362,6 +363,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         <Tabs defaultValue="ranking" className="w-full">
           <TabsList className="w-full bg-secondary mb-4">
             <TabsTrigger value="ranking" className="flex-1">{t('ranking')}</TabsTrigger>
+            <TabsTrigger value="consistency" className="flex-1">{t('consistency') || 'Consistência'}</TabsTrigger>
             <TabsTrigger value="chat" className="flex-1">{t('chat')}</TabsTrigger>
             <TabsTrigger value="dream" className="flex-1">{t('dreamPanel')}</TabsTrigger>
           </TabsList>
@@ -371,6 +373,13 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               members={group.members}
               currentUserId={profile?.id}
               formatCurrency={formatCurrency}
+            />
+          </TabsContent>
+
+          <TabsContent value="consistency">
+            <ConsistencyRanking
+              members={group.members}
+              currentUserId={profile?.id}
             />
           </TabsContent>
 
