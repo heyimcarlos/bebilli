@@ -295,24 +295,33 @@ export type Database = {
       }
       group_memberships: {
         Row: {
+          checkin_count: number
           group_id: string
           id: string
           joined_at: string | null
           role: Database["public"]["Enums"]["group_role"]
+          salary: number | null
+          show_amount: boolean
           user_id: string
         }
         Insert: {
+          checkin_count?: number
           group_id: string
           id?: string
           joined_at?: string | null
           role?: Database["public"]["Enums"]["group_role"]
+          salary?: number | null
+          show_amount?: boolean
           user_id: string
         }
         Update: {
+          checkin_count?: number
           group_id?: string
           id?: string
           joined_at?: string | null
           role?: Database["public"]["Enums"]["group_role"]
+          salary?: number | null
+          show_amount?: boolean
           user_id?: string
         }
         Relationships: [
@@ -342,6 +351,7 @@ export type Database = {
       groups: {
         Row: {
           category: string
+          competition_end_date: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -350,11 +360,13 @@ export type Database = {
           id: string
           image_url: string | null
           invite_code: string
+          is_open_goal: boolean
           name: string
           updated_at: string | null
         }
         Insert: {
           category?: string
+          competition_end_date?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -363,11 +375,13 @@ export type Database = {
           id?: string
           image_url?: string | null
           invite_code?: string
+          is_open_goal?: boolean
           name: string
           updated_at?: string | null
         }
         Update: {
           category?: string
+          competition_end_date?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -376,6 +390,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           invite_code?: string
+          is_open_goal?: boolean
           name?: string
           updated_at?: string | null
         }

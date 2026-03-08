@@ -13,6 +13,8 @@ export interface Group {
   created_by: string | null;
   created_at: string | null;
   group_type: 'individual' | 'shared';
+  is_open_goal: boolean;
+  competition_end_date: string | null;
 }
 
 export interface GroupMembership {
@@ -33,6 +35,10 @@ export interface GroupMemberWithProfile {
     avatar_url: string | null;
   };
   total_contribution: number;
+  salary: number | null;
+  show_amount: boolean;
+  checkin_count: number;
+  savings_percentage: number | null; // contribution / salary * 100
 }
 
 export interface GroupWithDetails extends Group {
@@ -107,7 +113,7 @@ export const useGroups = (userId: string | undefined) => {
         // Fetch memberships
         const { data: memberships } = await supabase
           .from('group_memberships')
-          .select('id, user_id, role')
+          .select('id, user_id, role, salary, show_amount, checkin_count')
           .eq('group_id', group.id);
         
         // Check if current user is admin of this group
@@ -151,18 +157,36 @@ export const useGroups = (userId: string | undefined) => {
         const totalAmount = Math.max(0, Object.values(contributionsByUser).reduce((sum, val) => sum + val, 0));
         const userContribution = contributionsByUser[userId] || 0;
 
-        const membersWithContributions: GroupMemberWithProfile[] = (members || []).map((m: any) => ({
-          id: m.id,
-          user_id: m.user_id,
-          role: m.role,
-          profile: m.profiles,
-          total_contribution: contributionsByUser[m.user_id] || 0,
-        }));
+        const membersWithContributions: GroupMemberWithProfile[] = (members || []).map((m: any) => {
+          const contribution = contributionsByUser[m.user_id] || 0;
+          const salary = m.salary ? Number(m.salary) : null;
+          return {
+            id: m.id,
+            user_id: m.user_id,
+            role: m.role,
+            profile: m.profiles,
+            total_contribution: contribution,
+            salary,
+            show_amount: m.show_amount ?? true,
+            checkin_count: m.checkin_count ?? 0,
+            savings_percentage: salary && salary > 0 ? (contribution / salary) * 100 : null,
+          };
+        });
 
         return {
           ...group,
-          invite_code: inviteCode, // Use the fetched invite code for admins
-          members: membersWithContributions.sort((a, b) => b.total_contribution - a.total_contribution),
+          is_open_goal: (group as any).is_open_goal ?? false,
+          competition_end_date: (group as any).competition_end_date ?? null,
+          invite_code: inviteCode,
+          members: membersWithContributions.sort((a, b) => {
+            // For open goal groups, sort by savings percentage if available
+            if ((group as any).is_open_goal) {
+              const aPct = a.savings_percentage ?? 0;
+              const bPct = b.savings_percentage ?? 0;
+              return bPct - aPct;
+            }
+            return b.total_contribution - a.total_contribution;
+          }),
           current_amount: totalAmount,
           user_contribution: userContribution,
         } as GroupWithDetails;
