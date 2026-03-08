@@ -740,6 +740,24 @@ const translations: Record<Language, Record<string, string>> = {
     timelineDesc: 'Conquistas anônimas da comunidade',
     noEventsYet: 'Nenhuma conquista ainda',
     beFirstAchievement: 'Comece seu streak para aparecer aqui!',
+    // Dynamic challenge titles
+    dailySaveChallenge: 'Economize hoje',
+    easyDayChallenge: 'Economia rápida',
+    ambitiousChallenge: 'Grande impulso',
+    balancedChallenge: 'Economia constante',
+    doubleChallenge: 'Dia de potência',
+    microChallenge: 'Micro economia',
+    growthChallenge: 'Passo de crescimento',
+    // Goal celebration
+    goalAchieved: 'Meta Alcançada!',
+    goalAchievedDesc: 'Seu grupo atingiu 100% da meta! Parabéns a todos os membros! 🥳🎊',
+    celebrate: 'Celebrar! 🎊',
+    // Receipt validation
+    receiptApproved: 'Comprovante aprovado automaticamente ✓',
+    receiptFlagged: 'Valor divergente — pendente de validação do grupo',
+    confidence: 'Confiança',
+    extractedDate: 'Data extraída',
+    transactionType: 'Tipo de transação',
   },
   en: {
     welcome: 'Welcome',
