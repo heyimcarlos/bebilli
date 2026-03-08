@@ -26,7 +26,7 @@ const TimelinePage: React.FC = () => {
   const { user } = useAuthContext();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'following'>('following');
+  
   const [highFives, setHighFives] = useState<Record<string, boolean>>({});
 
   const fetchEvents = async () => {
