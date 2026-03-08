@@ -330,6 +330,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                     />
                   </div>
                 )}
+                <div className="space-y-2"><Label>{t('goalAmount')} ($)</Label><Input type="number" placeholder="50000" className="bg-secondary" value={newGroup.goal} onChange={(e) => setNewGroup({ ...newGroup, goal: e.target.value })} /></div>
                 <div className="space-y-2"><Label>{t('descriptionOptional')}</Label><Textarea placeholder={t('descriptionPlaceholder')} className="bg-secondary resize-none" rows={3} value={newGroup.description} onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })} /></div>
                 <Button onClick={handleCreateGroup} disabled={creating || uploading || !newGroup.name || !newGroup.goal} className="w-full btn-primary text-primary-foreground">
                   {creating || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('createGroupButton')}
