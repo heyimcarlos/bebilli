@@ -362,7 +362,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background pb-20"
+      className="min-h-screen bg-background pb-44"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
