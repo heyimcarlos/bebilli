@@ -73,7 +73,7 @@ const ConsistencyRanking: React.FC<ConsistencyRankingProps> = ({ members, curren
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-2"
+      className="space-y-2 pb-24"
     >
       {rankedMembers.map((member, index) => {
         const tier = getStreakTier(member.streak);

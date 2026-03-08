@@ -4,7 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import BottomNav from '@/components/BottomNav';
-import LanguageCurrencyBar from '@/components/LanguageCurrencyBar';
+
 import ScannerOverlay from '@/components/ScannerOverlay';
 import NotificationBell from '@/components/NotificationBell';
 import NotificationPanel from '@/components/NotificationPanel';
@@ -28,7 +28,9 @@ import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import GoalCelebration from '@/components/GoalCelebration';
-import { Loader2, Menu } from 'lucide-react';
+import { Loader2, Menu, Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import BilliLogo from '@/components/BilliLogo';
 import SupportFormModal from '@/components/SupportFormModal';
 
 const AppContent: React.FC = () => {
@@ -157,31 +159,21 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {/* Language/Currency selector bar */}
-      <div className="fixed top-0 left-0 right-0 z-40">
-        <LanguageCurrencyBar />
-      </div>
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 z-40 bg-card border-b border-border">
+        <div className="flex items-center justify-between px-4 h-14 max-w-md mx-auto">
+          <BilliLogo size={32} showText />
+          <div className="flex items-center gap-1">
+            <NotificationBell onClick={() => setShowNotifications(true)} />
+            <Button variant="ghost" size="icon" onClick={() => setShowSideDrawer(true)}>
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
 
-      {/* Top bar: notification + hamburger */}
-      <motion.div
-        className="fixed top-[68px] right-4 z-50 flex items-center gap-2"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', delay: 0.3 }}
-      >
-        <NotificationBell onClick={() => setShowNotifications(true)} />
-        <motion.button
-          onClick={() => setShowSideDrawer(true)}
-          className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card transition-all"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Menu className="w-4.5 h-4.5" />
-        </motion.button>
-      </motion.div>
-
-      {/* Main content with top padding for fixed language bar */}
-      <div className="pt-[60px]">
+      {/* Main content */}
+      <div className="pt-14 pb-20">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
