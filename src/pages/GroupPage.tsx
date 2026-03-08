@@ -415,7 +415,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     <motion.div className="min-h-screen bg-background pb-44" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
       <div className="relative">
-        <div className="absolute inset-0 h-48">
+        <div className="absolute inset-0 h-64">
           <img
             src={group.image_url || "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800"}
             alt={group.name}
@@ -684,13 +684,13 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </TabsList>
 
           <TabsContent value="consistency">
-            <div className="h-48 overflow-y-auto pr-1">
+            <div className="h-64 overflow-y-auto pr-1">
               <ConsistencyRanking members={group.members} currentUserId={profile?.id} />
             </div>
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-0">
-            <div className="h-48 overflow-y-auto pr-1 flex flex-col">
+            <div className="h-64 overflow-y-auto pr-1 flex flex-col">
               <div className="glass-card p-4 flex-1 min-h-0 overflow-y-auto space-y-3">
                 {/* Bot welcome message */}
                 <motion.div className="flex gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -792,13 +792,13 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </TabsContent>
 
           <TabsContent value="receipts">
-            <div className="h-48 overflow-y-auto pr-1">
+            <div className="h-64 overflow-y-auto pr-1">
               <ReceiptValidationHistory groupId={groupId} />
             </div>
           </TabsContent>
 
           <TabsContent value="dream">
-            <div className="h-48 overflow-y-auto pr-1">
+            <div className="h-64 overflow-y-auto pr-1">
               <PartnerCoupons
                 userLevel={profile?.level || 1}
                 groupProgress={progress}
