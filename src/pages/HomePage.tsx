@@ -298,7 +298,38 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                     ))}
                   </div>
                 </div>
-                <div className="space-y-2"><Label>{t('goalAmount')} ($)</Label><Input type="number" placeholder="50000" className="bg-secondary" value={newGroup.goal} onChange={(e) => setNewGroup({ ...newGroup, goal: e.target.value })} /></div>
+                {/* Goal Mode Selection */}
+                <div className="space-y-2">
+                  <Label>{t('goalMode') || 'Modo da Meta'}</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button type="button" onClick={() => setNewGroup({ ...newGroup, goalMode: 'fixed' })}
+                      className={`p-3 rounded-xl border text-center text-sm transition-all ${newGroup.goalMode === 'fixed' ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground hover:border-primary/50'}`}>
+                      <span className="text-lg block">🎯</span>
+                      <span className="text-xs">{t('fixedGoal')}</span>
+                    </button>
+                    <button type="button" onClick={() => setNewGroup({ ...newGroup, goalMode: 'competition' })}
+                      className={`p-3 rounded-xl border text-center text-sm transition-all ${newGroup.goalMode === 'competition' ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border bg-secondary text-muted-foreground hover:border-primary/50'}`}>
+                      <span className="text-lg block">🏆</span>
+                      <span className="text-xs">{t('openGoal')}</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {newGroup.goalMode === 'fixed' ? t('fixedGoalDesc') : t('openGoalDesc')}
+                  </p>
+                </div>
+                {/* Competition End Date */}
+                {newGroup.goalMode === 'competition' && (
+                  <div className="space-y-2">
+                    <Label>{t('competitionEndDate')}</Label>
+                    <Input
+                      type="date"
+                      className="bg-secondary"
+                      value={newGroup.competitionEndDate}
+                      min={format(new Date(), 'yyyy-MM-dd')}
+                      onChange={(e) => setNewGroup({ ...newGroup, competitionEndDate: e.target.value })}
+                    />
+                  </div>
+                )}
                 <div className="space-y-2"><Label>{t('descriptionOptional')}</Label><Textarea placeholder={t('descriptionPlaceholder')} className="bg-secondary resize-none" rows={3} value={newGroup.description} onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })} /></div>
                 <Button onClick={handleCreateGroup} disabled={creating || uploading || !newGroup.name || !newGroup.goal} className="w-full btn-primary text-primary-foreground">
                   {creating || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('createGroupButton')}
