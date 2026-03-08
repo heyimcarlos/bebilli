@@ -224,6 +224,9 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
         )}
         <BillionaireCheckin hasCheckedInToday={hasContributedToday} onCheckin={handleDailyChallengeContribute} groups={groups.map(g => ({ id: g.id, name: g.name, goal_amount: g.goal_amount }))} />
         <MotivationalBanner />
+        <div className="mb-4">
+          <WhatsAppBanner />
+        </div>
 
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3 mb-6">
