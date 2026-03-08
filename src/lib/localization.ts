@@ -36,9 +36,7 @@ export const currencySymbols: Record<ExtendedCurrency, string> = {
 };
 
 export const currencyDecimals: Record<ExtendedCurrency, number> = {
-  CAD: 2, USD: 2, EUR: 2, BRL: 2, MXN: 2, CHF: 2, GBP: 2,
-  AUD: 2,
-  JPY: 0,
+  CAD: 2, USD: 2, BRL: 2,
 };
 
 // Community categories
