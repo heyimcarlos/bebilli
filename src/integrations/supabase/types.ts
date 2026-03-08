@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       bot_group_links: {
         Row: {
           created_at: string
@@ -237,6 +261,7 @@ export type Database = {
           group_id: string
           id: string
           note: string | null
+          source: string
           type: string
           user_id: string
         }
@@ -246,6 +271,7 @@ export type Database = {
           group_id: string
           id?: string
           note?: string | null
+          source?: string
           type?: string
           user_id: string
         }
@@ -255,6 +281,7 @@ export type Database = {
           group_id?: string
           id?: string
           note?: string | null
+          source?: string
           type?: string
           user_id?: string
         }

@@ -4,7 +4,7 @@ import {
   ArrowLeft, Users, Target, Key, Copy, RefreshCw, Loader2, Search, 
   TrendingUp, Crown, Shield, UserCog, Ticket, Mail, ToggleLeft, ToggleRight,
   ChevronDown, ChevronUp, DollarSign, Calendar, Filter, BarChart3, Eye,
-  Activity, Globe, Coins, CreditCard, Receipt, Download, PieChart
+  Activity, Globe, Coins, CreditCard, Receipt, Download, PieChart, MessageCircle, Save, Smartphone, Monitor
 } from 'lucide-react';
 import AdminAnalyticsTab from '@/components/AdminAnalyticsTab';
 import { supabase } from '@/integrations/supabase/client';
@@ -130,6 +130,11 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [subscriptionsLoading, setSubscriptionsLoading] = useState(false);
 
+  // WhatsApp settings
+  const [whatsappBotNumber, setWhatsappBotNumber] = useState('');
+  const [whatsappNumberSaving, setWhatsappNumberSaving] = useState(false);
+  const [botUserLinks, setBotUserLinks] = useState<any[]>([]);
+
   // Filters
   const [filterCountry, setFilterCountry] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
@@ -179,6 +184,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     fetchContributions();
     fetchCouponUsages();
     fetchSubscriptions();
+    fetchWhatsAppSettings();
   };
 
   // ===== FETCH SUBSCRIPTIONS =====
@@ -322,6 +328,28 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     setGroups(result);
     setGroupsLoading(false);
+  };
+
+  // ===== FETCH WHATSAPP SETTINGS =====
+  const fetchWhatsAppSettings = async () => {
+    const [settingsRes, linksRes] = await Promise.all([
+      supabase.from('app_settings' as any).select('value').eq('key', 'whatsapp_bot_number').single(),
+      supabase.from('bot_user_links').select('*').eq('platform', 'whatsapp').order('created_at', { ascending: false }),
+    ]);
+    if ((settingsRes.data as any)?.value) setWhatsappBotNumber((settingsRes.data as any).value);
+    setBotUserLinks(linksRes.data || []);
+  };
+
+  const saveWhatsAppNumber = async () => {
+    setWhatsappNumberSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from('app_settings' as any).update({ value: whatsappBotNumber, updated_by: user?.id, updated_at: new Date().toISOString() } as any).eq('key', 'whatsapp_bot_number');
+    if (error) {
+      toast({ title: t('error'), description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '✅', description: 'WhatsApp number saved!' });
+    }
+    setWhatsappNumberSaving(false);
   };
 
   // ===== FETCH CONTRIBUTIONS =====
@@ -724,13 +752,14 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-6 h-9">
+          <TabsList className="w-full grid grid-cols-7 h-9">
             <TabsTrigger value="users" className="text-[10px] px-1"><UserCog className="w-3 h-3 mr-0.5" />{t('adminUsers')}</TabsTrigger>
             <TabsTrigger value="groups" className="text-[10px] px-1"><Target className="w-3 h-3 mr-0.5" />{t('adminGroups')}</TabsTrigger>
             <TabsTrigger value="analytics" className="text-[10px] px-1"><PieChart className="w-3 h-3 mr-0.5" />Analytics</TabsTrigger>
             <TabsTrigger value="financial" className="text-[10px] px-1"><BarChart3 className="w-3 h-3 mr-0.5" />{t('adminFinancial')}</TabsTrigger>
             <TabsTrigger value="subscriptions" className="text-[10px] px-1"><CreditCard className="w-3 h-3 mr-0.5" />{t('adminSubscriptions')}</TabsTrigger>
             <TabsTrigger value="coupons" className="text-[10px] px-1"><Ticket className="w-3 h-3 mr-0.5" />{t('adminCoupons')}</TabsTrigger>
+            <TabsTrigger value="whatsapp" className="text-[10px] px-1"><MessageCircle className="w-3 h-3 mr-0.5" />WhatsApp</TabsTrigger>
           </TabsList>
 
           {/* ==================== USERS TAB ==================== */}
@@ -1206,6 +1235,68 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
               </div>
             )}
+          </TabsContent>
+          {/* ==================== WHATSAPP TAB ==================== */}
+          <TabsContent value="whatsapp" className="space-y-4 mt-4">
+            {/* Bot Number Config */}
+            <div className="glass-card p-4 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                <h3 className="text-sm font-bold">WhatsApp Bot Number</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">Configure the official Billi WhatsApp number that users will message to interact with the bot.</p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="+5511999999999"
+                  value={whatsappBotNumber}
+                  onChange={(e) => setWhatsappBotNumber(e.target.value)}
+                  className="bg-secondary text-sm"
+                />
+                <Button onClick={saveWhatsAppNumber} disabled={whatsappNumberSaving} size="sm" className="px-4">
+                  {whatsappNumberSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-3 h-3 mr-1" />Save</>}
+                </Button>
+              </div>
+            </div>
+
+            {/* Source Stats */}
+            <div className="glass-card p-4 space-y-3">
+              <h3 className="text-sm font-bold">Contribution Sources</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center p-3 rounded-xl bg-secondary/50">
+                  <Monitor className="w-5 h-5 mx-auto mb-1 text-primary" />
+                  <p className="text-lg font-bold">{allContributions.filter((c: any) => !c.source || c.source === 'app').length}</p>
+                  <p className="text-[10px] text-muted-foreground">Via App</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-[#25D366]/10">
+                  <Smartphone className="w-5 h-5 mx-auto mb-1 text-[#25D366]" />
+                  <p className="text-lg font-bold">{allContributions.filter((c: any) => c.source === 'whatsapp').length}</p>
+                  <p className="text-[10px] text-muted-foreground">Via WhatsApp</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Linked Users */}
+            <div className="glass-card p-4 space-y-3">
+              <h3 className="text-sm font-bold">Linked WhatsApp Users ({botUserLinks.length})</h3>
+              {botUserLinks.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">No users linked via WhatsApp yet</p>
+              ) : (
+                <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                  {botUserLinks.map((link: any) => {
+                    const linkedUser = users.find(u => u.id === link.user_id);
+                    return (
+                      <div key={link.id} className="flex items-center justify-between bg-secondary/30 rounded-lg p-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                          <span className="font-medium">{linkedUser?.name || 'Unknown'}</span>
+                        </div>
+                        <span className="text-muted-foreground font-mono text-[10px]">{link.platform_identifier}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
