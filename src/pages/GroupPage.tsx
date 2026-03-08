@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus, Eye, EyeOff, Flame, Clock } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus, Eye, EyeOff, Flame, Clock, ShieldCheck, AlertTriangle, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useGroupChat } from '@/hooks/useGroupChat';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
 import ConsistencyRanking from '@/components/ConsistencyRanking';
+import ReceiptValidationHistory from '@/components/ReceiptValidationHistory';
 import {
   Dialog,
   DialogContent,
@@ -477,10 +478,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       {/* Tabs */}
       <div className="px-6">
         <Tabs defaultValue="ranking" className="w-full">
-          <TabsList className="w-full bg-secondary mb-4">
+          <TabsList className="w-full bg-secondary mb-4 flex-wrap">
             <TabsTrigger value="ranking" className="flex-1">{t('ranking')}</TabsTrigger>
             <TabsTrigger value="consistency" className="flex-1">{t('consistency')}</TabsTrigger>
             <TabsTrigger value="chat" className="flex-1">{t('chat')}</TabsTrigger>
+            <TabsTrigger value="receipts" className="flex-1">{t('receipts') || 'Receipts'}</TabsTrigger>
             <TabsTrigger value="dream" className="flex-1">{t('dreamPanel')}</TabsTrigger>
           </TabsList>
 
@@ -597,6 +599,10 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 </Button>
               </motion.div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="receipts" className="space-y-4">
+            <ReceiptValidationHistory groupId={groupId} />
           </TabsContent>
 
           <TabsContent value="dream" className="space-y-4">
