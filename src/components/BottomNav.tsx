@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Users, Compass, User } from 'lucide-react';
+import { Home, Users, Compass, Activity } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 
 interface BottomNavProps {
@@ -14,8 +14,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'home', icon: Home, label: t('home') },
     { id: 'groups', icon: Users, label: t('myGroups') },
+    { id: 'feed', icon: Activity, label: 'Feed' },
     { id: 'explore', icon: Compass, label: t('explore') },
-    { id: 'profile', icon: User, label: t('profile') },
   ];
 
   return (
