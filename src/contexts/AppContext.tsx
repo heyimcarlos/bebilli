@@ -1894,7 +1894,7 @@ const translations: Record<Language, Record<string, string>> = {
     codeNotAvailable: 'Code non disponible',
     competitionMode: 'Compétition',
     endsOn: 'Se termine le',
-    totalSaved: 'Total',
+    competitionTotal: 'Total',
     yourPercentage: 'Votre %',
     setSalary: 'Définir le salaire',
     salary: 'Salaire',
