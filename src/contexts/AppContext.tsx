@@ -1435,7 +1435,6 @@ const translations: Record<Language, Record<string, string>> = {
     noValidationsDesc: 'Les reçus scannés via le scanner apparaîtront ici',
     approved: 'Approuvé',
     flagged: 'Signalé',
-    pending: 'En attente',
     declared: 'Déclaré',
     extracted: 'Extrait',
     receiptDate: 'Date du reçu',
