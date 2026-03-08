@@ -159,11 +159,13 @@ const AppContent: React.FC = () => {
   return (
     <>
       {/* Language/Currency selector bar */}
-      <LanguageCurrencyBar />
+      <div className="fixed top-0 left-0 right-0 z-40">
+        <LanguageCurrencyBar />
+      </div>
 
       {/* Top bar: notification + hamburger */}
       <motion.div
-        className="fixed top-14 right-4 z-50 flex items-center gap-2"
+        className="fixed top-[68px] right-4 z-50 flex items-center gap-2"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 0.3 }}
@@ -179,20 +181,23 @@ const AppContent: React.FC = () => {
         </motion.button>
       </motion.div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, x: activeTab === 'profile' ? 20 : -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: activeTab === 'profile' ? -20 : 20 }}
-          transition={{ duration: 0.2 }}
-        >
-          {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
-          {activeTab === 'groups' && <HomePage onGroupClick={handleGroupClick} />}
-          {activeTab === 'explore' && <ExplorePage />}
-          {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
-        </motion.div>
-      </AnimatePresence>
+      {/* Main content with top padding for fixed language bar */}
+      <div className="pt-[60px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: activeTab === 'profile' ? 20 : -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: activeTab === 'profile' ? -20 : 20 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
+            {activeTab === 'groups' && <HomePage onGroupClick={handleGroupClick} />}
+            {activeTab === 'explore' && <ExplorePage />}
+            {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
