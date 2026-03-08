@@ -176,6 +176,48 @@ const PremiumAnalytics: React.FC = () => {
         </div>
       </div>
 
+      {/* Monthly Comparison Chart */}
+      <div className="glass-card p-4 border border-amber-500/20">
+        <div className="flex items-center gap-2 mb-3">
+          <TrendingUp className="w-4 h-4 text-amber-500" />
+          <p className="text-sm font-medium">{t('monthlySavings') || 'Economia Mensal'}</p>
+        </div>
+        <div className="flex items-end gap-1.5 h-28">
+          {monthlyData.map((month, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+              <div className="w-full flex gap-0.5 items-end justify-center" style={{ height: '80px' }}>
+                <motion.div
+                  className="w-[45%] bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-sm"
+                  initial={{ height: 0 }}
+                  animate={{ height: `${(month.deposited / maxMonthlyAmount) * 80}px` }}
+                  transition={{ delay: i * 0.08, duration: 0.5 }}
+                />
+                <motion.div
+                  className="w-[45%] bg-gradient-to-t from-red-400 to-red-300 rounded-t-sm"
+                  initial={{ height: 0 }}
+                  animate={{ height: `${(month.withdrawn / maxMonthlyAmount) * 80}px` }}
+                  transition={{ delay: i * 0.08 + 0.05, duration: 0.5 }}
+                />
+              </div>
+              <span className="text-[10px] text-muted-foreground">{month.label}</span>
+              <span className={`text-[9px] font-semibold ${month.net >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
+                {month.net >= 0 ? '+' : ''}{formatCurrency(month.net)}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-center gap-4 mt-2">
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+            <span className="text-[10px] text-muted-foreground">{t('deposits') || 'Depósitos'}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 rounded-sm bg-red-400" />
+            <span className="text-[10px] text-muted-foreground">{t('withdrawals') || 'Retiradas'}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Per-Group Breakdown */}
       {groupBreakdown.length > 0 && (
         <div className="glass-card p-4 border border-amber-500/20">
