@@ -1,8 +1,6 @@
 // Localization support - focused markets
 
-export type ExtendedCurrency = 
-  | 'CAD' | 'USD' | 'EUR' | 'BRL' | 'MXN' | 'CHF' | 'GBP'
-  | 'AUD' | 'JPY';
+export type ExtendedCurrency = 'CAD' | 'USD' | 'BRL';
 
 export interface Country {
   code: string;
@@ -16,48 +14,29 @@ export const countries: Country[] = [
   { code: 'BR', name: 'Brazil', flag: '🇧🇷', currency: 'BRL', locale: 'pt-BR' },
   { code: 'US', name: 'United States', flag: '🇺🇸', currency: 'USD', locale: 'en-US' },
   { code: 'CA', name: 'Canada', flag: '🇨🇦', currency: 'CAD', locale: 'en-CA' },
-  { code: 'FR', name: 'France', flag: '🇫🇷', currency: 'EUR', locale: 'fr-FR' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', currency: 'GBP', locale: 'en-GB' },
-  { code: 'PT', name: 'Portugal', flag: '🇵🇹', currency: 'EUR', locale: 'pt-PT' },
-  { code: 'MX', name: 'Mexico', flag: '🇲🇽', currency: 'MXN', locale: 'es-MX' },
-  { code: 'AU', name: 'Australia', flag: '🇦🇺', currency: 'AUD', locale: 'en-AU' },
-  { code: 'CH', name: 'Switzerland', flag: '🇨🇭', currency: 'CHF', locale: 'fr-CH' },
-  { code: 'BE', name: 'Belgium', flag: '🇧🇪', currency: 'EUR', locale: 'fr-BE' },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪', currency: 'EUR', locale: 'de-DE' },
-  { code: 'IT', name: 'Italy', flag: '🇮🇹', currency: 'EUR', locale: 'it-IT' },
-  { code: 'ES', name: 'Spain', flag: '🇪🇸', currency: 'EUR', locale: 'es-ES' },
-  { code: 'JP', name: 'Japan', flag: '🇯🇵', currency: 'JPY', locale: 'ja-JP' },
-  { code: 'NL', name: 'Netherlands', flag: '🇳🇱', currency: 'EUR', locale: 'nl-NL' },
+  { code: 'FR', name: 'France', flag: '🇫🇷', currency: 'USD', locale: 'fr-FR' },
+  { code: 'MX', name: 'Mexico', flag: '🇲🇽', currency: 'USD', locale: 'es-MX' },
+  { code: 'ES', name: 'Spain', flag: '🇪🇸', currency: 'USD', locale: 'es-ES' },
+  { code: 'AR', name: 'Argentina', flag: '🇦🇷', currency: 'USD', locale: 'es-AR' },
+  { code: 'CO', name: 'Colombia', flag: '🇨🇴', currency: 'USD', locale: 'es-CO' },
+  { code: 'CL', name: 'Chile', flag: '🇨🇱', currency: 'USD', locale: 'es-CL' },
+  { code: 'PT', name: 'Portugal', flag: '🇵🇹', currency: 'USD', locale: 'pt-PT' },
 ];
 
 export const currencyRates: Record<ExtendedCurrency, number> = {
   CAD: 1,
   USD: 0.74,
-  EUR: 0.68,
   BRL: 3.70,
-  MXN: 12.50,
-  CHF: 0.65,
-  GBP: 0.58,
-  AUD: 1.12,
-  JPY: 110.50,
 };
 
 export const currencySymbols: Record<ExtendedCurrency, string> = {
   CAD: 'CA$',
   USD: 'US$',
-  EUR: '€',
   BRL: 'R$',
-  MXN: 'MX$',
-  CHF: 'CHF',
-  GBP: '£',
-  AUD: 'A$',
-  JPY: '¥',
 };
 
 export const currencyDecimals: Record<ExtendedCurrency, number> = {
-  CAD: 2, USD: 2, EUR: 2, BRL: 2, MXN: 2, CHF: 2, GBP: 2,
-  AUD: 2,
-  JPY: 0,
+  CAD: 2, USD: 2, BRL: 2,
 };
 
 // Community categories
