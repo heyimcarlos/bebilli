@@ -63,7 +63,12 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
   if (!group) return null;
 
-  const progress = group.goal_amount > 0 ? (group.current_amount / group.goal_amount) * 100 : 0;
+  const isOpenGoal = (group as any).is_open_goal || false;
+  const competitionEndDate = (group as any).competition_end_date;
+  const progress = !isOpenGoal && group.goal_amount > 0 ? (group.current_amount / group.goal_amount) * 100 : 0;
+  
+  // Current user's membership info
+  const currentMembership = group.members.find(m => m.user_id === profile?.id);
   
   // Check if current user is admin
   const isAdmin = group.members.some(m => m.user_id === profile?.id && m.role === 'admin');
