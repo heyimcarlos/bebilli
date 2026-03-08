@@ -35,12 +35,16 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'analytics' | 'subscription'>('overview');
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+  const [cancelledSub, setCancelledSub] = useState<SubscriptionInfo | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
+
   useEffect(() => {
-    if (!user || !isPremium) return;
+    if (!user) return;
     const fetchSub = async () => {
-      const { data } = await supabase
+      // Fetch active subscription
+      const { data: activeSub } = await supabase
         .from('user_subscriptions')
         .select('id, plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
         .eq('user_id', user.id)
@@ -48,10 +52,23 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data) setSubscription(data as SubscriptionInfo);
+      if (activeSub) {
+        setSubscription(activeSub as SubscriptionInfo);
+        return;
+      }
+      // Fetch cancelled subscription for reactivation
+      const { data: cancelled } = await supabase
+        .from('user_subscriptions')
+        .select('id, plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
+        .eq('user_id', user.id)
+        .eq('status', 'cancelled')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) setCancelledSub(cancelled as SubscriptionInfo);
     };
     fetchSub();
-  }, [user, isPremium]);
+  }, [user]);
 
   const showPanel = externalOpen !== undefined ? externalOpen : internalOpen;
   const closePanel = () => {
@@ -331,6 +348,105 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
                             </motion.div>
                           )}
                         </>
+                      ) : cancelledSub ? (
+                        /* Reactivation Banner */
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="space-y-4"
+                        >
+                          <div className="relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-amber-500/5 p-5">
+                            <motion.div
+                              className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/5 to-transparent"
+                              animate={{ x: ['-100%', '100%'] }}
+                              transition={{ repeat: Infinity, duration: 4, ease: 'linear' }}
+                            />
+                            <div className="relative space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Crown className="w-6 h-6 text-amber-500" />
+                                <h3 className="font-bold text-lg">{t('weWantYouBack') || 'We want you back!'}</h3>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {t('reactivateDesc') || 'Reactivate your VIP subscription and regain access to all premium benefits instantly.'}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Calendar className="w-3.5 h-3.5" />
+                                <span>{t('previousPlan') || 'Previous plan'}: <span className="font-semibold capitalize">{cancelledSub.plan_type}</span> — {formatCurrency(cancelledSub.amount)}/{cancelledSub.plan_type === 'annual' ? (t('year') || 'yr') : (t('month') || 'mo')}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Benefits reminder */}
+                          <div className="space-y-1.5">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('whatYouMiss') || "What you're missing"}</p>
+                            {[
+                              { icon: Zap, label: t('unlimitedGroups') || 'Unlimited Groups' },
+                              { icon: Shield, label: t('advancedAnalytics') || 'Advanced Analytics' },
+                              { icon: Gift, label: t('exclusiveCoupons') || 'Exclusive Coupons' },
+                            ].map((b, i) => (
+                              <motion.div
+                                key={b.label}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 + i * 0.05 }}
+                                className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50"
+                              >
+                                <div className="w-7 h-7 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                  <b.icon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                                </div>
+                                <p className="text-sm font-medium flex-1">{b.label}</p>
+                                <XCircle className="w-4 h-4 text-muted-foreground/40" />
+                              </motion.div>
+                            ))}
+                          </div>
+
+                          <motion.button
+                            onClick={async () => {
+                              if (!cancelledSub || !user) return;
+                              setReactivating(true);
+                              try {
+                                const now = new Date().toISOString();
+                                const renewalDate = new Date();
+                                renewalDate.setMonth(renewalDate.getMonth() + (cancelledSub.plan_type === 'annual' ? 12 : 1));
+
+                                const { error: subError } = await supabase
+                                  .from('user_subscriptions')
+                                  .update({
+                                    status: 'active',
+                                    cancelled_at: null,
+                                    subscribed_at: now,
+                                    renewal_date: renewalDate.toISOString(),
+                                    payment_date: now,
+                                  })
+                                  .eq('id', cancelledSub.id);
+                                if (subError) throw subError;
+
+                                const { error: profileError } = await supabase
+                                  .from('profiles')
+                                  .update({ is_premium: true })
+                                  .eq('id', user.id);
+                                if (profileError) throw profileError;
+
+                                setSubscription({ ...cancelledSub, status: 'active', subscribed_at: now, renewal_date: renewalDate.toISOString() });
+                                setCancelledSub(null);
+                                toast.success(t('subscriptionReactivated') || 'Welcome back! VIP reactivated 🎉');
+                                setTimeout(() => window.location.reload(), 1500);
+                              } catch (err) {
+                                console.error('Reactivation error:', err);
+                                toast.error(t('reactivateError') || 'Failed to reactivate subscription');
+                              } finally {
+                                setReactivating(false);
+                              }
+                            }}
+                            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-2"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            disabled={reactivating}
+                          >
+                            {reactivating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+                            {reactivating ? (t('reactivating') || 'Reactivating...') : (t('reactivateVIP') || 'Reactivate VIP')}
+                          </motion.button>
+                        </motion.div>
                       ) : (
                         <div className="text-center py-6">
                           <Crown className="w-10 h-10 mx-auto text-amber-500 mb-3" />
