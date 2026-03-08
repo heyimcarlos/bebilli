@@ -25,11 +25,12 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
   const [subscribing, setSubscribing] = useState(false);
   const [redeemed, setRedeemed] = useState(false);
   
-  // Fixed regional pricing (not converted from CAD)
+  // Fixed regional pricing per spec
   const regionalPricing: Record<string, { monthly: number; symbol: string }> = {
-    CAD: { monthly: 9.90, symbol: 'CA$' },
-    USD: { monthly: 9.99, symbol: 'US$' },
     BRL: { monthly: 9.90, symbol: 'R$' },
+    CAD: { monthly: 5.90, symbol: 'CA$' },
+    USD: { monthly: 4.00, symbol: 'US$' },
+    EUR: { monthly: 3.90, symbol: '€' },
   };
   
   const pricing = regionalPricing[currency] || regionalPricing.USD;

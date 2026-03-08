@@ -265,6 +265,7 @@ const LoginPage: React.FC = () => {
                 <SelectItem value="BRL">🇧🇷 R$ BRL</SelectItem>
                 <SelectItem value="CAD">🇨🇦 CA$ CAD</SelectItem>
                 <SelectItem value="USD">🇺🇸 US$ USD</SelectItem>
+                <SelectItem value="EUR">🇫🇷 € EUR</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -4,6 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import BottomNav from '@/components/BottomNav';
+import LanguageCurrencyBar from '@/components/LanguageCurrencyBar';
 import ScannerOverlay from '@/components/ScannerOverlay';
 import NotificationBell from '@/components/NotificationBell';
 import NotificationPanel from '@/components/NotificationPanel';
@@ -157,6 +158,9 @@ const AppContent: React.FC = () => {
 
   return (
     <>
+      {/* Language/Currency selector bar */}
+      <LanguageCurrencyBar />
+
       {/* Top bar: notification + hamburger */}
       <motion.div
         className="fixed top-14 right-4 z-50 flex items-center gap-2"
@@ -184,6 +188,7 @@ const AppContent: React.FC = () => {
           transition={{ duration: 0.2 }}
         >
           {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
+          {activeTab === 'groups' && <HomePage onGroupClick={handleGroupClick} />}
           {activeTab === 'explore' && <ExplorePage />}
           {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
         </motion.div>
