@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle, ArrowRightLeft } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
