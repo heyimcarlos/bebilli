@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, Image, X, ZoomIn } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface ReceiptValidation {
   id: string;
@@ -30,6 +31,7 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
   const { user } = useAuthContext();
   const [validations, setValidations] = useState<ReceiptValidation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchValidations = async () => {
@@ -94,62 +96,98 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 mb-2">
-        <ShieldCheck className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-bold">{t('validationHistory') || 'Validation History'}</h3>
-        <Badge variant="outline" className="text-[10px] ml-auto">{validations.length}</Badge>
-      </div>
-      
-      {validations.map((v, i) => (
-        <motion.div
-          key={v.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-          className="glass-card p-3 space-y-2"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {getStatusBadge(v.validation_status, v.amount_match)}
-              {v.extracted_type && (
-                <span className="text-[10px] text-muted-foreground capitalize bg-secondary px-2 py-0.5 rounded-full">
-                  {v.extracted_type}
-                </span>
-              )}
+    <>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-2">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-bold">{t('validationHistory') || 'Validation History'}</h3>
+          <Badge variant="outline" className="text-[10px] ml-auto">{validations.length}</Badge>
+        </div>
+        
+        {validations.map((v, i) => (
+          <motion.div
+            key={v.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="glass-card p-3 space-y-2"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {getStatusBadge(v.validation_status, v.amount_match)}
+                {v.extracted_type && (
+                  <span className="text-[10px] text-muted-foreground capitalize bg-secondary px-2 py-0.5 rounded-full">
+                    {v.extracted_type}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {new Date(v.created_at).toLocaleDateString()}
+              </span>
             </div>
-            <span className="text-[10px] text-muted-foreground">
-              {new Date(v.created_at).toLocaleDateString()}
-            </span>
-          </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <p className="text-muted-foreground">{t('declared') || 'Declared'}</p>
-              <p className="font-semibold">{formatCurrency(v.declared_amount)}</p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <p className="text-muted-foreground">{t('declared') || 'Declared'}</p>
+                <p className="font-semibold">{formatCurrency(v.declared_amount)}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">{t('extracted') || 'Extracted'}</p>
+                <p className={`font-semibold ${v.amount_match === false ? 'text-amber-500' : v.amount_match === true ? 'text-green-500' : ''}`}>
+                  {v.extracted_amount != null ? formatCurrency(v.extracted_amount) : '—'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-muted-foreground">{t('extracted') || 'Extracted'}</p>
-              <p className={`font-semibold ${v.amount_match === false ? 'text-amber-500' : v.amount_match === true ? 'text-green-500' : ''}`}>
-                {v.extracted_amount != null ? formatCurrency(v.extracted_amount) : '—'}
+
+            {v.extracted_date && (
+              <p className="text-[10px] text-muted-foreground">
+                {t('receiptDate') || 'Receipt date'}: {v.extracted_date}
               </p>
-            </div>
+            )}
+
+            {/* Receipt image thumbnail */}
+            {v.receipt_image_url && (
+              <button
+                onClick={() => setSelectedImage(v.receipt_image_url)}
+                className="flex items-center gap-2 w-full mt-1 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-xs text-muted-foreground group"
+              >
+                <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0 border border-border">
+                  <img
+                    src={v.receipt_image_url}
+                    alt="Receipt"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <span className="flex-1 text-left">{t('viewReceipt') || 'View receipt'}</span>
+                <ZoomIn className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            )}
+
+            {v.validation_status === 'flagged' && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 text-xs text-amber-600">
+                ⚠️ {t('flaggedWarning') || 'Amount mismatch detected. Requires group review.'}
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Full-screen image viewer */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 bg-background/95 backdrop-blur-sm border-border">
+          <div className="relative flex items-center justify-center min-h-[50vh]">
+            {selectedImage && (
+              <img
+                src={selectedImage}
+                alt="Receipt"
+                className="max-w-full max-h-[85vh] object-contain rounded-lg"
+              />
+            )}
           </div>
-
-          {v.extracted_date && (
-            <p className="text-[10px] text-muted-foreground">
-              {t('receiptDate') || 'Receipt date'}: {v.extracted_date}
-            </p>
-          )}
-
-          {v.validation_status === 'flagged' && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 text-xs text-amber-600">
-              ⚠️ {t('flaggedWarning') || 'Amount mismatch detected. Requires group review.'}
-            </div>
-          )}
-        </motion.div>
-      ))}
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
