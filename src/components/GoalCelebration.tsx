@@ -88,7 +88,7 @@ const GoalCelebration: React.FC<GoalCelebrationProps> = ({ isOpen, onClose, grou
                 onClick={onClose}
                 className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-2xl"
               >
-                {t('celebrate') || 'Celebrate! 🎊'}
+                {t('celebrate')}
               </Button>
             </div>
           </motion.div>
