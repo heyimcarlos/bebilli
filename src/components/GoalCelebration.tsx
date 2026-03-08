@@ -66,7 +66,7 @@ const GoalCelebration: React.FC<GoalCelebrationProps> = ({ isOpen, onClose, grou
                 transition={{ delay: 0.3 }}
                 className="text-2xl font-black mb-2"
               >
-                🎉 {t('goalAchieved') || 'Goal Achieved!'}
+                🎉 {t('goalAchieved')}
               </motion.h2>
               <motion.p
                 initial={{ y: 20, opacity: 0 }}
@@ -82,13 +82,13 @@ const GoalCelebration: React.FC<GoalCelebrationProps> = ({ isOpen, onClose, grou
                 transition={{ delay: 0.7 }}
                 className="text-sm text-muted-foreground mb-6"
               >
-                {t('goalAchievedDesc') || 'Your group reached 100% of the goal! Congratulations to all members! 🥳🎊'}
+                {t('goalAchievedDesc')}
               </motion.p>
               <Button
                 onClick={onClose}
                 className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-2xl"
               >
-                {t('celebrate') || 'Celebrate! 🎊'}
+                {t('celebrate')}
               </Button>
             </div>
           </motion.div>

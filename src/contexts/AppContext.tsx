@@ -740,6 +740,24 @@ const translations: Record<Language, Record<string, string>> = {
     timelineDesc: 'Conquistas anônimas da comunidade',
     noEventsYet: 'Nenhuma conquista ainda',
     beFirstAchievement: 'Comece seu streak para aparecer aqui!',
+    // Dynamic challenge titles
+    dailySaveChallenge: 'Economize hoje',
+    easyDayChallenge: 'Economia rápida',
+    ambitiousChallenge: 'Grande impulso',
+    balancedChallenge: 'Economia constante',
+    doubleChallenge: 'Dia de potência',
+    microChallenge: 'Micro economia',
+    growthChallenge: 'Passo de crescimento',
+    // Goal celebration
+    goalAchieved: 'Meta Alcançada!',
+    goalAchievedDesc: 'Seu grupo atingiu 100% da meta! Parabéns a todos os membros! 🥳🎊',
+    celebrate: 'Celebrar! 🎊',
+    // Receipt validation
+    receiptApproved: 'Comprovante aprovado automaticamente ✓',
+    receiptFlagged: 'Valor divergente — pendente de validação do grupo',
+    confidence: 'Confiança',
+    extractedDate: 'Data extraída',
+    transactionType: 'Tipo de transação',
   },
   en: {
     welcome: 'Welcome',
@@ -1354,6 +1372,21 @@ const translations: Record<Language, Record<string, string>> = {
     timelineDesc: 'Anonymous achievements from the community',
     noEventsYet: 'No achievements yet',
     beFirstAchievement: 'Start your streak to appear here!',
+    dailySaveChallenge: 'Save today',
+    easyDayChallenge: 'Quick save',
+    ambitiousChallenge: 'Big push',
+    balancedChallenge: 'Steady save',
+    doubleChallenge: 'Power day',
+    microChallenge: 'Micro save',
+    growthChallenge: 'Growth step',
+    goalAchieved: 'Goal Achieved!',
+    goalAchievedDesc: 'Your group reached 100% of the goal! Congratulations to all members! 🥳🎊',
+    celebrate: 'Celebrate! 🎊',
+    receiptApproved: 'Receipt auto-approved ✓',
+    receiptFlagged: 'Amount mismatch — pending group validation',
+    confidence: 'Confidence',
+    extractedDate: 'Extracted date',
+    transactionType: 'Transaction type',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -1945,6 +1978,21 @@ const translations: Record<Language, Record<string, string>> = {
     timelineDesc: 'Réalisations anonymes de la communauté',
     noEventsYet: 'Aucune réalisation encore',
     beFirstAchievement: 'Commencez votre série pour apparaître ici!',
+    dailySaveChallenge: 'Économisez aujourd\'hui',
+    easyDayChallenge: 'Économie rapide',
+    ambitiousChallenge: 'Grand effort',
+    balancedChallenge: 'Économie régulière',
+    doubleChallenge: 'Journée puissante',
+    microChallenge: 'Micro économie',
+    growthChallenge: 'Pas de croissance',
+    goalAchieved: 'Objectif Atteint !',
+    goalAchievedDesc: 'Votre groupe a atteint 100% de l\'objectif ! Félicitations à tous les membres ! 🥳🎊',
+    celebrate: 'Célébrer ! 🎊',
+    receiptApproved: 'Reçu approuvé automatiquement ✓',
+    receiptFlagged: 'Montant divergent — en attente de validation du groupe',
+    confidence: 'Confiance',
+    extractedDate: 'Date extraite',
+    transactionType: 'Type de transaction',
   },
   es: {
     welcome: 'Bienvenido',
@@ -2569,6 +2617,22 @@ const translations: Record<Language, Record<string, string>> = {
     timelineDesc: 'Logros anónimos de la comunidad',
     noEventsYet: 'Ningún logro aún',
     beFirstAchievement: '¡Comienza tu racha para aparecer aquí!',
+    competitionTotal: 'Total',
+    dailySaveChallenge: 'Ahorra hoy',
+    easyDayChallenge: 'Ahorro rápido',
+    ambitiousChallenge: 'Gran impulso',
+    balancedChallenge: 'Ahorro constante',
+    doubleChallenge: 'Día de potencia',
+    microChallenge: 'Micro ahorro',
+    growthChallenge: 'Paso de crecimiento',
+    goalAchieved: '¡Meta Alcanzada!',
+    goalAchievedDesc: '¡Tu grupo alcanzó el 100% de la meta! ¡Felicitaciones a todos los miembros! 🥳🎊',
+    celebrate: '¡Celebrar! 🎊',
+    receiptApproved: 'Recibo aprobado automáticamente ✓',
+    receiptFlagged: 'Monto divergente — pendiente de validación del grupo',
+    confidence: 'Confianza',
+    extractedDate: 'Fecha extraída',
+    transactionType: 'Tipo de transacción',
   },
 };
 
@@ -2641,7 +2705,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           .maybeSingle();
         
         if (data) {
-          if (data.language && ['pt', 'en', 'fr'].includes(data.language)) {
+          if (data.language && ['pt', 'en', 'fr', 'es'].includes(data.language)) {
             setLanguageState(data.language as Language);
             localStorage.setItem(STORAGE_KEY_LANGUAGE, data.language);
           }
