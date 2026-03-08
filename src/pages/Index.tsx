@@ -191,7 +191,7 @@ const AppContent: React.FC = () => {
             transition={{ duration: 0.2 }}
           >
             {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
-            {activeTab === 'groups' && <HomePage onGroupClick={handleGroupClick} />}
+            {activeTab === 'groups' && <MyGroupsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'feed' && <TimelinePage />}
             {activeTab === 'explore' && <ExplorePage />}
             {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
