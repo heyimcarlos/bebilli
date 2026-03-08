@@ -130,6 +130,11 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [subscriptionsLoading, setSubscriptionsLoading] = useState(false);
 
+  // WhatsApp settings
+  const [whatsappBotNumber, setWhatsappBotNumber] = useState('');
+  const [whatsappNumberSaving, setWhatsappNumberSaving] = useState(false);
+  const [botUserLinks, setBotUserLinks] = useState<any[]>([]);
+
   // Filters
   const [filterCountry, setFilterCountry] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
