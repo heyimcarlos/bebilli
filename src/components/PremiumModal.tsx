@@ -63,7 +63,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
     setCouponError('');
   };
 
-  const formatPrice = (value: number) => `${pricing.symbol} ${value.toLocaleString(undefined, { minimumFractionDigits: currency === 'JPY' || currency === 'KRW' ? 0 : 2, maximumFractionDigits: currency === 'JPY' || currency === 'KRW' ? 0 : 2 })}`;
+  const formatPrice = (value: number) => `${pricing.symbol} ${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   
   const basePrice = selectedPlan === 'monthly' ? MONTHLY_PRICE : ANNUAL_MONTHLY;
   const totalPrice = selectedPlan === 'annual' ? ANNUAL_PRICE : MONTHLY_PRICE;
