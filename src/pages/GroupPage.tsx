@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useGroupChat } from '@/hooks/useGroupChat';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
 import ConsistencyRanking from '@/components/ConsistencyRanking';
+import ReceiptValidationHistory from '@/components/ReceiptValidationHistory';
 import {
   Dialog,
   DialogContent,
