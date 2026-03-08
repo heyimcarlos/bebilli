@@ -116,10 +116,7 @@ const AppContent: React.FC = () => {
         type: 'contribution',
         title: `${t('newContribution')} 💰`,
         message: `${profile?.name || 'You'} ${t('contributedTo')} ${group.name}: ${formatCurrency(amount)}`,
-        groupId: group.id,
-        groupName: group.name,
-        userName: profile?.name,
-        amount,
+        data: { group_id: group.id, group_name: group.name, user_name: profile?.name, amount },
       });
     }
     setTimeout(() => { setShowScanner(false); }, 1000);
