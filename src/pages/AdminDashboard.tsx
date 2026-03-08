@@ -330,6 +330,28 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setGroupsLoading(false);
   };
 
+  // ===== FETCH WHATSAPP SETTINGS =====
+  const fetchWhatsAppSettings = async () => {
+    const [settingsRes, linksRes] = await Promise.all([
+      supabase.from('app_settings' as any).select('value').eq('key', 'whatsapp_bot_number').single(),
+      supabase.from('bot_user_links').select('*').eq('platform', 'whatsapp').order('created_at', { ascending: false }),
+    ]);
+    if ((settingsRes.data as any)?.value) setWhatsappBotNumber((settingsRes.data as any).value);
+    setBotUserLinks(linksRes.data || []);
+  };
+
+  const saveWhatsAppNumber = async () => {
+    setWhatsappNumberSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from('app_settings' as any).update({ value: whatsappBotNumber, updated_by: user?.id, updated_at: new Date().toISOString() } as any).eq('key', 'whatsapp_bot_number');
+    if (error) {
+      toast({ title: t('error'), description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '✅', description: 'WhatsApp number saved!' });
+    }
+    setWhatsappNumberSaving(false);
+  };
+
   // ===== FETCH CONTRIBUTIONS =====
   const fetchContributions = async () => {
     const { data } = await supabase.from('contributions').select('*').order('created_at', { ascending: false });
