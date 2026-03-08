@@ -1236,6 +1236,68 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </div>
             )}
           </TabsContent>
+          {/* ==================== WHATSAPP TAB ==================== */}
+          <TabsContent value="whatsapp" className="space-y-4 mt-4">
+            {/* Bot Number Config */}
+            <div className="glass-card p-4 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                <h3 className="text-sm font-bold">WhatsApp Bot Number</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">Configure the official Billi WhatsApp number that users will message to interact with the bot.</p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="+5511999999999"
+                  value={whatsappBotNumber}
+                  onChange={(e) => setWhatsappBotNumber(e.target.value)}
+                  className="bg-secondary text-sm"
+                />
+                <Button onClick={saveWhatsAppNumber} disabled={whatsappNumberSaving} size="sm" className="px-4">
+                  {whatsappNumberSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-3 h-3 mr-1" />Save</>}
+                </Button>
+              </div>
+            </div>
+
+            {/* Source Stats */}
+            <div className="glass-card p-4 space-y-3">
+              <h3 className="text-sm font-bold">Contribution Sources</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center p-3 rounded-xl bg-secondary/50">
+                  <Monitor className="w-5 h-5 mx-auto mb-1 text-primary" />
+                  <p className="text-lg font-bold">{allContributions.filter((c: any) => !c.source || c.source === 'app').length}</p>
+                  <p className="text-[10px] text-muted-foreground">Via App</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-[#25D366]/10">
+                  <Smartphone className="w-5 h-5 mx-auto mb-1 text-[#25D366]" />
+                  <p className="text-lg font-bold">{allContributions.filter((c: any) => c.source === 'whatsapp').length}</p>
+                  <p className="text-[10px] text-muted-foreground">Via WhatsApp</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Linked Users */}
+            <div className="glass-card p-4 space-y-3">
+              <h3 className="text-sm font-bold">Linked WhatsApp Users ({botUserLinks.length})</h3>
+              {botUserLinks.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">No users linked via WhatsApp yet</p>
+              ) : (
+                <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                  {botUserLinks.map((link: any) => {
+                    const linkedUser = users.find(u => u.id === link.user_id);
+                    return (
+                      <div key={link.id} className="flex items-center justify-between bg-secondary/30 rounded-lg p-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                          <span className="font-medium">{linkedUser?.name || 'Unknown'}</span>
+                        </div>
+                        <span className="text-muted-foreground font-mono text-[10px]">{link.platform_identifier}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
