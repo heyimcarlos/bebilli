@@ -2847,6 +2847,8 @@ const translations: Record<Language, Record<string, string>> = {
     sending: 'Enviando...',
     receiptApproved: 'Recibo aprobado automáticamente ✓',
     receiptFlagged: 'Monto divergente — pendiente de validación del grupo',
+    receiptMatchDesc: 'El monto del recibo corresponde a su contribución.',
+    receiptMismatchDesc: 'El monto extraído difiere del declarado. Será revisado por el grupo.',
     confidence: 'Confianza',
     extractedDate: 'Fecha extraída',
     transactionType: 'Tipo de transacción',

@@ -104,37 +104,7 @@ If you cannot detect any amount, return: {"amount": 0, "currency": null, "date":
       validationStatus = amountMatch ? 'approved' : 'flagged';
     }
 
-    // Store validation record if we have contribution context
-    if (contributionId && groupId) {
-      try {
-        const authHeader = req.headers.get('Authorization');
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-        const supabase = createClient(supabaseUrl, supabaseKey, {
-          global: { headers: { Authorization: authHeader || '' } },
-        });
-
-        // Get user ID from auth
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from('receipt_validations').insert({
-            contribution_id: contributionId,
-            user_id: user.id,
-            group_id: groupId,
-            declared_amount: declaredAmount || 0,
-            extracted_amount: parsed.amount,
-            extracted_date: parsed.date,
-            extracted_type: parsed.transaction_type,
-            extracted_description: parsed.description,
-            validation_status: validationStatus,
-            amount_match: amountMatch,
-          });
-        }
-      } catch (dbErr) {
-        console.error('DB insert error:', dbErr);
-        // Don't fail the whole request for a DB error
-      }
-    }
+    // Note: DB record is now managed client-side to avoid double-inserts
 
     return new Response(JSON.stringify({
       ...parsed,
