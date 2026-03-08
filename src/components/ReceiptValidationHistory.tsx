@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle, ArrowRightLeft } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle, ArrowRightLeft, ChevronRight } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 
 interface ReceiptValidation {
@@ -36,6 +36,7 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
   const { user } = useAuthContext();
   const [validations, setValidations] = useState<ReceiptValidation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedValidation, setSelectedValidation] = useState<ReceiptValidation | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -62,7 +63,6 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
     setUpdatingId(id);
     const previous = validations;
 
-    // Optimistic update
     setValidations(prev =>
       prev.map(v => v.id === id ? { ...v, validation_status: newStatus } : v)
     );
@@ -74,11 +74,7 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
 
     if (error) {
       setValidations(previous);
-      toast({
-        title: '❌ Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: '❌ Error', description: error.message, variant: 'destructive' });
     } else {
       toast({
         title: newStatus === 'approved' ? '✅ Approved' : '❌ Rejected',
@@ -86,11 +82,27 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
           ? (t('receiptApproved') || 'Receipt has been approved.')
           : (t('receiptRejected') || 'Receipt has been rejected.'),
       });
+      // Update the selected validation too
+      setSelectedValidation(prev => prev?.id === id ? { ...prev, validation_status: newStatus } : prev);
     }
     setUpdatingId(null);
   };
 
-  const getStatusBadge = (status: string, match: boolean | null) => {
+  const getStatusDot = (status: string) => {
+    if (status === 'approved') return 'bg-green-500';
+    if (status === 'rejected') return 'bg-destructive';
+    if (status === 'flagged') return 'bg-amber-500';
+    return 'bg-muted-foreground';
+  };
+
+  const getStatusLabel = (status: string) => {
+    if (status === 'approved') return t('approved') || 'Approved';
+    if (status === 'rejected') return t('rejected') || 'Rejected';
+    if (status === 'flagged') return t('flagged') || 'Flagged';
+    return t('pending') || 'Pending';
+  };
+
+  const getStatusBadge = (status: string) => {
     if (status === 'approved') {
       return (
         <Badge className="bg-green-500/10 text-green-600 border-green-500/30 text-[10px]">
@@ -141,61 +153,88 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
     );
   }
 
+  const v = selectedValidation;
+  const canReview = v && (v.validation_status === 'pending' || v.validation_status === 'flagged') && v.user_id !== user?.id;
+
   return (
     <>
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 mb-2">
-          <ShieldCheck className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold">{t('validationHistory') || 'Validation History'}</h3>
-          <Badge variant="outline" className="text-[10px] ml-auto">{validations.length}</Badge>
-        </div>
-        
-        {validations.map((v, i) => {
-          const canReview = (v.validation_status === 'pending' || v.validation_status === 'flagged') && v.user_id !== user?.id;
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <ShieldCheck className="w-4 h-4 text-primary" />
+        <h3 className="text-sm font-bold">{t('validationHistory') || 'Validation History'}</h3>
+        <Badge variant="outline" className="text-[10px] ml-auto">{validations.length}</Badge>
+      </div>
 
-          return (
-            <motion.div
-              key={v.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card p-3 space-y-2"
-            >
+      {/* Compact list */}
+      <div className="space-y-1">
+        {validations.map((item, i) => (
+          <motion.button
+            key={item.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.03 }}
+            onClick={() => setSelectedValidation(item)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-left"
+          >
+            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getStatusDot(item.validation_status)}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{formatCurrency(item.declared_amount)}</p>
+              <p className="text-[10px] text-muted-foreground">{getStatusLabel(item.validation_status)}</p>
+            </div>
+            <span className="text-[10px] text-muted-foreground flex-shrink-0">
+              {new Date(item.created_at).toLocaleDateString()}
+            </span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Detail dialog */}
+      <Dialog open={!!selectedValidation} onOpenChange={(open) => !open && setSelectedValidation(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <FileText className="w-4 h-4" />
+              {t('receiptDetails') || 'Receipt Details'}
+            </DialogTitle>
+          </DialogHeader>
+
+          {v && (
+            <div className="space-y-4">
+              {/* Status */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {getStatusBadge(v.validation_status, v.amount_match)}
-                  {v.extracted_type && (
-                    <span className="text-[10px] text-muted-foreground capitalize bg-secondary px-2 py-0.5 rounded-full">
-                      {v.extracted_type}
-                    </span>
-                  )}
-                </div>
+                {getStatusBadge(v.validation_status)}
+                {v.extracted_type && (
+                  <span className="text-[10px] text-muted-foreground capitalize bg-secondary px-2 py-0.5 rounded-full">
+                    {v.extracted_type}
+                  </span>
+                )}
                 <span className="text-[10px] text-muted-foreground">
                   {new Date(v.created_at).toLocaleDateString()}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <p className="text-muted-foreground">{t('declared') || 'Declared'}</p>
-                  <p className="font-semibold">{formatCurrency(v.declared_amount)}</p>
+              {/* Amounts */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="glass-card p-3">
+                  <p className="text-muted-foreground mb-1">{t('declared') || 'Declared'}</p>
+                  <p className="font-semibold text-sm">{formatCurrency(v.declared_amount)}</p>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-muted-foreground">{t('extracted') || 'Extracted'}</p>
+                <div className="glass-card p-3">
+                  <p className="text-muted-foreground mb-1">{t('extracted') || 'Extracted'}</p>
                   {(() => {
                     const isForeign = v.extracted_currency && v.extracted_currency !== currency;
-                    const effectiveAmount = isForeign && v.converted_amount != null ? v.converted_amount : v.extracted_amount;
                     const matchColor = v.amount_match === false ? 'text-amber-500' : v.amount_match === true ? 'text-green-500' : '';
 
                     if (isForeign && v.extracted_amount != null) {
                       return (
-                        <>
-                          <p className="font-semibold text-muted-foreground">
+                        <div className="flex flex-col gap-0.5">
+                          <p className="font-semibold text-sm text-muted-foreground">
                             {v.extracted_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             <span className="ml-1 text-[10px] bg-secondary px-1.5 py-0.5 rounded-full">{v.extracted_currency}</span>
                           </p>
                           {v.converted_amount != null && (
-                            <p className={`font-semibold flex items-center gap-1 ${matchColor}`}>
+                            <p className={`font-semibold text-sm flex items-center gap-1 ${matchColor}`}>
                               <ArrowRightLeft className="w-3 h-3 flex-shrink-0" />
                               {formatCurrency(v.converted_amount)}
                             </p>
@@ -203,12 +242,12 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                           {v.exchange_rate != null && (
                             <p className="text-[9px] text-muted-foreground">Rate: {v.exchange_rate}</p>
                           )}
-                        </>
+                        </div>
                       );
                     }
 
                     return (
-                      <p className={`font-semibold ${matchColor}`}>
+                      <p className={`font-semibold text-sm ${matchColor}`}>
                         {v.extracted_amount != null ? formatCurrency(v.extracted_amount) : '—'}
                       </p>
                     );
@@ -217,41 +256,38 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
               </div>
 
               {v.extracted_date && (
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground">
                   {t('receiptDate') || 'Receipt date'}: {v.extracted_date}
                 </p>
               )}
 
+              {/* Receipt image */}
               {v.receipt_image_url && (
                 <button
                   onClick={() => setSelectedImage(v.receipt_image_url)}
-                  className="flex items-center gap-2 w-full mt-1 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-xs text-muted-foreground group"
+                  className="flex items-center gap-3 w-full p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-xs text-muted-foreground group"
                 >
-                  <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0 border border-border">
-                    <img
-                      src={v.receipt_image_url}
-                      alt="Receipt"
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                  <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0 border border-border">
+                    <img src={v.receipt_image_url} alt="Receipt" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <span className="flex-1 text-left">{t('viewReceipt') || 'View receipt'}</span>
                   <ZoomIn className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               )}
 
+              {/* Flagged warning */}
               {v.validation_status === 'flagged' && (
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 text-xs text-amber-600">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-600">
                   ⚠️ {t('flaggedWarning') || 'Amount mismatch detected. Requires group review.'}
                 </div>
               )}
 
-              {/* Approve / Reject buttons for other members */}
+              {/* Approve / Reject */}
               {canReview && (
                 <div className="flex items-center gap-2 pt-1">
                   <Button
                     size="sm"
-                    className="flex-1 h-8 text-xs bg-green-600 hover:bg-green-700 text-white"
+                    className="flex-1 h-9 text-xs bg-green-600 hover:bg-green-700 text-white"
                     disabled={updatingId === v.id}
                     onClick={() => handleUpdateStatus(v.id, 'approved')}
                   >
@@ -261,7 +297,7 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="flex-1 h-8 text-xs text-destructive hover:bg-destructive/10"
+                    className="flex-1 h-9 text-xs text-destructive hover:bg-destructive/10"
                     disabled={updatingId === v.id}
                     onClick={() => handleUpdateStatus(v.id, 'rejected')}
                   >
@@ -270,21 +306,17 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                   </Button>
                 </div>
               )}
-            </motion.div>
-          );
-        })}
-      </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Full-screen image viewer */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 bg-background/95 backdrop-blur-sm border-border">
           <div className="relative flex items-center justify-center min-h-[50vh]">
             {selectedImage && (
-              <img
-                src={selectedImage}
-                alt="Receipt"
-                className="max-w-full max-h-[85vh] object-contain rounded-lg"
-              />
+              <img src={selectedImage} alt="Receipt" className="max-w-full max-h-[85vh] object-contain rounded-lg" />
             )}
           </div>
         </DialogContent>
