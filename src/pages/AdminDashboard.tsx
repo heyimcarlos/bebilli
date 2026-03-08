@@ -4,7 +4,7 @@ import {
   ArrowLeft, Users, Target, Key, Copy, RefreshCw, Loader2, Search, 
   TrendingUp, Crown, Shield, UserCog, Ticket, Mail, ToggleLeft, ToggleRight,
   ChevronDown, ChevronUp, DollarSign, Calendar, Filter, BarChart3, Eye,
-  Activity, Globe, Coins, CreditCard, Receipt, Download, PieChart
+  Activity, Globe, Coins, CreditCard, Receipt, Download, PieChart, MessageCircle, Save, Smartphone, Monitor
 } from 'lucide-react';
 import AdminAnalyticsTab from '@/components/AdminAnalyticsTab';
 import { supabase } from '@/integrations/supabase/client';
