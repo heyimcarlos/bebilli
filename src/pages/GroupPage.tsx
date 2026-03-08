@@ -44,11 +44,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showSalaryModal, setShowSalaryModal] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('');
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [contributing, setContributing] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
+  const [salaryInput, setSalaryInput] = useState('');
+  const [showAmountToggle, setShowAmountToggle] = useState(true);
 
   const group = groups.find((g) => g.id === groupId);
   const { messages: chatMessages, loading: chatLoading, sendMessage: sendChatMessage, uploadAudio } = useGroupChat(groupId, user?.id);
