@@ -4,7 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import BottomNav from '@/components/BottomNav';
-import LanguageCurrencyBar from '@/components/LanguageCurrencyBar';
+
 import ScannerOverlay from '@/components/ScannerOverlay';
 import NotificationBell from '@/components/NotificationBell';
 import NotificationPanel from '@/components/NotificationPanel';
