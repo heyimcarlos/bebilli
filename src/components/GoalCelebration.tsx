@@ -66,7 +66,7 @@ const GoalCelebration: React.FC<GoalCelebrationProps> = ({ isOpen, onClose, grou
                 transition={{ delay: 0.3 }}
                 className="text-2xl font-black mb-2"
               >
-                🎉 {t('goalAchieved') || 'Goal Achieved!'}
+                🎉 {t('goalAchieved')}
               </motion.h2>
               <motion.p
                 initial={{ y: 20, opacity: 0 }}
