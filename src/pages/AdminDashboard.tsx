@@ -132,6 +132,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   // WhatsApp settings
   const [whatsappBotNumber, setWhatsappBotNumber] = useState('');
+  const [whatsappPhoneNumberId, setWhatsappPhoneNumberId] = useState('');
   const [whatsappNumberSaving, setWhatsappNumberSaving] = useState(false);
   const [botUserLinks, setBotUserLinks] = useState<any[]>([]);
 
