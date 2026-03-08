@@ -18,7 +18,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, avatarUrl
     { id: 'feed', icon: Home, label: t('home') || 'Home' },
     { id: 'groups', icon: Users, label: t('myGroups') },
     { id: 'explore', icon: Compass, label: t('explore') },
-    { id: 'me', icon: null, label: t('me') || 'Me' },
+    { id: 'me', icon: null, label: t('you') || 'You' },
   ];
 
   return (
