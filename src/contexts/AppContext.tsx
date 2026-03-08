@@ -1944,10 +1944,6 @@ const getLocaleCurrency = (): Currency => {
   if (lang.startsWith('en-gb')) return 'GBP';
   if (lang.startsWith('en-au')) return 'AUD';
   if (lang.startsWith('fr')) return 'EUR';
-  if (lang.startsWith('es-mx')) return 'MXN';
-  if (lang.startsWith('es')) return 'EUR';
-  if (lang.startsWith('it')) return 'EUR';
-  if (lang.startsWith('de')) return 'EUR';
   if (lang.startsWith('ja')) return 'JPY';
   return 'CAD';
 };
