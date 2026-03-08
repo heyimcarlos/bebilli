@@ -355,8 +355,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               <SelectTrigger className="w-36 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="pt">🇧🇷 Português</SelectItem>
-                <SelectItem value="en">🇨🇦 English</SelectItem>
+                <SelectItem value="en">🇺🇸 English</SelectItem>
                 <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                <SelectItem value="es">🇪🇸 Español</SelectItem>
               </SelectContent>
             </Select>
           </div>
