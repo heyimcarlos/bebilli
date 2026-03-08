@@ -334,7 +334,13 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
                     />
                   </div>
                 )}
-                <div className="space-y-2"><Label>{t('goalAmount')} ($)</Label><Input type="number" placeholder="50000" className="bg-secondary" value={newGroup.goal} onChange={(e) => setNewGroup({ ...newGroup, goal: e.target.value })} /></div>
+                <div className="space-y-2">
+                  <Label>{newGroup.goalMode === 'competition' ? (t('monthlySalary') || 'Valor do salário mensal') : `${t('goalAmount')} ($)`}</Label>
+                  <Input type="number" placeholder={newGroup.goalMode === 'competition' ? '5000' : '50000'} className="bg-secondary" value={newGroup.goal} onChange={(e) => setNewGroup({ ...newGroup, goal: e.target.value })} />
+                  {newGroup.goalMode === 'competition' && (
+                    <p className="text-xs text-muted-foreground">{t('monthlySalaryDesc') || 'Informe o salário mensal para calcular o ranking de economia'}</p>
+                  )}
+                </div>
                 <div className="space-y-2"><Label>{t('descriptionOptional')}</Label><Textarea placeholder={t('descriptionPlaceholder')} className="bg-secondary resize-none" rows={3} value={newGroup.description} onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })} /></div>
                 <Button onClick={handleCreateGroup} disabled={creating || uploading || !newGroup.name || !newGroup.goal} className="w-full btn-primary text-primary-foreground">
                   {creating || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('createGroupButton')}

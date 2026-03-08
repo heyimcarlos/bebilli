@@ -304,6 +304,13 @@ export const useGroups = (userId: string | undefined) => {
     }
 
     await fetchGroups();
+    // Timeline event for group join
+    await supabase.from('timeline_events').insert({
+      user_id: userId,
+      event_type: 'group_joined',
+      event_data: { group_name: result.group_name || '' },
+      is_anonymous: false,
+    }).then(() => {});
     return { 
       data: { id: result.group_id, name: result.group_name }, 
       error: null 
@@ -335,6 +342,16 @@ export const useGroups = (userId: string | undefined) => {
 
     if (!error) {
       await fetchGroups();
+      // Generate timeline event for contributions
+      if (type === 'deposit') {
+        const group = groups.find(g => g.id === groupId);
+        await supabase.from('timeline_events').insert({
+          user_id: userId,
+          event_type: 'contribution',
+          event_data: { group_name: group?.name || '', amount },
+          is_anonymous: false,
+        }).then(() => {});
+      }
     }
 
     return { data, error };
