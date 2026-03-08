@@ -362,7 +362,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background pb-20"
+      className="min-h-screen bg-background pb-44"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -595,7 +595,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       )}
 
       {/* Leaderboard - always visible */}
-      <div className="px-6 mb-4">
+      <div className="px-6 mb-4 relative z-0">
         <AnimatedLeaderboard
           members={group.members}
           currentUserId={profile?.id}
@@ -605,7 +605,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       </div>
 
       {/* Tabs */}
-      <div className="px-6">
+      <div className="px-6 relative z-10">
         <Tabs defaultValue="consistency" className="w-full">
           <TabsList className="w-full bg-secondary mb-4 flex-wrap">
             <TabsTrigger value="consistency" className="flex-1">{t('consistency')}</TabsTrigger>
