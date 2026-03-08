@@ -745,7 +745,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    ${amount}
+                    {formatCurrency(amount)}
                   </motion.button>
                 ))}
                 {group.user_contribution > 0 && (
