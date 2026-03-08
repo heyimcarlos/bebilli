@@ -88,7 +88,7 @@ const TimelinePage: React.FC = () => {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'timeline_events' }, () => fetchEvents())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [filter, user]);
+  }, [user]);
 
   const toggleHighFive = (eventId: string) => {
     setHighFives(prev => ({ ...prev, [eventId]: !prev[eventId] }));
