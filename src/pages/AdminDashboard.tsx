@@ -752,13 +752,14 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-6 h-9">
+          <TabsList className="w-full grid grid-cols-7 h-9">
             <TabsTrigger value="users" className="text-[10px] px-1"><UserCog className="w-3 h-3 mr-0.5" />{t('adminUsers')}</TabsTrigger>
             <TabsTrigger value="groups" className="text-[10px] px-1"><Target className="w-3 h-3 mr-0.5" />{t('adminGroups')}</TabsTrigger>
             <TabsTrigger value="analytics" className="text-[10px] px-1"><PieChart className="w-3 h-3 mr-0.5" />Analytics</TabsTrigger>
             <TabsTrigger value="financial" className="text-[10px] px-1"><BarChart3 className="w-3 h-3 mr-0.5" />{t('adminFinancial')}</TabsTrigger>
             <TabsTrigger value="subscriptions" className="text-[10px] px-1"><CreditCard className="w-3 h-3 mr-0.5" />{t('adminSubscriptions')}</TabsTrigger>
             <TabsTrigger value="coupons" className="text-[10px] px-1"><Ticket className="w-3 h-3 mr-0.5" />{t('adminCoupons')}</TabsTrigger>
+            <TabsTrigger value="whatsapp" className="text-[10px] px-1"><MessageCircle className="w-3 h-3 mr-0.5" />WhatsApp</TabsTrigger>
           </TabsList>
 
           {/* ==================== USERS TAB ==================== */}
