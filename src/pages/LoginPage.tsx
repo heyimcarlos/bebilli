@@ -250,9 +250,10 @@ const LoginPage: React.FC = () => {
             <Select value={language} onValueChange={(v) => setLanguage(v as any)}>
               <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="en">🇨🇦 English</SelectItem>
-                <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                <SelectItem value="en">🇺🇸 English</SelectItem>
                 <SelectItem value="pt">🇧🇷 Português</SelectItem>
+                <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                <SelectItem value="es">🇪🇸 Español</SelectItem>
               </SelectContent>
             </Select>
           </div>
