@@ -1,8 +1,6 @@
 // Localization support - focused markets
 
-export type ExtendedCurrency = 
-  | 'CAD' | 'USD' | 'EUR' | 'BRL' | 'MXN' | 'CHF' | 'GBP'
-  | 'AUD' | 'JPY';
+export type ExtendedCurrency = 'CAD' | 'USD' | 'BRL';
 
 export interface Country {
   code: string;
