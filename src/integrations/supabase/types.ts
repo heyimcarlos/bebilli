@@ -746,6 +746,65 @@ export type Database = {
         }
         Relationships: []
       }
+      receipt_validations: {
+        Row: {
+          amount_match: boolean | null
+          contribution_id: string
+          created_at: string
+          declared_amount: number
+          extracted_amount: number | null
+          extracted_date: string | null
+          extracted_description: string | null
+          extracted_type: string | null
+          group_id: string
+          id: string
+          receipt_image_url: string | null
+          tolerance_percent: number
+          user_id: string
+          validation_status: string
+        }
+        Insert: {
+          amount_match?: boolean | null
+          contribution_id: string
+          created_at?: string
+          declared_amount: number
+          extracted_amount?: number | null
+          extracted_date?: string | null
+          extracted_description?: string | null
+          extracted_type?: string | null
+          group_id: string
+          id?: string
+          receipt_image_url?: string | null
+          tolerance_percent?: number
+          user_id: string
+          validation_status?: string
+        }
+        Update: {
+          amount_match?: boolean | null
+          contribution_id?: string
+          created_at?: string
+          declared_amount?: number
+          extracted_amount?: number | null
+          extracted_date?: string | null
+          extracted_description?: string | null
+          extracted_type?: string | null
+          group_id?: string
+          id?: string
+          receipt_image_url?: string | null
+          tolerance_percent?: number
+          user_id?: string
+          validation_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_validations_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_coupons: {
         Row: {
           code: string
