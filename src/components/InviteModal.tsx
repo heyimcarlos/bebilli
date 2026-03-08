@@ -28,9 +28,6 @@ const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, groupName, i
     const msgs: Record<string, string> = {
       pt: `🚀 Junte-se ao grupo "${groupName}" na Billi e vamos conquistar nosso sonho juntos! Use o código: ${inviteCode} ou acesse: ${inviteLink}`,
       fr: `🚀 Rejoignez le groupe "${groupName}" sur Billi et réalisons notre rêve ensemble! Code: ${inviteCode} ou accédez: ${inviteLink}`,
-      es: `🚀 Únete al grupo "${groupName}" en Billi y conquistemos nuestro sueño juntos! Usa el código: ${inviteCode} o accede: ${inviteLink}`,
-      it: `🚀 Unisciti al gruppo "${groupName}" su Billi e realizziamo il nostro sogno insieme! Usa il codice: ${inviteCode} o accedi: ${inviteLink}`,
-      de: `🚀 Tritt der Gruppe "${groupName}" auf Billi bei und lass uns unseren Traum gemeinsam verwirklichen! Code: ${inviteCode} oder: ${inviteLink}`,
     };
     return msgs[language] || `🚀 Join the group "${groupName}" on Billi and let's achieve our dream together! Use the code: ${inviteCode} or access: ${inviteLink}`;
   };
