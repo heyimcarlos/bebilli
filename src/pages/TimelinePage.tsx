@@ -181,19 +181,6 @@ const TimelinePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="px-4 pt-6 pb-3">
-        {/* Filter tabs */}
-        {user && (
-          <div className="flex gap-1 bg-secondary/50 p-1 rounded-lg mb-4">
-            <button onClick={() => setFilter('following')}
-              className={`flex-1 text-xs py-2 rounded-md font-semibold transition-colors ${filter === 'following' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
-              {t('following') || 'Following'}
-            </button>
-            <button onClick={() => setFilter('all')}
-              className={`flex-1 text-xs py-2 rounded-md font-semibold transition-colors ${filter === 'all' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
-              {t('everyone') || 'Everyone'}
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="px-4">
