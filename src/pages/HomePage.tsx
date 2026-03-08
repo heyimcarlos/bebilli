@@ -8,6 +8,7 @@ import { validateGoalAmount } from '@/lib/validation';
 import EnhancedGroupCard from '@/components/EnhancedGroupCard';
 import UserStatsCard from '@/components/UserStatsCard';
 import MotivationalBanner from '@/components/MotivationalBanner';
+import WhatsAppBanner from '@/components/WhatsAppBanner';
 import BillionaireCheckin from '@/components/BillionaireCheckin';
 import PremiumModal from '@/components/PremiumModal';
 import { Button } from '@/components/ui/button';
