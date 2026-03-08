@@ -834,6 +834,46 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           }}
         />
       )}
+
+      {/* Salary Settings Modal */}
+      <Dialog open={showSalaryModal} onOpenChange={setShowSalaryModal}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-primary" />
+              {t('setSalary') || 'Set Your Salary'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              {t('salaryDesc') || 'Your salary is used to calculate savings percentage for the competition ranking. It stays private.'}
+            </p>
+            <Input
+              type="number"
+              placeholder={t('monthlySalary') || 'Monthly salary'}
+              value={salaryInput}
+              onChange={(e) => setSalaryInput(e.target.value)}
+              className="bg-secondary"
+            />
+            <Button
+              onClick={async () => {
+                if (!currentMembership || !salaryInput) return;
+                const salary = parseFloat(salaryInput);
+                if (salary <= 0) return;
+                await supabase.from('group_memberships').update({ salary }).eq('id', currentMembership.id);
+                await refreshGroups();
+                setShowSalaryModal(false);
+                setSalaryInput('');
+                toast({ title: '✅', description: t('salaryUpdated') || 'Salary updated!' });
+              }}
+              disabled={!salaryInput || parseFloat(salaryInput) <= 0}
+              className="w-full btn-primary text-primary-foreground"
+            >
+              {t('save') || 'Save'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
