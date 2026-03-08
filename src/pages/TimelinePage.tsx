@@ -26,14 +26,14 @@ const TimelinePage: React.FC = () => {
   const { user } = useAuthContext();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'following'>('following');
+  
   const [highFives, setHighFives] = useState<Record<string, boolean>>({});
 
   const fetchEvents = async () => {
     setLoading(true);
 
     let followingIds: string[] = [];
-    if (user && filter === 'following') {
+    if (user) {
       const { data: followData } = await supabase
         .from('user_follows')
         .select('following_id')
@@ -49,7 +49,7 @@ const TimelinePage: React.FC = () => {
       .order('created_at', { ascending: false })
       .limit(50);
 
-    if (filter === 'following' && followingIds.length > 0) {
+    if (followingIds.length > 0) {
       query = query.in('user_id', followingIds);
     }
 
@@ -88,7 +88,7 @@ const TimelinePage: React.FC = () => {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'timeline_events' }, () => fetchEvents())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [filter, user]);
+  }, [user]);
 
   const toggleHighFive = (eventId: string) => {
     setHighFives(prev => ({ ...prev, [eventId]: !prev[eventId] }));
@@ -181,19 +181,6 @@ const TimelinePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="px-4 pt-6 pb-3">
-        {/* Filter tabs */}
-        {user && (
-          <div className="flex gap-1 bg-secondary/50 p-1 rounded-lg mb-4">
-            <button onClick={() => setFilter('following')}
-              className={`flex-1 text-xs py-2 rounded-md font-semibold transition-colors ${filter === 'following' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
-              {t('following') || 'Following'}
-            </button>
-            <button onClick={() => setFilter('all')}
-              className={`flex-1 text-xs py-2 rounded-md font-semibold transition-colors ${filter === 'all' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
-              {t('everyone') || 'Everyone'}
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="px-4">
@@ -205,8 +192,8 @@ const TimelinePage: React.FC = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Card className="p-8 text-center">
               <Globe className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="font-semibold mb-2">{filter === 'following' ? (t('noFollowingActivity') || 'No activity from people you follow') : (t('noEventsYet') || 'No achievements yet')}</h3>
-              <p className="text-sm text-muted-foreground">{filter === 'following' ? (t('followPeopleTip') || 'Follow people to see their updates here!') : (t('beFirstAchievement') || 'Start your streak to appear here!')}</p>
+              <h3 className="font-semibold mb-2">{t('noFollowingActivity') || 'No activity from people you follow'}</h3>
+              <p className="text-sm text-muted-foreground">{t('followPeopleTip') || 'Follow people to see their updates here!'}</p>
             </Card>
           </motion.div>
         ) : (
