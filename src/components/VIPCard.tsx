@@ -67,9 +67,8 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
         .maybeSingle();
       if (cancelled) setCancelledSub(cancelled as SubscriptionInfo);
     };
-    };
     fetchSub();
-  }, [user, isPremium]);
+  }, [user]);
 
   const showPanel = externalOpen !== undefined ? externalOpen : internalOpen;
   const closePanel = () => {
