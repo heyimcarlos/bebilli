@@ -128,9 +128,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   useEffect(() => {
     if (!user) return;
     const loadFollowData = async () => {
-      const { data: followersData } = await supabase.from('user_follows' as any).select('*').eq('following_id', user.id).eq('status', 'accepted');
-      const { data: followingData } = await supabase.from('user_follows' as any).select('*').eq('follower_id', user.id).eq('status', 'accepted');
-      const { data: pendingData } = await supabase.from('user_follows' as any).select('*').eq('following_id', user.id).eq('status', 'pending');
+      const { data: followersData } = await supabase.from('user_follows').select('*').eq('following_id', user.id).eq('status', 'accepted');
+      const { data: followingData } = await supabase.from('user_follows').select('*').eq('follower_id', user.id).eq('status', 'accepted');
+      const { data: pendingData } = await supabase.from('user_follows').select('*').eq('following_id', user.id).eq('status', 'pending');
 
       setFollowCounts({
         followers: (followersData as any[])?.length || 0,
