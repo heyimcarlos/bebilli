@@ -252,7 +252,7 @@ export const useGroups = (userId: string | undefined) => {
     };
   }, [fetchGroups, userId]);
 
-  const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string, groupType: 'individual' | 'shared' = 'shared', category: string = 'other') => {
+  const createGroup = async (name: string, goalAmount: number, imageUrl?: string, description?: string, groupType: 'individual' | 'shared' = 'shared', category: string = 'other', isOpenGoal: boolean = false, competitionEndDate?: string) => {
     if (!userId) return { error: new Error('Not authenticated') };
 
     // Use the secure database function to create group atomically
@@ -263,7 +263,9 @@ export const useGroups = (userId: string | undefined) => {
       group_description: description || null,
       group_type: groupType,
       group_category: category,
-    });
+      group_is_open_goal: isOpenGoal,
+      group_competition_end_date: competitionEndDate || null,
+    } as any);
 
     if (error) {
       console.error('Error creating group:', error);

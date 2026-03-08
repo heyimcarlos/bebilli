@@ -1047,6 +1047,19 @@ export type Database = {
             }
             Returns: Json
           }
+        | {
+            Args: {
+              group_category?: string
+              group_competition_end_date?: string
+              group_description?: string
+              group_goal_amount: number
+              group_image_url?: string
+              group_is_open_goal?: boolean
+              group_name: string
+              group_type?: string
+            }
+            Returns: Json
+          }
       get_group_invite_code: { Args: { group_uuid: string }; Returns: string }
       has_role: {
         Args: {
