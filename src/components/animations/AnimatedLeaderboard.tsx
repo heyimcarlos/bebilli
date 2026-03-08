@@ -133,7 +133,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
               <DefaultAvatar name={member.profile.name} size={sizes.avatar} className="w-full h-full" />
             )}
           </motion.div>
-          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-lg">{emojis[rank]}</span>
+          <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-lg">{emojis[rank]}</span>
         </div>
         <p className={`${sizes.textSize} font-medium truncate ${sizes.maxW} text-center`}>{member.profile.name}</p>
         <p className={`${sizes.textSize} ${rank === 0 ? "text-primary font-bold" : "text-muted-foreground"}`}>
