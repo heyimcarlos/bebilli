@@ -60,8 +60,32 @@ const PremiumAnalytics: React.FC = () => {
   const totalWithdrawn = withdrawals.reduce((sum, c) => sum + c.amount, 0);
   const netSaved = totalDeposited - totalWithdrawn;
 
-  // Weekly breakdown (last 4 weeks)
+  // Monthly breakdown (last 6 months)
   const now = new Date();
+  const monthlyData = Array.from({ length: 6 }, (_, i) => {
+    const monthDate = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 0, 23, 59, 59);
+    const monthDeposits = deposits.filter(c => {
+      const d = new Date(c.date);
+      return d >= monthDate && d <= monthEnd;
+    });
+    const monthWithdrawals = withdrawals.filter(c => {
+      const d = new Date(c.date);
+      return d >= monthDate && d <= monthEnd;
+    });
+    const deposited = monthDeposits.reduce((sum, c) => sum + c.amount, 0);
+    const withdrawn = monthWithdrawals.reduce((sum, c) => sum + c.amount, 0);
+    return {
+      label: monthDate.toLocaleDateString(undefined, { month: 'short' }),
+      deposited,
+      withdrawn,
+      net: deposited - withdrawn,
+    };
+  });
+
+  const maxMonthlyAmount = Math.max(...monthlyData.map(m => Math.max(m.deposited, m.withdrawn)), 1);
+
+  // Weekly breakdown (last 4 weeks)
   const weeklyData = Array.from({ length: 4 }, (_, i) => {
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - (i + 1) * 7);
@@ -149,6 +173,48 @@ const PremiumAnalytics: React.FC = () => {
               <span className="text-[10px] font-semibold">{formatCurrency(week.amount)}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Monthly Comparison Chart */}
+      <div className="glass-card p-4 border border-amber-500/20">
+        <div className="flex items-center gap-2 mb-3">
+          <TrendingUp className="w-4 h-4 text-amber-500" />
+          <p className="text-sm font-medium">{t('monthlySavings') || 'Economia Mensal'}</p>
+        </div>
+        <div className="flex items-end gap-1.5 h-28">
+          {monthlyData.map((month, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+              <div className="w-full flex gap-0.5 items-end justify-center" style={{ height: '80px' }}>
+                <motion.div
+                  className="w-[45%] bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-sm"
+                  initial={{ height: 0 }}
+                  animate={{ height: `${(month.deposited / maxMonthlyAmount) * 80}px` }}
+                  transition={{ delay: i * 0.08, duration: 0.5 }}
+                />
+                <motion.div
+                  className="w-[45%] bg-gradient-to-t from-red-400 to-red-300 rounded-t-sm"
+                  initial={{ height: 0 }}
+                  animate={{ height: `${(month.withdrawn / maxMonthlyAmount) * 80}px` }}
+                  transition={{ delay: i * 0.08 + 0.05, duration: 0.5 }}
+                />
+              </div>
+              <span className="text-[10px] text-muted-foreground">{month.label}</span>
+              <span className={`text-[9px] font-semibold ${month.net >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
+                {month.net >= 0 ? '+' : ''}{formatCurrency(month.net)}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-center gap-4 mt-2">
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+            <span className="text-[10px] text-muted-foreground">{t('deposits') || 'Depósitos'}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 rounded-sm bg-red-400" />
+            <span className="text-[10px] text-muted-foreground">{t('withdrawals') || 'Retiradas'}</span>
+          </div>
         </div>
       </div>
 
