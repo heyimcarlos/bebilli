@@ -270,30 +270,8 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     }
   };
 
-  const handleQuickContribute = async (amount: number) => {
-    setContributing(true);
-    const { error } = await addContribution(groupId, amount);
-    setContributing(false);
-
-    if (error) {
-      toast({
-        title: t('error'),
-        description: error.message,
-        variant: 'destructive',
-      });
-    } else {
-      setShowContributeModal(false);
-      
-      // Show celebration
-      setLastContribution({ 
-        amount, 
-        streak: (profile?.current_streak || 0) + 1 
-      });
-      setShowWinModal(true);
-      
-      // Refresh groups to update progress
-      await refreshGroups();
-    }
+  const handleQuickContribute = (amount: number) => {
+    setContributionAmount(String(amount));
   };
 
   const handleSendMessage = async () => {
