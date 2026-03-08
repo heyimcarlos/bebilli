@@ -28,7 +28,9 @@ import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
 import { ConfettiCelebration, MilestoneModal } from '@/components/animations';
 import GoalCelebration from '@/components/GoalCelebration';
-import { Loader2, Menu } from 'lucide-react';
+import { Loader2, Menu, Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import BilliLogo from '@/components/BilliLogo';
 import SupportFormModal from '@/components/SupportFormModal';
 
 const AppContent: React.FC = () => {
