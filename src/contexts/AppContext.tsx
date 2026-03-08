@@ -730,6 +730,7 @@ const translations: Record<Language, Record<string, string>> = {
     salaryUpdated: 'Salário atualizado!',
     amountVisible: 'Visível',
     amountHidden: 'Oculto',
+    goalMode: 'Modo da Meta',
     openGoal: 'Competição Aberta',
     fixedGoal: 'Meta Fixa',
     openGoalDesc: 'Quem junta mais % do salário vence!',
