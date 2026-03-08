@@ -35,7 +35,8 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'analytics' | 'subscription'>('overview');
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
-
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   useEffect(() => {
     if (!user || !isPremium) return;
     const fetchSub = async () => {
