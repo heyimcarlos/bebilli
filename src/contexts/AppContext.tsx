@@ -1539,6 +1539,7 @@ const translations: Record<Language, Record<string, string>> = {
     timeline: 'Communautés',
     profile: 'Profil',
     home: 'Accueil',
+    you: 'Vous',
     group: 'Groupe',
     ranking: 'Classement',
     chat: 'Chat',
