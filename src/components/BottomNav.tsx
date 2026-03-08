@@ -44,7 +44,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, avatarUrl
               <Avatar className={`w-6 h-6 ring-2 ${activeTab === 'me' ? 'ring-primary' : 'ring-transparent'}`}>
                 <AvatarImage src={avatarUrl || undefined} />
                 <AvatarFallback className="bg-secondary text-[10px]">
-                  {userName ? userName.charAt(0).toUpperCase() : <DefaultAvatar size={24} />}
+                  {userName ? userName.charAt(0).toUpperCase() : '?'}
                 </AvatarFallback>
               </Avatar>
             ) : (
