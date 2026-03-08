@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type Language = 'pt' | 'en' | 'fr' | 'es' | 'it' | 'de';
-export type Currency = 'BRL' | 'USD' | 'EUR' | 'CAD' | 'MXN' | 'CHF' | 'GBP' | 'AUD' | 'JPY' | 'CNY' | 'INR' | 'KRW' | 'SGD' | 'HKD' | 'NZD' | 'SEK' | 'NOK' | 'DKK' | 'PLN' | 'ZAR' | 'AED' | 'THB' | 'MYR' | 'PHP';
+export type Language = 'pt' | 'en' | 'fr';
+export type Currency = 'BRL' | 'USD' | 'EUR' | 'CAD' | 'GBP' | 'AUD' | 'MXN' | 'CHF' | 'JPY';
 
 const STORAGE_KEY_LANGUAGE = 'billi-language';
 const STORAGE_KEY_CURRENCY = 'billi-currency';
