@@ -2552,16 +2552,18 @@ const currencyRates: Record<Currency, number> = {
   CAD: 1,
   USD: 0.74,
   BRL: 3.70,
+  EUR: 0.68,
 };
 
 const currencySymbols: Record<Currency, string> = {
   CAD: 'CA$',
   USD: 'US$',
   BRL: 'R$',
+  EUR: '€',
 };
 
 const currencyDecimals: Record<Currency, number> = {
-  CAD: 2, USD: 2, BRL: 2,
+  CAD: 2, USD: 2, BRL: 2, EUR: 2,
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
