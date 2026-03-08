@@ -725,7 +725,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     key={amount}
                     onClick={() => handleQuickContribute(amount)}
                     disabled={contributing}
-                    className="flex-1 min-w-[60px] h-12 rounded-xl bg-secondary hover:bg-secondary/80 font-semibold transition-colors"
+                    className={`flex-1 min-w-[60px] h-12 rounded-xl font-semibold transition-colors ${
+                      contributionAmount === String(amount) 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-secondary hover:bg-secondary/80'
+                    }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -738,27 +742,51 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             {/* Custom amount */}
             <div className="space-y-2">
                <p className="text-sm text-muted-foreground">{t('customAmount')}</p>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                   placeholder={t('enterAmount')}
-                  value={contributionAmount}
-                  onChange={(e) => setContributionAmount(e.target.value)}
-                  className="bg-secondary"
-                />
-                <Button
-                  onClick={handleContribute}
-                  disabled={contributing || !contributionAmount}
-                  className="btn-primary text-primary-foreground px-6"
-                >
-                  {contributing ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    t('add') || 'Add'
-                  )}
-                </Button>
-              </div>
+              <Input
+                type="number"
+                placeholder={t('enterAmount')}
+                value={contributionAmount}
+                onChange={(e) => setContributionAmount(e.target.value)}
+                className="bg-secondary"
+              />
             </div>
+
+            {/* Receipt attachment - required */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground flex items-center gap-1">
+                <FileText className="w-4 h-4" />
+                {t('attachReceipt') || 'Attach receipt'} <span className="text-destructive">*</span>
+              </p>
+              <p className="text-xs text-muted-foreground">{t('receiptRequiredDesc') || 'A receipt is required for group approval.'}</p>
+              <input type="file" ref={receiptInputRef} onChange={handleReceiptSelect} accept="image/*,.pdf" className="hidden" />
+              {receiptPreview ? (
+                <div className="relative inline-block">
+                  <img src={receiptPreview} alt="Receipt" className="h-24 rounded-lg border border-border" />
+                  <button onClick={clearReceipt} className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => receiptInputRef.current?.click()} disabled={contributing} className="w-full h-11 border-dashed">
+                  <Upload className="w-4 h-4 mr-2" />
+                  {t('uploadReceipt') || 'Upload receipt or photo'}
+                </Button>
+              )}
+            </div>
+
+            {/* Submit */}
+            <Button
+              onClick={handleContribute}
+              disabled={contributing || !contributionAmount || !receiptFile}
+              className="w-full h-12 btn-primary text-primary-foreground font-semibold"
+            >
+              {contributing ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Plus className="w-4 h-4 mr-2" />
+              )}
+              {contributing ? (t('sending') || 'Sending...') : (t('addContribution'))}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
