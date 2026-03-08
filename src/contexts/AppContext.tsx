@@ -2892,6 +2892,18 @@ const translations: Record<Language, Record<string, string>> = {
     extractedDate: 'Fecha extraída',
     transactionType: 'Tipo de transacción',
     viewReceipt: 'Ver comprobante',
+    pendingVerification: 'Pendiente de verificación',
+    receiptDetails: 'Detalles del Comprobante',
+    noCouponsAvailable: 'No hay cupones de socios disponibles aún',
+    monthlySavings: 'Ahorro Mensual',
+    recordAudio: 'Grabar audio',
+    rejected: 'Rechazado',
+    currentStreak: 'Racha Actual',
+    personalBest: '¡Estás en tu mejor momento!',
+    nextLevel: 'Siguiente nivel',
+    day: 'día',
+    receiptApprovedMsg: 'Comprobante aprobado con éxito.',
+    receiptRejectedMsg: 'Comprobante rechazado.',
   },
 };
 
