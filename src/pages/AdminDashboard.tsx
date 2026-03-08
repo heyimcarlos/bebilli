@@ -184,6 +184,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     fetchContributions();
     fetchCouponUsages();
     fetchSubscriptions();
+    fetchWhatsAppSettings();
   };
 
   // ===== FETCH SUBSCRIPTIONS =====
