@@ -194,6 +194,7 @@ const AppContent: React.FC = () => {
           >
             {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
             {activeTab === 'groups' && <HomePage onGroupClick={handleGroupClick} />}
+            {activeTab === 'feed' && <TimelinePage />}
             {activeTab === 'explore' && <ExplorePage />}
             {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
           </motion.div>
