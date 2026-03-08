@@ -1,6 +1,6 @@
 // Localization support - focused markets
 
-export type ExtendedCurrency = 'CAD' | 'USD' | 'BRL';
+export type ExtendedCurrency = 'CAD' | 'USD' | 'BRL' | 'EUR';
 
 export interface Country {
   code: string;
@@ -8,35 +8,52 @@ export interface Country {
   flag: string;
   currency: ExtendedCurrency;
   locale: string;
+  language: string;
 }
 
 export const countries: Country[] = [
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷', currency: 'BRL', locale: 'pt-BR' },
-  { code: 'US', name: 'United States', flag: '🇺🇸', currency: 'USD', locale: 'en-US' },
-  { code: 'CA', name: 'Canada', flag: '🇨🇦', currency: 'CAD', locale: 'en-CA' },
-  { code: 'FR', name: 'France', flag: '🇫🇷', currency: 'USD', locale: 'fr-FR' },
-  { code: 'MX', name: 'Mexico', flag: '🇲🇽', currency: 'USD', locale: 'es-MX' },
-  { code: 'ES', name: 'Spain', flag: '🇪🇸', currency: 'USD', locale: 'es-ES' },
-  { code: 'AR', name: 'Argentina', flag: '🇦🇷', currency: 'USD', locale: 'es-AR' },
-  { code: 'CO', name: 'Colombia', flag: '🇨🇴', currency: 'USD', locale: 'es-CO' },
-  { code: 'CL', name: 'Chile', flag: '🇨🇱', currency: 'USD', locale: 'es-CL' },
-  { code: 'PT', name: 'Portugal', flag: '🇵🇹', currency: 'USD', locale: 'pt-PT' },
+  // Portuguese
+  { code: 'BR', name: 'Brazil', flag: '🇧🇷', currency: 'BRL', locale: 'pt-BR', language: 'pt' },
+  { code: 'PT', name: 'Portugal', flag: '🇵🇹', currency: 'EUR', locale: 'pt-PT', language: 'pt' },
+  // English
+  { code: 'CA', name: 'Canada', flag: '🇨🇦', currency: 'CAD', locale: 'en-CA', language: 'en' },
+  { code: 'US', name: 'United States', flag: '🇺🇸', currency: 'USD', locale: 'en-US', language: 'en' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', currency: 'USD', locale: 'en-GB', language: 'en' },
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', currency: 'USD', locale: 'en-AU', language: 'en' },
+  // French
+  { code: 'FR', name: 'France', flag: '🇫🇷', currency: 'EUR', locale: 'fr-FR', language: 'fr' },
+  { code: 'QC', name: 'Québec', flag: '🇨🇦', currency: 'CAD', locale: 'fr-CA', language: 'fr' },
+  { code: 'BE', name: 'Belgique', flag: '🇧🇪', currency: 'EUR', locale: 'fr-BE', language: 'fr' },
+  { code: 'CH', name: 'Suisse', flag: '🇨🇭', currency: 'EUR', locale: 'fr-CH', language: 'fr' },
+  // Spanish
+  { code: 'MX', name: 'México', flag: '🇲🇽', currency: 'USD', locale: 'es-MX', language: 'es' },
+  { code: 'AR', name: 'Argentina', flag: '🇦🇷', currency: 'USD', locale: 'es-AR', language: 'es' },
+  { code: 'CO', name: 'Colombia', flag: '🇨🇴', currency: 'USD', locale: 'es-CO', language: 'es' },
+  { code: 'CL', name: 'Chile', flag: '🇨🇱', currency: 'USD', locale: 'es-CL', language: 'es' },
+  { code: 'ES', name: 'España', flag: '🇪🇸', currency: 'EUR', locale: 'es-ES', language: 'es' },
+  { code: 'PE', name: 'Perú', flag: '🇵🇪', currency: 'USD', locale: 'es-PE', language: 'es' },
 ];
+
+export const getCountriesByLanguage = (lang: string): Country[] => {
+  return countries.filter(c => c.language === lang);
+};
 
 export const currencyRates: Record<ExtendedCurrency, number> = {
   CAD: 1,
   USD: 0.74,
   BRL: 3.70,
+  EUR: 0.68,
 };
 
 export const currencySymbols: Record<ExtendedCurrency, string> = {
   CAD: 'CA$',
   USD: 'US$',
   BRL: 'R$',
+  EUR: '€',
 };
 
 export const currencyDecimals: Record<ExtendedCurrency, number> = {
-  CAD: 2, USD: 2, BRL: 2,
+  CAD: 2, USD: 2, BRL: 2, EUR: 2,
 };
 
 // Community categories
@@ -55,13 +72,13 @@ export const communityCategories = [
   { id: 'Hobby', icon: 'Sparkles', color: 'violet' },
 ];
 
-// Achievement badges
+// New badge system - 4 languages
 export interface Badge {
   id: string;
   name: Record<string, string>;
   description: Record<string, string>;
   icon: string;
-  requirement: { type: 'streak' | 'contributions' | 'amount' | 'groups' | 'level' | 'premium'; value: number };
+  requirement: { type: 'streak' | 'contributions' | 'amount' | 'groups' | 'level' | 'premium' | 'goal_complete' | 'goal_half' | 'competition_win' | 'travel_group' | 'ahead_of_schedule'; value: number };
   tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'vip';
   premiumOnly?: boolean;
 }
@@ -69,116 +86,75 @@ export interface Badge {
 export const badges: Badge[] = [
   {
     id: 'first_step',
-    name: { en: 'First Step', pt: 'Primeiro Passo', fr: 'Premier Pas' },
-    description: { en: 'Made your first contribution', pt: 'Fez sua primeira contribuição', fr: 'Première contribution' },
-    icon: '🌱',
+    name: { pt: 'Primeiro Passo', en: 'First Step', fr: 'Premier Pas', es: 'Primer Paso' },
+    description: { pt: 'Fez seu primeiro aporte', en: 'First contribution uploaded', fr: 'Première contribution', es: 'Primer aporte registrado' },
+    icon: '🥇',
     requirement: { type: 'contributions', value: 1 },
     tier: 'bronze',
   },
   {
-    id: 'consistent_saver',
-    name: { en: 'Consistent Saver', pt: 'Poupador Consistente', fr: 'Épargnant Régulier' },
-    description: { en: '7-day streak', pt: 'Streak de 7 dias', fr: 'Série de 7 jours' },
+    id: 'on_fire',
+    name: { pt: 'Na Chama', en: 'On Fire', fr: 'En Feu', es: 'En Llamas' },
+    description: { pt: '3 meses contribuindo seguidos', en: '3 months contributing in a row', fr: '3 mois consécutifs', es: '3 meses seguidos contribuyendo' },
     icon: '🔥',
-    requirement: { type: 'streak', value: 7 },
-    tier: 'bronze',
-  },
-  {
-    id: 'habit_builder',
-    name: { en: 'Habit Builder', pt: 'Construtor de Hábitos', fr: 'Bâtisseur d\'Habitudes' },
-    description: { en: '30-day streak', pt: 'Streak de 30 dias', fr: 'Série de 30 jours' },
-    icon: '💪',
-    requirement: { type: 'streak', value: 30 },
-    tier: 'silver',
-  },
-  {
-    id: 'century_saver',
-    name: { en: 'Century Saver', pt: 'Poupador Centenário', fr: 'Épargnant Centenaire' },
-    description: { en: '100-day streak', pt: 'Streak de 100 dias', fr: 'Série de 100 jours' },
-    icon: '🏆',
-    requirement: { type: 'streak', value: 100 },
+    requirement: { type: 'streak', value: 90 },
     tier: 'gold',
   },
   {
+    id: 'halfway',
+    name: { pt: 'Na Metade', en: 'Halfway There', fr: 'À Mi-Chemin', es: 'A Mitad' },
+    description: { pt: 'Grupo atingiu 50% da meta', en: 'Group reached 50% of goal', fr: 'Groupe à 50% de l\'objectif', es: 'Grupo alcanzó 50% de la meta' },
+    icon: '🌓',
+    requirement: { type: 'goal_half', value: 50 },
+    tier: 'silver',
+  },
+  {
+    id: 'goal_crusher',
+    name: { pt: 'Meta Batida', en: 'Goal Crusher', fr: 'Objectif Atteint', es: 'Meta Cumplida' },
+    description: { pt: 'Grupo completou a meta', en: 'Group completed goal', fr: 'Groupe a atteint l\'objectif', es: 'Grupo completó la meta' },
+    icon: '🏆',
+    requirement: { type: 'goal_complete', value: 100 },
+    tier: 'platinum',
+  },
+  {
+    id: 'top_saver',
+    name: { pt: 'Top Poupadora', en: 'Top Saver', fr: 'Meilleure Épargnante', es: 'Top Ahorradora' },
+    description: { pt: 'Ganhou competição mensal', en: 'Won monthly competition', fr: 'A gagné la compétition mensuelle', es: 'Ganó la competencia mensual' },
+    icon: '👑',
+    requirement: { type: 'competition_win', value: 1 },
+    tier: 'diamond',
+  },
+  {
+    id: 'explorer',
+    name: { pt: 'Exploradora', en: 'Explorer', fr: 'Exploratrice', es: 'Exploradora' },
+    description: { pt: 'Criou grupo de viagem', en: 'Created a travel goal group', fr: 'A créé un groupe voyage', es: 'Creó un grupo de viaje' },
+    icon: '🌍',
+    requirement: { type: 'travel_group', value: 1 },
+    tier: 'silver',
+  },
+  {
     id: 'team_player',
-    name: { en: 'Team Player', pt: 'Jogador de Equipe', fr: 'Joueur d\'Équipe' },
-    description: { en: 'Join 3 groups', pt: 'Entre em 3 grupos', fr: 'Rejoindre 3 groupes' },
+    name: { pt: 'Trabalho em Equipe', en: 'Team Player', fr: 'Esprit d\'Équipe', es: 'Trabajo en Equipo' },
+    description: { pt: 'Entrou em 3 grupos diferentes', en: 'Joined 3 different groups', fr: 'A rejoint 3 groupes', es: 'Se unió a 3 grupos diferentes' },
     icon: '🤝',
     requirement: { type: 'groups', value: 3 },
     tier: 'bronze',
   },
   {
-    id: 'thousand_club',
-    name: { en: 'Thousand Club', pt: 'Clube dos Mil', fr: 'Club des Mille' },
-    description: { en: 'Save $1,000 total', pt: 'Economize $1.000 no total', fr: 'Économisez 1 000 $' },
-    icon: '💰',
-    requirement: { type: 'amount', value: 1000 },
-    tier: 'silver',
-  },
-  {
-    id: 'five_k_club',
-    name: { en: '$5K Club', pt: 'Clube dos $5K', fr: 'Club des 5K$' },
-    description: { en: 'Save $5,000 total', pt: 'Economize $5.000 no total', fr: 'Économisez 5 000 $' },
+    id: 'ahead_of_schedule',
+    name: { pt: 'Adiantada', en: 'Ahead of Schedule', fr: 'En Avance', es: 'Adelantada' },
+    description: { pt: 'Grupo bateu a meta antes do prazo', en: 'Group hit goal before deadline', fr: 'Groupe a atteint l\'objectif avant la date', es: 'Grupo alcanzó la meta antes del plazo' },
     icon: '💎',
-    requirement: { type: 'amount', value: 5000 },
-    tier: 'gold',
-  },
-  {
-    id: 'ten_k_club',
-    name: { en: '$10K Club', pt: 'Clube dos $10K', fr: 'Club des 10K$' },
-    description: { en: 'Save $10,000 total', pt: 'Economize $10.000 no total', fr: 'Économisez 10 000 $' },
-    icon: '👑',
-    requirement: { type: 'amount', value: 10000 },
-    tier: 'platinum',
-  },
-  {
-    id: 'billionaire_mindset',
-    name: { en: 'Billionaire Mindset', pt: 'Mentalidade Bilionária', fr: 'Mentalité de Milliardaire' },
-    description: { en: 'Reach Level 10', pt: 'Alcance o Nível 10', fr: 'Atteindre le Niveau 10' },
-    icon: '🚀',
-    requirement: { type: 'level', value: 10 },
+    requirement: { type: 'ahead_of_schedule', value: 1 },
     tier: 'diamond',
   },
-  {
-    id: 'deposit_master',
-    name: { en: 'Deposit Master', pt: 'Mestre dos Depósitos', fr: 'Maître des Dépôts' },
-    description: { en: '50 contributions', pt: '50 contribuições', fr: '50 contributions' },
-    icon: '⭐',
-    requirement: { type: 'contributions', value: 50 },
-    tier: 'silver',
-  },
-  {
-    id: 'legend',
-    name: { en: 'Legend', pt: 'Lenda', fr: 'Légende' },
-    description: { en: '365-day streak', pt: 'Streak de 365 dias', fr: 'Série de 365 jours' },
-    icon: '🌟',
-    requirement: { type: 'streak', value: 365 },
-    tier: 'diamond',
-  },
+  // Legacy/extra badges kept
   {
     id: 'vip_member',
-    name: { en: 'VIP Member', pt: 'Membro VIP', fr: 'Membre VIP' },
-    description: { en: 'Premium subscriber', pt: 'Assinante Premium', fr: 'Abonné Premium' },
+    name: { pt: 'Membro VIP', en: 'VIP Member', fr: 'Membre VIP', es: 'Miembro VIP' },
+    description: { pt: 'Assinante Premium', en: 'Premium subscriber', fr: 'Abonné Premium', es: 'Suscriptor Premium' },
     icon: '👑',
     requirement: { type: 'premium', value: 1 },
-    tier: 'vip',
-    premiumOnly: true,
-  },
-  {
-    id: 'vip_saver',
-    name: { en: 'VIP Saver', pt: 'Poupador VIP', fr: 'Épargnant VIP' },
-    description: { en: 'Save $500 as VIP', pt: 'Economize $500 como VIP', fr: 'Économisez 500$ en VIP' },
-    icon: '💫',
-    requirement: { type: 'amount', value: 500 },
-    tier: 'vip',
-    premiumOnly: true,
-  },
-  {
-    id: 'vip_streak',
-    name: { en: 'VIP Streak', pt: 'Streak VIP', fr: 'Série VIP' },
-    description: { en: '14-day streak as VIP', pt: 'Streak de 14 dias como VIP', fr: 'Série de 14 jours en VIP' },
-    icon: '🔱',
-    requirement: { type: 'streak', value: 14 },
     tier: 'vip',
     premiumOnly: true,
   },
@@ -191,4 +167,20 @@ export const tierColors = {
   platinum: { bg: 'bg-cyan-400/20', text: 'text-cyan-400', border: 'border-cyan-400/30' },
   diamond: { bg: 'bg-purple-400/20', text: 'text-purple-400', border: 'border-purple-400/30' },
   vip: { bg: 'bg-amber-500/20', text: 'text-amber-500', border: 'border-amber-500/40' },
+};
+
+// Premium pricing - fixed per region
+export const premiumPricing: Record<ExtendedCurrency, { monthly: number; symbol: string; label: string }> = {
+  BRL: { monthly: 9.90, symbol: 'R$', label: 'R$ 9,90/mês' },
+  CAD: { monthly: 5.90, symbol: 'CA$', label: 'CA$ 5,90/month' },
+  USD: { monthly: 4.00, symbol: 'US$', label: 'US$ 4,00/month' },
+  EUR: { monthly: 3.90, symbol: '€', label: '€ 3,90/mois' },
+};
+
+// Brand taglines
+export const taglines: Record<string, string> = {
+  pt: 'Junte. Poupe. Conquiste.',
+  en: 'Save together. Win together.',
+  fr: 'Épargnez. Gagnez. Ensemble.',
+  es: 'Ahorra. Gana. Juntas.',
 };
