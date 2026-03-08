@@ -60,6 +60,45 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
   const [salaryInput, setSalaryInput] = useState('');
   const [showAmountToggle, setShowAmountToggle] = useState(true);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReceiptSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReceiptFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => setReceiptPreview(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearReceipt = () => {
+    setReceiptFile(null);
+    setReceiptPreview(null);
+    if (receiptInputRef.current) receiptInputRef.current.value = '';
+  };
+
+  const uploadReceipt = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
+    const { error } = await supabase.storage.from('receipt-images').upload(fileName, file);
+    if (error) { console.error('Receipt upload error:', error); return null; }
+    const { data } = supabase.storage.from('receipt-images').getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
+  const saveReceiptValidation = async (contributionId: string, amount: number, receiptUrl: string) => {
+    await supabase.from('receipt_validations').insert({
+      contribution_id: contributionId,
+      user_id: user!.id,
+      group_id: groupId,
+      declared_amount: amount,
+      receipt_image_url: receiptUrl,
+      validation_status: 'pending',
+    });
+  };
 
   const group = groups.find((g) => g.id === groupId);
   const { messages: chatMessages, loading: chatLoading, sendMessage: sendChatMessage, uploadAudio } = useGroupChat(groupId, user?.id);
