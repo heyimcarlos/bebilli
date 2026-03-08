@@ -2908,8 +2908,8 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
-// Base currency is CAD - all rates are relative to CAD
-const currencyRates: Record<Currency, number> = {
+// Fallback rates (CAD base) used when API is unavailable
+const fallbackRates: Record<Currency, number> = {
   CAD: 1,
   USD: 0.74,
   BRL: 3.70,
