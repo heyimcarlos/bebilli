@@ -809,6 +809,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Receipt validation
     receiptApproved: 'Comprovante aprovado automaticamente ✓',
     receiptFlagged: 'Valor divergente — pendente de validação do grupo',
+    receiptMatchDesc: 'O valor do comprovante corresponde ao aporte declarado.',
+    receiptMismatchDesc: 'O valor extraído difere do declarado. Será revisado pelo grupo.',
     confidence: 'Confiança',
     extractedDate: 'Data extraída',
     transactionType: 'Tipo de transação',
