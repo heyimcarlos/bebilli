@@ -2551,30 +2551,17 @@ const translations: Record<Language, Record<string, string>> = {
 const currencyRates: Record<Currency, number> = {
   CAD: 1,
   USD: 0.74,
-  EUR: 0.68,
   BRL: 3.70,
-  GBP: 0.58,
-  AUD: 1.12,
-  MXN: 12.50,
-  CHF: 0.65,
-  JPY: 110.50,
 };
 
 const currencySymbols: Record<Currency, string> = {
   CAD: 'CA$',
   USD: 'US$',
-  EUR: '€',
   BRL: 'R$',
-  GBP: '£',
-  AUD: 'A$',
-  MXN: 'MX$',
-  CHF: 'CHF',
-  JPY: '¥',
 };
 
 const currencyDecimals: Record<Currency, number> = {
-  CAD: 2, USD: 2, EUR: 2, BRL: 2, GBP: 2, AUD: 2, MXN: 2, CHF: 2,
-  JPY: 0,
+  CAD: 2, USD: 2, BRL: 2,
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
