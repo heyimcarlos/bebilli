@@ -72,6 +72,7 @@ interface AppContextType {
   formatCurrency: (value: number) => string;
   formatPremiumPrice: (cadValue: number) => string;
   t: (key: string) => string;
+  rates: Record<Currency, number>;
 }
 
 const translations: Record<Language, Record<string, string>> = {
@@ -2907,8 +2908,8 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
-// Base currency is CAD - all rates are relative to CAD
-const currencyRates: Record<Currency, number> = {
+// Fallback rates (CAD base) used when API is unavailable
+const fallbackRates: Record<Currency, number> = {
   CAD: 1,
   USD: 0.74,
   BRL: 3.70,
@@ -2963,6 +2964,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   );
   const [user, setUser] = useState<User | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [rates, setRates] = useState<Record<Currency, number>>(fallbackRates);
+
+  // Fetch live exchange rates from Frankfurter API (CAD base)
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const res = await fetch('https://api.frankfurter.app/latest?from=CAD&to=USD,BRL,EUR');
+        if (!res.ok) throw new Error('Rate fetch failed');
+        const data = await res.json();
+        setRates({ CAD: 1, ...data.rates });
+      } catch {
+        // Silent fallback — keep default rates
+      }
+    };
+    fetchRates();
+  }, []);
 
   // Load language/currency from profile when user logs in - DB is source of truth
   useEffect(() => {
@@ -3119,16 +3136,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return localeMap[language];
   };
 
-  // Format currency WITHOUT conversion - for all app values (groups, contributions)
+  // Format currency WITH live conversion from CAD base
   const formatCurrency = (value: number): string => {
+    const converted = value * (rates[currency] || 1);
     const locale = getLocale();
     const decimals = currencyDecimals[currency];
-    return `${currencySymbols[currency]} ${value.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+    return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
   };
 
-  // Format Premium price WITH conversion from CAD base
+  // Format Premium price WITH live conversion from CAD base
   const formatPremiumPrice = (cadValue: number): string => {
-    const converted = cadValue * currencyRates[currency];
+    const converted = cadValue * (rates[currency] || 1);
     const locale = getLocale();
     const decimals = currencyDecimals[currency];
     return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
@@ -3158,6 +3176,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         formatCurrency,
         formatPremiumPrice,
         t,
+        rates,
       }}
     >
       {children}
