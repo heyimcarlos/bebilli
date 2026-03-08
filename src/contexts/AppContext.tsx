@@ -87,6 +87,7 @@ const translations: Record<Language, Record<string, string>> = {
     timeline: 'Comunidades',
     profile: 'Perfil',
     home: 'Início',
+    you: 'Você',
     group: 'Grupo',
     ranking: 'Ranking',
     chat: 'Chat',
