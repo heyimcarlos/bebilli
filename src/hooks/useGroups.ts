@@ -13,6 +13,8 @@ export interface Group {
   created_by: string | null;
   created_at: string | null;
   group_type: 'individual' | 'shared';
+  is_open_goal: boolean;
+  competition_end_date: string | null;
 }
 
 export interface GroupMembership {
@@ -33,6 +35,10 @@ export interface GroupMemberWithProfile {
     avatar_url: string | null;
   };
   total_contribution: number;
+  salary: number | null;
+  show_amount: boolean;
+  checkin_count: number;
+  savings_percentage: number | null; // contribution / salary * 100
 }
 
 export interface GroupWithDetails extends Group {
