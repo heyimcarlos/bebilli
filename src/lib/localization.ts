@@ -26,25 +26,13 @@ export const countries: Country[] = [
 export const currencyRates: Record<ExtendedCurrency, number> = {
   CAD: 1,
   USD: 0.74,
-  EUR: 0.68,
   BRL: 3.70,
-  MXN: 12.50,
-  CHF: 0.65,
-  GBP: 0.58,
-  AUD: 1.12,
-  JPY: 110.50,
 };
 
 export const currencySymbols: Record<ExtendedCurrency, string> = {
   CAD: 'CA$',
   USD: 'US$',
-  EUR: '€',
   BRL: 'R$',
-  MXN: 'MX$',
-  CHF: 'CHF',
-  GBP: '£',
-  AUD: 'A$',
-  JPY: '¥',
 };
 
 export const currencyDecimals: Record<ExtendedCurrency, number> = {
