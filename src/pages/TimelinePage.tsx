@@ -230,7 +230,7 @@ const TimelinePage: React.FC = () => {
                             <Avatar className="w-9 h-9">
                               <AvatarImage src={event.avatar_url || undefined} />
                               <AvatarFallback className="bg-secondary text-xs">
-                                {event.is_anonymous ? '?' : (event.username?.charAt(0)?.toUpperCase() || <DefaultAvatar size={20} />)}
+                              {event.is_anonymous ? '?' : (event.username?.charAt(0)?.toUpperCase() || '?')}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
