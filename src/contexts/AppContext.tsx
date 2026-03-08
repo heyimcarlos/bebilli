@@ -2565,6 +2565,10 @@ const translations: Record<Language, Record<string, string>> = {
     openGoalDesc: '¡Quien ahorre más % de su salario gana!',
     fixedGoalDesc: 'Alcancen un monto específico juntos.',
     competitionEndDate: 'Fecha de término',
+    timelineFeed: 'Feed Social',
+    timelineDesc: 'Logros anónimos de la comunidad',
+    noEventsYet: 'Ningún logro aún',
+    beFirstAchievement: '¡Comienza tu racha para aparecer aquí!',
   },
 };
 
