@@ -31,7 +31,7 @@ const LanguageCurrencyBar: React.FC = () => {
   };
 
   return (
-    <div className="sticky top-0 z-40 bg-card/90 backdrop-blur-lg border-b border-border px-3 py-1.5">
+    <div className="bg-card/90 backdrop-blur-lg border-b border-border px-3 py-1.5">
       <div className="flex gap-1 mb-1 overflow-x-auto scrollbar-none">
         {languages.map((l) => (
           <button

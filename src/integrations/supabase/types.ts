@@ -794,6 +794,33 @@ export type Database = {
         }
         Relationships: []
       }
+      timeline_events: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_type: string
+          id: string
+          is_anonymous: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json
+          event_type: string
+          id?: string
+          is_anonymous?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_type?: string
+          id?: string
+          is_anonymous?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_follows: {
         Row: {
           created_at: string

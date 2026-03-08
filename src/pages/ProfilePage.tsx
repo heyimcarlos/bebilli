@@ -128,9 +128,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   useEffect(() => {
     if (!user) return;
     const loadFollowData = async () => {
-      const { data: followersData } = await supabase.from('user_follows' as any).select('*').eq('following_id', user.id).eq('status', 'accepted');
-      const { data: followingData } = await supabase.from('user_follows' as any).select('*').eq('follower_id', user.id).eq('status', 'accepted');
-      const { data: pendingData } = await supabase.from('user_follows' as any).select('*').eq('following_id', user.id).eq('status', 'pending');
+      const { data: followersData } = await supabase.from('user_follows').select('*').eq('following_id', user.id).eq('status', 'accepted');
+      const { data: followingData } = await supabase.from('user_follows').select('*').eq('follower_id', user.id).eq('status', 'accepted');
+      const { data: pendingData } = await supabase.from('user_follows').select('*').eq('following_id', user.id).eq('status', 'pending');
 
       setFollowCounts({
         followers: (followersData as any[])?.length || 0,
@@ -190,7 +190,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   };
 
   const handleFollowAction = async (followId: string, action: 'accepted' | 'rejected') => {
-    await supabase.from('user_follows' as any).update({ status: action }).eq('id', followId);
+    await supabase.from('user_follows').update({ status: action }).eq('id', followId);
     setPendingRequests(prev => prev.filter(p => p.id !== followId));
     if (action === 'accepted') {
       setFollowCounts(prev => ({ ...prev, followers: prev.followers + 1, pending: prev.pending - 1 }));
