@@ -1931,7 +1931,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 // Detect language from browser locale
 const getLocaleLanguage = (): Language => {
   const browserLang = navigator.language?.split('-')[0]?.toLowerCase();
-  const supported: Language[] = ['pt', 'en', 'fr', 'es', 'it', 'de'];
+  const supported: Language[] = ['pt', 'en', 'fr'];
   return supported.includes(browserLang as Language) ? (browserLang as Language) : 'en';
 };
 
