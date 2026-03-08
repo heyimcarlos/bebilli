@@ -600,6 +600,10 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             </div>
           </TabsContent>
 
+          <TabsContent value="receipts" className="space-y-4">
+            <ReceiptValidationHistory groupId={groupId} />
+          </TabsContent>
+
           <TabsContent value="dream" className="space-y-4">
             {/* Partner Coupons Component */}
             <PartnerCoupons 
