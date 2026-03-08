@@ -17,6 +17,7 @@ interface VIPCardProps {
 }
 
 interface SubscriptionInfo {
+  id: string;
   plan_type: string;
   amount: number;
   currency: string;
