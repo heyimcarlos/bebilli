@@ -1493,6 +1493,8 @@ const translations: Record<Language, Record<string, string>> = {
     sending: 'Sending...',
     receiptApproved: 'Receipt auto-approved ✓',
     receiptFlagged: 'Amount mismatch — pending group validation',
+    receiptMatchDesc: 'The receipt amount matches your contribution.',
+    receiptMismatchDesc: 'The extracted amount differs from your declared amount. It will be reviewed.',
     confidence: 'Confidence',
     extractedDate: 'Extracted date',
     transactionType: 'Transaction type',
