@@ -192,8 +192,8 @@ const TimelinePage: React.FC = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Card className="p-8 text-center">
               <Globe className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="font-semibold mb-2">{filter === 'following' ? (t('noFollowingActivity') || 'No activity from people you follow') : (t('noEventsYet') || 'No achievements yet')}</h3>
-              <p className="text-sm text-muted-foreground">{filter === 'following' ? (t('followPeopleTip') || 'Follow people to see their updates here!') : (t('beFirstAchievement') || 'Start your streak to appear here!')}</p>
+              <h3 className="font-semibold mb-2">{t('noFollowingActivity') || 'No activity from people you follow'}</h3>
+              <p className="text-sm text-muted-foreground">{t('followPeopleTip') || 'Follow people to see their updates here!'}</p>
             </Card>
           </motion.div>
         ) : (
