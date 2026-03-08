@@ -82,7 +82,7 @@ const GoalCelebration: React.FC<GoalCelebrationProps> = ({ isOpen, onClose, grou
                 transition={{ delay: 0.7 }}
                 className="text-sm text-muted-foreground mb-6"
               >
-                {t('goalAchievedDesc') || 'Your group reached 100% of the goal! Congratulations to all members! 🥳🎊'}
+                {t('goalAchievedDesc')}
               </motion.p>
               <Button
                 onClick={onClose}
