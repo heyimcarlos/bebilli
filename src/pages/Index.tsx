@@ -16,6 +16,7 @@ import HomePage from '@/pages/HomePage';
 import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
+import PremiumModal from '@/components/PremiumModal';
 import TimelinePage from '@/pages/TimelinePage';
 import VIPCard from '@/components/VIPCard';
 import SideDrawer from '@/components/SideDrawer';
