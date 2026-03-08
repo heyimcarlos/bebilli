@@ -72,6 +72,7 @@ interface AppContextType {
   formatCurrency: (value: number) => string;
   formatPremiumPrice: (cadValue: number) => string;
   t: (key: string) => string;
+  rates: Record<Currency, number>;
 }
 
 const translations: Record<Language, Record<string, string>> = {
