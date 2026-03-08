@@ -594,25 +594,25 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         </motion.div>
       )}
 
+      {/* Leaderboard - always visible */}
+      <div className="px-6 mb-4">
+        <AnimatedLeaderboard
+          members={group.members}
+          currentUserId={profile?.id}
+          formatCurrency={formatCurrency}
+          isOpenGoal={isOpenGoal}
+        />
+      </div>
+
       {/* Tabs */}
       <div className="px-6">
-        <Tabs defaultValue="ranking" className="w-full">
+        <Tabs defaultValue="consistency" className="w-full">
           <TabsList className="w-full bg-secondary mb-4 flex-wrap">
-            <TabsTrigger value="ranking" className="flex-1">{t('ranking')}</TabsTrigger>
             <TabsTrigger value="consistency" className="flex-1">{t('consistency')}</TabsTrigger>
             <TabsTrigger value="chat" className="flex-1">{t('chat')}</TabsTrigger>
             <TabsTrigger value="receipts" className="flex-1">{t('receipts') || 'Receipts'}</TabsTrigger>
             <TabsTrigger value="dream" className="flex-1">{t('dreamPanel')}</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="ranking">
-            <AnimatedLeaderboard
-              members={group.members}
-              currentUserId={profile?.id}
-              formatCurrency={formatCurrency}
-              isOpenGoal={isOpenGoal}
-            />
-          </TabsContent>
 
           <TabsContent value="consistency">
             <ConsistencyRanking
