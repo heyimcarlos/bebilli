@@ -79,8 +79,8 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
       toast({
         title: newStatus === 'approved' ? '✅ Approved' : '❌ Rejected',
         description: newStatus === 'approved'
-          ? (t('receiptApproved') || 'Receipt has been approved.')
-          : (t('receiptRejected') || 'Receipt has been rejected.'),
+          ? (t('receiptApprovedMsg') || 'Receipt has been approved.')
+          : (t('receiptRejectedMsg') || 'Receipt has been rejected.'),
       });
       // Update the selected validation too
       setSelectedValidation(prev => prev?.id === id ? { ...prev, validation_status: newStatus } : prev);
