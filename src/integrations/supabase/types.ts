@@ -393,6 +393,90 @@ export type Database = {
           },
         ]
       }
+      goal_completion_proofs: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          image_url: string
+          status: string
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          image_url: string
+          status?: string
+          total_amount: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          image_url?: string
+          status?: string
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_completion_proofs_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_completion_proofs_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups_member_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_completion_proofs_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_proof_votes: {
+        Row: {
+          approved: boolean
+          created_at: string
+          id: string
+          proof_id: string
+          user_id: string
+        }
+        Insert: {
+          approved: boolean
+          created_at?: string
+          id?: string
+          proof_id: string
+          user_id: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          proof_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_proof_votes_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "goal_completion_proofs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_memberships: {
         Row: {
           checkin_count: number

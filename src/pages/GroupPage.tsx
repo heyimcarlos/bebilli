@@ -20,6 +20,7 @@ import { useGroupChat } from '@/hooks/useGroupChat';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
 import ConsistencyRanking from '@/components/ConsistencyRanking';
 import ReceiptValidationHistory from '@/components/ReceiptValidationHistory';
+import GoalProofSubmit from '@/components/GoalProofSubmit';
 import {
   Dialog,
   DialogContent,
@@ -513,6 +514,24 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               </div>
             </div>
           </div>
+        </motion.div>
+      )}
+
+      {/* Goal Completion Proof - when goal is reached */}
+      {!isOpenGoal && progress >= 100 && (
+        <motion.div
+          className="px-6 mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <GoalProofSubmit
+            groupId={groupId}
+            userId={user?.id || ''}
+            totalAmount={group.current_amount}
+            members={group.members}
+            formatCurrency={formatCurrency}
+          />
         </motion.div>
       )}
 
