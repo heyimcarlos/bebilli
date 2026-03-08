@@ -133,7 +133,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
     } else {
       toast({ title: '🎉 ' + t('groupCreated'), description: `${newGroup.name} ${t('groupCreatedDesc')}` });
       setCreateModalOpen(false);
-      setNewGroup({ name: '', goal: '', description: '', category: 'other', type: 'shared' });
+      setNewGroup({ name: '', goal: '', description: '', category: 'other', type: 'shared', goalMode: 'fixed', competitionEndDate: '' });
       clearImage();
       refreshPremium();
     }
