@@ -2964,6 +2964,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   );
   const [user, setUser] = useState<User | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [rates, setRates] = useState<Record<Currency, number>>(fallbackRates);
+
+  // Fetch live exchange rates from Frankfurter API (CAD base)
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const res = await fetch('https://api.frankfurter.app/latest?from=CAD&to=USD,BRL,EUR');
+        if (!res.ok) throw new Error('Rate fetch failed');
+        const data = await res.json();
+        setRates({ CAD: 1, ...data.rates });
+      } catch {
+        // Silent fallback — keep default rates
+      }
+    };
+    fetchRates();
+  }, []);
 
   // Load language/currency from profile when user logs in - DB is source of truth
   useEffect(() => {
