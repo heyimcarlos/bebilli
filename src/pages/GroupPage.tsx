@@ -482,6 +482,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               members={group.members}
               currentUserId={profile?.id}
               formatCurrency={formatCurrency}
+              isOpenGoal={isOpenGoal}
             />
           </TabsContent>
 
