@@ -343,44 +343,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
         </div>
         
         <div className="glass-card p-3 space-y-2.5 text-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-muted-foreground" />
-              <span>{t('language')}</span>
-            </div>
-            <Select value={language} onValueChange={async (val) => {
-              setLanguage(val as any);
-              if (user) await updateProfile({ language: val } as any);
-            }}>
-              <SelectTrigger className="w-36 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pt">🇧🇷 Português</SelectItem>
-                <SelectItem value="en">🇺🇸 English</SelectItem>
-                <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                <SelectItem value="es">🇪🇸 Español</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="h-px bg-border" />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
-              <span>{t('currency')}</span>
-            </div>
-            <Select value={currency} onValueChange={async (val) => {
-              setCurrency(val as any);
-              if (user) await updateProfile({ currency: val } as any);
-            }}>
-              <SelectTrigger className="w-36 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="BRL">🇧🇷 R$ BRL</SelectItem>
-                <SelectItem value="CAD">🇨🇦 CA$ CAD</SelectItem>
-                <SelectItem value="USD">🇺🇸 US$ USD</SelectItem>
-                <SelectItem value="EUR">🇫🇷 € EUR</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="h-px bg-border" />
+          {/* Language & Currency are now controlled from the top bar only */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {theme === 'dark' ? <Moon className="w-4 h-4 text-muted-foreground" /> : <Sun className="w-4 h-4 text-muted-foreground" />}
