@@ -35,12 +35,16 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'analytics' | 'subscription'>('overview');
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+  const [cancelledSub, setCancelledSub] = useState<SubscriptionInfo | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
+
   useEffect(() => {
-    if (!user || !isPremium) return;
+    if (!user) return;
     const fetchSub = async () => {
-      const { data } = await supabase
+      // Fetch active subscription
+      const { data: activeSub } = await supabase
         .from('user_subscriptions')
         .select('id, plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
         .eq('user_id', user.id)
@@ -48,7 +52,21 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data) setSubscription(data as SubscriptionInfo);
+      if (activeSub) {
+        setSubscription(activeSub as SubscriptionInfo);
+        return;
+      }
+      // Fetch cancelled subscription for reactivation
+      const { data: cancelled } = await supabase
+        .from('user_subscriptions')
+        .select('id, plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
+        .eq('user_id', user.id)
+        .eq('status', 'cancelled')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) setCancelledSub(cancelled as SubscriptionInfo);
+    };
     };
     fetchSub();
   }, [user, isPremium]);
