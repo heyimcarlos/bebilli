@@ -45,6 +45,7 @@ export interface GroupWithDetails extends Group {
   members: GroupMemberWithProfile[];
   current_amount: number;
   user_contribution: number;
+  user_pending: number;
 }
 
 export type ContributionType = 'deposit' | 'withdrawal';
