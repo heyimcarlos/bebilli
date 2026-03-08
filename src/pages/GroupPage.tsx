@@ -20,6 +20,7 @@ import { useGroupChat } from '@/hooks/useGroupChat';
 import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
 import ConsistencyRanking from '@/components/ConsistencyRanking';
 import ReceiptValidationHistory from '@/components/ReceiptValidationHistory';
+import GoalProofSubmit from '@/components/GoalProofSubmit';
 import {
   Dialog,
   DialogContent,
