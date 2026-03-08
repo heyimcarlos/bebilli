@@ -2213,6 +2213,7 @@ const translations: Record<Language, Record<string, string>> = {
     timeline: 'Comunidades',
     profile: 'Perfil',
     home: 'Inicio',
+    you: 'Tú',
     group: 'Grupo',
     ranking: 'Ranking',
     chat: 'Chat',
