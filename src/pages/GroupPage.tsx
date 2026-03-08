@@ -624,122 +624,129 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </TabsList>
 
           <TabsContent value="consistency">
-            <ConsistencyRanking
-              members={group.members}
-              currentUserId={profile?.id}
-            />
-          </TabsContent>
-
-          <TabsContent value="chat" className="space-y-4">
-            <div className="glass-card p-4 min-h-[300px] max-h-[400px] overflow-y-auto space-y-3">
-              {/* Bot welcome message */}
-              <motion.div 
-                className="flex gap-3"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-primary" />
-                </div>
-                <div className="bg-secondary rounded-2xl rounded-tl-none px-4 py-2 max-w-[80%]">
-                  <p className="text-xs text-primary font-medium mb-1">Bili Bot</p>
-                  <p className="text-sm">{t('welcomeToGroup')} {group.name}! {t('startContributing')} 🚀</p>
-                </div>
-              </motion.div>
-              
-              {chatLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <AnimatePresence initial={false}>
-                  {chatMessages.map((msg) => {
-                    const isOwn = msg.user_id === user?.id;
-                    return (
-                      <motion.div 
-                        key={msg.id} 
-                        className={`flex gap-3 ${isOwn ? 'justify-end' : ''}`}
-                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                      >
-                        {!isOwn && (
-                          <Avatar className="w-8 h-8 flex-shrink-0">
-                            <AvatarImage src={msg.profile?.avatar_url || undefined} />
-                            <AvatarFallback className="bg-primary p-0">
-                              <DefaultAvatar name={msg.profile?.name || 'U'} size={32} />
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div className={`max-w-[80%] ${isOwn ? 'text-right' : ''}`}>
-                          {!isOwn && (
-                            <p className="text-xs text-muted-foreground mb-0.5">{msg.profile?.name}</p>
-                          )}
-                          <div className={`inline-block rounded-2xl ${
-                            isOwn 
-                              ? 'bg-primary text-primary-foreground rounded-tr-sm' 
-                              : 'bg-secondary rounded-tl-sm'
-                          }`}>
-                            {msg.content && (
-                              <p className="text-sm px-4 py-2">{msg.content}</p>
-                            )}
-                            {msg.audio_url && (
-                              <div className="px-3 py-2">
-                                <audio src={msg.audio_url} controls className="h-8 max-w-[200px]" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-            
-            {/* Audio preview */}
-            {pendingAudio && (
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 border border-border">
-                <audio src={URL.createObjectURL(pendingAudio)} controls className="h-8 flex-1" />
-                <Button variant="ghost" size="icon" onClick={() => setPendingAudio(null)} className="shrink-0 w-8 h-8">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
-            
-            <div className="flex gap-2">
-              <AudioRecorder onAudioReady={(blob) => setPendingAudio(blob)} disabled={false} />
-              <Input
-                placeholder={t('typeMessage')}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="bg-secondary"
+            <div className="h-[60vh] overflow-y-auto pr-1">
+              <ConsistencyRanking
+                members={group.members}
+                currentUserId={profile?.id}
               />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!message.trim() && !pendingAudio}
-                  className="btn-primary text-primary-foreground w-12 h-12"
-                >
-                  <Send className="w-5 h-5" />
-                </Button>
-              </motion.div>
             </div>
           </TabsContent>
 
-          <TabsContent value="receipts" className="space-y-4">
-            <ReceiptValidationHistory groupId={groupId} />
+          <TabsContent value="chat" className="space-y-0">
+            <div className="h-[60vh] overflow-y-auto pr-1 flex flex-col">
+              <div className="glass-card p-4 flex-1 min-h-0 overflow-y-auto space-y-3">
+                {/* Bot welcome message */}
+                <motion.div 
+                  className="flex gap-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="bg-secondary rounded-2xl rounded-tl-none px-4 py-2 max-w-[80%]">
+                    <p className="text-xs text-primary font-medium mb-1">Bili Bot</p>
+                    <p className="text-sm">{t('welcomeToGroup')} {group.name}! {t('startContributing')} 🚀</p>
+                  </div>
+                </motion.div>
+                
+                {chatLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <AnimatePresence initial={false}>
+                    {chatMessages.map((msg) => {
+                      const isOwn = msg.user_id === user?.id;
+                      return (
+                        <motion.div 
+                          key={msg.id} 
+                          className={`flex gap-3 ${isOwn ? 'justify-end' : ''}`}
+                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                        >
+                          {!isOwn && (
+                            <Avatar className="w-8 h-8 flex-shrink-0">
+                              <AvatarImage src={msg.profile?.avatar_url || undefined} />
+                              <AvatarFallback className="bg-primary p-0">
+                                <DefaultAvatar name={msg.profile?.name || 'U'} size={32} />
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div className={`max-w-[80%] ${isOwn ? 'text-right' : ''}`}>
+                            {!isOwn && (
+                              <p className="text-xs text-muted-foreground mb-0.5">{msg.profile?.name}</p>
+                            )}
+                            <div className={`inline-block rounded-2xl ${
+                              isOwn 
+                                ? 'bg-primary text-primary-foreground rounded-tr-sm' 
+                                : 'bg-secondary rounded-tl-sm'
+                            }`}>
+                              {msg.content && (
+                                <p className="text-sm px-4 py-2">{msg.content}</p>
+                              )}
+                              {msg.audio_url && (
+                                <div className="px-3 py-2">
+                                  <audio src={msg.audio_url} controls className="h-8 max-w-[200px]" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+              
+              {/* Audio preview */}
+              {pendingAudio && (
+                <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 border border-border mt-2">
+                  <audio src={URL.createObjectURL(pendingAudio)} controls className="h-8 flex-1" />
+                  <Button variant="ghost" size="icon" onClick={() => setPendingAudio(null)} className="shrink-0 w-8 h-8">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex gap-2 mt-2">
+                <AudioRecorder onAudioReady={(blob) => setPendingAudio(blob)} disabled={false} />
+                <Input
+                  placeholder={t('typeMessage')}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  className="bg-secondary"
+                />
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!message.trim() && !pendingAudio}
+                    className="btn-primary text-primary-foreground w-12 h-12"
+                  >
+                    <Send className="w-5 h-5" />
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="dream" className="space-y-4">
-            {/* Partner Coupons Component */}
-            <PartnerCoupons 
-              userLevel={profile?.level || 1} 
-              groupProgress={progress}
-              isPremium={profile?.is_premium || false}
-            />
+          <TabsContent value="receipts">
+            <div className="h-[60vh] overflow-y-auto pr-1">
+              <ReceiptValidationHistory groupId={groupId} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="dream">
+            <div className="h-[60vh] overflow-y-auto pr-1">
+              <PartnerCoupons 
+                userLevel={profile?.level || 1} 
+                groupProgress={progress}
+                isPremium={profile?.is_premium || false}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
