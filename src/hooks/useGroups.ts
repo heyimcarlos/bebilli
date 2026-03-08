@@ -157,18 +157,36 @@ export const useGroups = (userId: string | undefined) => {
         const totalAmount = Math.max(0, Object.values(contributionsByUser).reduce((sum, val) => sum + val, 0));
         const userContribution = contributionsByUser[userId] || 0;
 
-        const membersWithContributions: GroupMemberWithProfile[] = (members || []).map((m: any) => ({
-          id: m.id,
-          user_id: m.user_id,
-          role: m.role,
-          profile: m.profiles,
-          total_contribution: contributionsByUser[m.user_id] || 0,
-        }));
+        const membersWithContributions: GroupMemberWithProfile[] = (members || []).map((m: any) => {
+          const contribution = contributionsByUser[m.user_id] || 0;
+          const salary = m.salary ? Number(m.salary) : null;
+          return {
+            id: m.id,
+            user_id: m.user_id,
+            role: m.role,
+            profile: m.profiles,
+            total_contribution: contribution,
+            salary,
+            show_amount: m.show_amount ?? true,
+            checkin_count: m.checkin_count ?? 0,
+            savings_percentage: salary && salary > 0 ? (contribution / salary) * 100 : null,
+          };
+        });
 
         return {
           ...group,
-          invite_code: inviteCode, // Use the fetched invite code for admins
-          members: membersWithContributions.sort((a, b) => b.total_contribution - a.total_contribution),
+          is_open_goal: (group as any).is_open_goal ?? false,
+          competition_end_date: (group as any).competition_end_date ?? null,
+          invite_code: inviteCode,
+          members: membersWithContributions.sort((a, b) => {
+            // For open goal groups, sort by savings percentage if available
+            if ((group as any).is_open_goal) {
+              const aPct = a.savings_percentage ?? 0;
+              const bPct = b.savings_percentage ?? 0;
+              return bPct - aPct;
+            }
+            return b.total_contribution - a.total_contribution;
+          }),
           current_amount: totalAmount,
           user_contribution: userContribution,
         } as GroupWithDetails;
