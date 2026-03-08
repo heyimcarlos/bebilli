@@ -32,10 +32,16 @@ interface GroupPageProps {
   onBack: () => void;
 }
 
-const QUICK_AMOUNTS = [5, 10, 20, 50, 100];
+const QUICK_AMOUNTS_BY_CURRENCY: Record<string, number[]> = {
+  CAD: [5, 10, 20, 50, 100],
+  USD: [5, 10, 20, 50, 100],
+  BRL: [10, 20, 50, 100, 200],
+  EUR: [5, 10, 20, 50, 100],
+};
 
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
-  const { t, formatCurrency } = useApp();
+  const { t, formatCurrency, currency } = useApp();
+  const QUICK_AMOUNTS = QUICK_AMOUNTS_BY_CURRENCY[currency] || QUICK_AMOUNTS_BY_CURRENCY.CAD;
   const { groups, profile, addContribution, addWithdrawal, refreshGroups, updateGroup, leaveGroup, deleteGroup, hideGroup, user } = useAuthContext();
   const { toast } = useToast();
   const [message, setMessage] = useState('');
@@ -676,7 +682,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    ${amount}
+                    {formatCurrency(amount)}
                   </motion.button>
                 ))}
               </div>
@@ -739,7 +745,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    ${amount}
+                    {formatCurrency(amount)}
                   </motion.button>
                 ))}
                 {group.user_contribution > 0 && (
