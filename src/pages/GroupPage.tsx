@@ -40,7 +40,8 @@ const QUICK_AMOUNTS_BY_CURRENCY: Record<string, number[]> = {
 };
 
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
-  const { t, formatCurrency } = useApp();
+  const { t, formatCurrency, currency } = useApp();
+  const QUICK_AMOUNTS = QUICK_AMOUNTS_BY_CURRENCY[currency] || QUICK_AMOUNTS_BY_CURRENCY.CAD;
   const { groups, profile, addContribution, addWithdrawal, refreshGroups, updateGroup, leaveGroup, deleteGroup, hideGroup, user } = useAuthContext();
   const { toast } = useToast();
   const [message, setMessage] = useState('');
