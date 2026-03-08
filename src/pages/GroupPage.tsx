@@ -102,6 +102,10 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareCaption, setShareCaption] = useState('');
+  const [lastContribData, setLastContribData] = useState<{ amount: number; groupName: string } | null>(null);
+  const [sharingToFeed, setSharingToFeed] = useState(false);
 
   const handleReceiptSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
