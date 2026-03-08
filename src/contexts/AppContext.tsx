@@ -1941,6 +1941,10 @@ const translations: Record<Language, Record<string, string>> = {
     deleteGroupConfirm: 'Êtes-vous sûr de vouloir supprimer ce groupe? Cette action est irréversible et toutes les données seront perdues.',
     cancel: 'Annuler',
     delete: 'Supprimer',
+    timelineFeed: 'Fil Social',
+    timelineDesc: 'Réalisations anonymes de la communauté',
+    noEventsYet: 'Aucune réalisation encore',
+    beFirstAchievement: 'Commencez votre série pour apparaître ici!',
   },
   es: {
     welcome: 'Bienvenido',
