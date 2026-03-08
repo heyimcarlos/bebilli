@@ -736,6 +736,10 @@ const translations: Record<Language, Record<string, string>> = {
     openGoalDesc: 'Quem junta mais % do salário vence!',
     fixedGoalDesc: 'Alcance um valor específico juntos.',
     competitionEndDate: 'Data de término',
+    timelineFeed: 'Feed Social',
+    timelineDesc: 'Conquistas anônimas da comunidade',
+    noEventsYet: 'Nenhuma conquista ainda',
+    beFirstAchievement: 'Comece seu streak para aparecer aqui!',
   },
   en: {
     welcome: 'Welcome',
@@ -1346,6 +1350,10 @@ const translations: Record<Language, Record<string, string>> = {
     openGoalDesc: 'Whoever saves the highest % of salary wins!',
     fixedGoalDesc: 'Reach a specific amount together.',
     competitionEndDate: 'Competition end date',
+    timelineFeed: 'Social Feed',
+    timelineDesc: 'Anonymous achievements from the community',
+    noEventsYet: 'No achievements yet',
+    beFirstAchievement: 'Start your streak to appear here!',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -1933,6 +1941,10 @@ const translations: Record<Language, Record<string, string>> = {
     deleteGroupConfirm: 'Êtes-vous sûr de vouloir supprimer ce groupe? Cette action est irréversible et toutes les données seront perdues.',
     cancel: 'Annuler',
     delete: 'Supprimer',
+    timelineFeed: 'Fil Social',
+    timelineDesc: 'Réalisations anonymes de la communauté',
+    noEventsYet: 'Aucune réalisation encore',
+    beFirstAchievement: 'Commencez votre série pour apparaître ici!',
   },
   es: {
     welcome: 'Bienvenido',
@@ -2553,6 +2565,10 @@ const translations: Record<Language, Record<string, string>> = {
     openGoalDesc: '¡Quien ahorre más % de su salario gana!',
     fixedGoalDesc: 'Alcancen un monto específico juntos.',
     competitionEndDate: 'Fecha de término',
+    timelineFeed: 'Feed Social',
+    timelineDesc: 'Logros anónimos de la comunidad',
+    noEventsYet: 'Ningún logro aún',
+    beFirstAchievement: '¡Comienza tu racha para aparecer aquí!',
   },
 };
 
