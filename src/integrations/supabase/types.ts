@@ -894,9 +894,12 @@ export type Database = {
         Row: {
           amount_match: boolean | null
           contribution_id: string
+          converted_amount: number | null
           created_at: string
           declared_amount: number
+          exchange_rate: number | null
           extracted_amount: number | null
+          extracted_currency: string | null
           extracted_date: string | null
           extracted_description: string | null
           extracted_type: string | null
@@ -910,9 +913,12 @@ export type Database = {
         Insert: {
           amount_match?: boolean | null
           contribution_id: string
+          converted_amount?: number | null
           created_at?: string
           declared_amount: number
+          exchange_rate?: number | null
           extracted_amount?: number | null
+          extracted_currency?: string | null
           extracted_date?: string | null
           extracted_description?: string | null
           extracted_type?: string | null
@@ -926,9 +932,12 @@ export type Database = {
         Update: {
           amount_match?: boolean | null
           contribution_id?: string
+          converted_amount?: number | null
           created_at?: string
           declared_amount?: number
+          exchange_rate?: number | null
           extracted_amount?: number | null
+          extracted_currency?: string | null
           extracted_date?: string | null
           extracted_description?: string | null
           extracted_type?: string | null

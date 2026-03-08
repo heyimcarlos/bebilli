@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle, ArrowRightLeft } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +22,9 @@ interface ReceiptValidation {
   tolerance_percent: number;
   created_at: string;
   receipt_image_url: string | null;
+  extracted_currency?: string | null;
+  converted_amount?: number | null;
+  exchange_rate?: number | null;
 }
 
 interface ReceiptValidationHistoryProps {
@@ -29,7 +32,7 @@ interface ReceiptValidationHistoryProps {
 }
 
 const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ groupId }) => {
-  const { t, formatCurrency } = useApp();
+  const { t, formatCurrency, currency } = useApp();
   const { user } = useAuthContext();
   const [validations, setValidations] = useState<ReceiptValidation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -177,11 +180,39 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                   <p className="text-muted-foreground">{t('declared') || 'Declared'}</p>
                   <p className="font-semibold">{formatCurrency(v.declared_amount)}</p>
                 </div>
-                <div>
+                <div className="flex flex-col gap-0.5">
                   <p className="text-muted-foreground">{t('extracted') || 'Extracted'}</p>
-                  <p className={`font-semibold ${v.amount_match === false ? 'text-amber-500' : v.amount_match === true ? 'text-green-500' : ''}`}>
-                    {v.extracted_amount != null ? formatCurrency(v.extracted_amount) : '—'}
-                  </p>
+                  {(() => {
+                    const isForeign = v.extracted_currency && v.extracted_currency !== currency;
+                    const effectiveAmount = isForeign && v.converted_amount != null ? v.converted_amount : v.extracted_amount;
+                    const matchColor = v.amount_match === false ? 'text-amber-500' : v.amount_match === true ? 'text-green-500' : '';
+
+                    if (isForeign && v.extracted_amount != null) {
+                      return (
+                        <>
+                          <p className="font-semibold text-muted-foreground">
+                            {v.extracted_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <span className="ml-1 text-[10px] bg-secondary px-1.5 py-0.5 rounded-full">{v.extracted_currency}</span>
+                          </p>
+                          {v.converted_amount != null && (
+                            <p className={`font-semibold flex items-center gap-1 ${matchColor}`}>
+                              <ArrowRightLeft className="w-3 h-3 flex-shrink-0" />
+                              {formatCurrency(v.converted_amount)}
+                            </p>
+                          )}
+                          {v.exchange_rate != null && (
+                            <p className="text-[9px] text-muted-foreground">Rate: {v.exchange_rate}</p>
+                          )}
+                        </>
+                      );
+                    }
+
+                    return (
+                      <p className={`font-semibold ${matchColor}`}>
+                        {v.extracted_amount != null ? formatCurrency(v.extracted_amount) : '—'}
+                      </p>
+                    );
+                  })()}
                 </div>
               </div>
 
