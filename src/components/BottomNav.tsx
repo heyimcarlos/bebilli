@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Compass, Activity } from 'lucide-react';
+import { Users, Compass, Home } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
