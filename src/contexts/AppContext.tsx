@@ -2119,9 +2119,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       pt: 'pt-BR',
       en: 'en-CA',
       fr: 'fr-CA',
-      es: 'es-MX',
-      it: 'it-IT',
-      de: 'de-DE',
     };
     return localeMap[language];
   };
