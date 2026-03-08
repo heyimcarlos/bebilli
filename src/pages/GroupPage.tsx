@@ -1,33 +1,59 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus, Eye, EyeOff, Flame, Clock, ShieldCheck, AlertTriangle, FileText, X, Upload } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useApp } from '@/contexts/AppContext';
-import { useAuthContext } from '@/contexts/AuthContext';
-import { validateContributionAmount } from '@/lib/validation';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import InviteModal from '@/components/InviteModal';
-import QuickWinModal from '@/components/QuickWinModal';
-import EditGroupModal from '@/components/EditGroupModal';
-import PartnerCoupons from '@/components/PartnerCoupons';
-import GroupActionsMenu from '@/components/GroupActionsMenu';
-import AudioRecorder from '@/components/AudioRecorder';
-import DefaultAvatar from '@/components/DefaultAvatar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useGroupChat } from '@/hooks/useGroupChat';
-import { AnimatedBadge, AnimatedProgressBar, AnimatedCounter, AnimatedLeaderboard, StreakDisplay } from '@/components/animations';
-import ConsistencyRanking from '@/components/ConsistencyRanking';
-import ReceiptValidationHistory from '@/components/ReceiptValidationHistory';
-import GoalProofSubmit from '@/components/GoalProofSubmit';
+import React, { useState, useRef, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+  ArrowLeft,
+  Send,
+  Bot,
+  Lock,
+  Check,
+  Gift,
+  Share2,
+  Plus,
+  Minus,
+  DollarSign,
+  Loader2,
+  Pencil,
+  Trash2,
+  Users,
+  UserPlus,
+  Eye,
+  EyeOff,
+  Flame,
+  Clock,
+  ShieldCheck,
+  AlertTriangle,
+  FileText,
+  X,
+  Upload,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useApp } from "@/contexts/AppContext";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { validateContributionAmount } from "@/lib/validation";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import InviteModal from "@/components/InviteModal";
+import QuickWinModal from "@/components/QuickWinModal";
+import EditGroupModal from "@/components/EditGroupModal";
+import PartnerCoupons from "@/components/PartnerCoupons";
+import GroupActionsMenu from "@/components/GroupActionsMenu";
+import AudioRecorder from "@/components/AudioRecorder";
+import DefaultAvatar from "@/components/DefaultAvatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGroupChat } from "@/hooks/useGroupChat";
+import {
+  AnimatedBadge,
+  AnimatedProgressBar,
+  AnimatedCounter,
+  AnimatedLeaderboard,
+  StreakDisplay,
+} from "@/components/animations";
+import ConsistencyRanking from "@/components/ConsistencyRanking";
+import ReceiptValidationHistory from "@/components/ReceiptValidationHistory";
+import GoalProofSubmit from "@/components/GoalProofSubmit";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface GroupPageProps {
   groupId: string;
@@ -44,9 +70,20 @@ const QUICK_AMOUNTS_BY_CURRENCY: Record<string, number[]> = {
 const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const { t, formatCurrency, currency } = useApp();
   const QUICK_AMOUNTS = QUICK_AMOUNTS_BY_CURRENCY[currency] || QUICK_AMOUNTS_BY_CURRENCY.CAD;
-  const { groups, profile, addContribution, addWithdrawal, refreshGroups, updateGroup, leaveGroup, deleteGroup, hideGroup, user } = useAuthContext();
+  const {
+    groups,
+    profile,
+    addContribution,
+    addWithdrawal,
+    refreshGroups,
+    updateGroup,
+    leaveGroup,
+    deleteGroup,
+    hideGroup,
+    user,
+  } = useAuthContext();
   const { toast } = useToast();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showContributeModal, setShowContributeModal] = useState(false);
@@ -54,12 +91,12 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSalaryModal, setShowSalaryModal] = useState(false);
-  const [contributionAmount, setContributionAmount] = useState('');
-  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [contributionAmount, setContributionAmount] = useState("");
+  const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const [contributing, setContributing] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
-  const [salaryInput, setSalaryInput] = useState('');
+  const [salaryInput, setSalaryInput] = useState("");
   const [showAmountToggle, setShowAmountToggle] = useState(true);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
@@ -78,27 +115,30 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const clearReceipt = () => {
     setReceiptFile(null);
     setReceiptPreview(null);
-    if (receiptInputRef.current) receiptInputRef.current.value = '';
+    if (receiptInputRef.current) receiptInputRef.current.value = "";
   };
 
   const uploadReceipt = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split('.').pop();
+    const fileExt = file.name.split(".").pop();
     const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
-    const { error } = await supabase.storage.from('receipt-images').upload(fileName, file);
-    if (error) { console.error('Receipt upload error:', error); return null; }
-    const { data } = supabase.storage.from('receipt-images').getPublicUrl(fileName);
+    const { error } = await supabase.storage.from("receipt-images").upload(fileName, file);
+    if (error) {
+      console.error("Receipt upload error:", error);
+      return null;
+    }
+    const { data } = supabase.storage.from("receipt-images").getPublicUrl(fileName);
     return data.publicUrl;
   };
 
   const saveReceiptValidation = async (contributionId: string, amount: number, receiptUrl: string) => {
     // First save the pending record
-    await supabase.from('receipt_validations').insert({
+    await supabase.from("receipt_validations").insert({
       contribution_id: contributionId,
       user_id: user!.id,
       group_id: groupId,
       declared_amount: amount,
       receipt_image_url: receiptUrl,
-      validation_status: 'pending',
+      validation_status: "pending",
     });
 
     // Then trigger AI OCR validation in background
@@ -112,7 +152,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         reader.readAsDataURL(blob);
       });
 
-      const { data: scanResult, error: scanError } = await supabase.functions.invoke('scan-receipt', {
+      const { data: scanResult, error: scanError } = await supabase.functions.invoke("scan-receipt", {
         body: {
           imageBase64: base64,
           declaredAmount: amount,
@@ -122,50 +162,57 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       });
 
       if (scanError) {
-        console.error('OCR scan error:', scanError);
+        console.error("OCR scan error:", scanError);
         return;
       }
 
       // Update the validation record with OCR results
       if (scanResult) {
         await supabase
-          .from('receipt_validations')
+          .from("receipt_validations")
           .update({
             extracted_amount: scanResult.amount || null,
             extracted_date: scanResult.date || null,
             extracted_type: scanResult.transaction_type || null,
             extracted_description: scanResult.description || null,
-            validation_status: scanResult.validation_status || 'pending',
+            validation_status: scanResult.validation_status || "pending",
             amount_match: scanResult.amount_match,
           })
-          .eq('contribution_id', contributionId)
-          .eq('user_id', user!.id);
+          .eq("contribution_id", contributionId)
+          .eq("user_id", user!.id);
 
         // Show result toast
-        if (scanResult.validation_status === 'approved') {
+        if (scanResult.validation_status === "approved") {
           toast({
-            title: '✅ ' + (t('receiptApproved') || 'Receipt approved!'),
-            description: (t('receiptMatchDesc') || 'The receipt amount matches your contribution.'),
+            title: "✅ " + (t("receiptApproved") || "Receipt approved!"),
+            description: t("receiptMatchDesc") || "The receipt amount matches your contribution.",
           });
-        } else if (scanResult.validation_status === 'flagged') {
+        } else if (scanResult.validation_status === "flagged") {
           toast({
-            title: '⚠️ ' + (t('receiptFlagged') || 'Receipt flagged'),
-            description: (t('receiptMismatchDesc') || 'The extracted amount differs from your declared amount. It will be reviewed.'),
-            variant: 'destructive',
+            title: "⚠️ " + (t("receiptFlagged") || "Receipt flagged"),
+            description:
+              t("receiptMismatchDesc") ||
+              "The extracted amount differs from your declared amount. It will be reviewed.",
+            variant: "destructive",
           });
         }
       }
     } catch (err) {
-      console.error('Receipt OCR processing error:', err);
+      console.error("Receipt OCR processing error:", err);
     }
   };
 
   const group = groups.find((g) => g.id === groupId);
-  const { messages: chatMessages, loading: chatLoading, sendMessage: sendChatMessage, uploadAudio } = useGroupChat(groupId, user?.id);
+  const {
+    messages: chatMessages,
+    loading: chatLoading,
+    sendMessage: sendChatMessage,
+    uploadAudio,
+  } = useGroupChat(groupId, user?.id);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
   if (!group) return null;
@@ -173,43 +220,43 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const isOpenGoal = (group as any).is_open_goal || false;
   const competitionEndDate = (group as any).competition_end_date;
   const progress = !isOpenGoal && group.goal_amount > 0 ? (group.current_amount / group.goal_amount) * 100 : 0;
-  
+
   // Current user's membership info
-  const currentMembership = group.members.find(m => m.user_id === profile?.id);
-  
+  const currentMembership = group.members.find((m) => m.user_id === profile?.id);
+
   // Check if current user is admin
-  const isAdmin = group.members.some(m => m.user_id === profile?.id && m.role === 'admin');
-  
+  const isAdmin = group.members.some((m) => m.user_id === profile?.id && m.role === "admin");
+
   // Check if shared group is pending (needs at least 2 members)
-  const isSharedPending = (group as any).group_type === 'shared' && group.members.length < 2;
+  const isSharedPending = (group as any).group_type === "shared" && group.members.length < 2;
 
   const partners = [
-    { name: 'Expedia', logo: '✈️', discount: '15% OFF', unlockAt: 25 },
-    { name: 'Booking', logo: '🏨', discount: '20% OFF', unlockAt: 50 },
-    { name: 'Airbnb', logo: '🏠', discount: '25% OFF', unlockAt: 75 },
-    { name: 'Air Canada', logo: '🛫', discount: '30% OFF', unlockAt: 100 },
+    { name: "Expedia", logo: "✈️", discount: "15% OFF", unlockAt: 25 },
+    { name: "Booking", logo: "🏨", discount: "20% OFF", unlockAt: 50 },
+    { name: "Airbnb", logo: "🏠", discount: "25% OFF", unlockAt: 75 },
+    { name: "Air Canada", logo: "🛫", discount: "30% OFF", unlockAt: 100 },
   ];
 
   const handleContribute = async () => {
     if (isSharedPending) {
-      toast({ title: t('error'), description: t('sharedGroupDesc'), variant: 'destructive' });
+      toast({ title: t("error"), description: t("sharedGroupDesc"), variant: "destructive" });
       return;
     }
     const amount = validateContributionAmount(contributionAmount);
     if (amount === null) {
       toast({
-        title: t('error'),
-        description: t('invalidAmountError'),
-        variant: 'destructive',
+        title: t("error"),
+        description: t("invalidAmountError"),
+        variant: "destructive",
       });
       return;
     }
 
     if (!receiptFile) {
       toast({
-        title: t('error'),
-        description: t('receiptRequired') || 'Please attach a receipt for approval.',
-        variant: 'destructive',
+        title: t("error"),
+        description: t("receiptRequired") || "Please attach a receipt for approval.",
+        variant: "destructive",
       });
       return;
     }
@@ -220,7 +267,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     const receiptUrl = await uploadReceipt(receiptFile);
     if (!receiptUrl) {
       setContributing(false);
-      toast({ title: t('error'), description: t('receiptUploadError') || 'Failed to upload receipt.', variant: 'destructive' });
+      toast({
+        title: t("error"),
+        description: t("receiptUploadError") || "Failed to upload receipt.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -229,9 +280,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
     if (error) {
       toast({
-        title: t('error'),
+        title: t("error"),
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } else {
       // Save receipt validation record
@@ -240,16 +291,16 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       }
 
       setShowContributeModal(false);
-      setContributionAmount('');
+      setContributionAmount("");
       clearReceipt();
-      
+
       // Show celebration
-      setLastContribution({ 
-        amount, 
-        streak: (profile?.current_streak || 0) + 1 
+      setLastContribution({
+        amount,
+        streak: (profile?.current_streak || 0) + 1,
       });
       setShowWinModal(true);
-      
+
       // Refresh groups to update progress
       await refreshGroups();
     }
@@ -259,18 +310,18 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     const amount = validateContributionAmount(withdrawalAmount);
     if (amount === null) {
       toast({
-        title: t('error'),
-        description: t('invalidAmountError'),
-        variant: 'destructive',
+        title: t("error"),
+        description: t("invalidAmountError"),
+        variant: "destructive",
       });
       return;
     }
 
     if (amount > group.user_contribution) {
       toast({
-        title: t('error'),
-        description: t('insufficientBalance'),
-        variant: 'destructive',
+        title: t("error"),
+        description: t("insufficientBalance"),
+        variant: "destructive",
       });
       return;
     }
@@ -281,19 +332,19 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
     if (error) {
       toast({
-        title: t('error'),
+        title: t("error"),
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } else {
       setShowWithdrawModal(false);
-      setWithdrawalAmount('');
-      
+      setWithdrawalAmount("");
+
       toast({
-        title: '💸 ' + t('withdrawalSuccess'),
-        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup')}`,
+        title: "💸 " + t("withdrawalSuccess"),
+        description: `${formatCurrency(amount)} ${t("withdrawnFromGroup")}`,
       });
-      
+
       await refreshGroups();
     }
   };
@@ -301,9 +352,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const handleQuickWithdraw = async (amount: number) => {
     if (amount > group.user_contribution) {
       toast({
-        title: t('error'),
-        description: t('insufficientBalance'),
-        variant: 'destructive',
+        title: t("error"),
+        description: t("insufficientBalance"),
+        variant: "destructive",
       });
       return;
     }
@@ -314,18 +365,18 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
     if (error) {
       toast({
-        title: t('error'),
+        title: t("error"),
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } else {
       setShowWithdrawModal(false);
-      
+
       toast({
-        title: '💸 ' + t('withdrawalSuccess'),
-        description: `${formatCurrency(amount)} ${t('withdrawnFromGroup')}`,
+        title: "💸 " + t("withdrawalSuccess"),
+        description: `${formatCurrency(amount)} ${t("withdrawnFromGroup")}`,
       });
-      
+
       await refreshGroups();
     }
   };
@@ -336,47 +387,43 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
   const handleSendMessage = async () => {
     if (!message.trim() && !pendingAudio) return;
-    
+
     let audioUrl: string | null = null;
     if (pendingAudio) {
       audioUrl = await uploadAudio(pendingAudio);
       setPendingAudio(null);
     }
-    
+
     await sendChatMessage(message.trim() || undefined, audioUrl || undefined);
-    setMessage('');
+    setMessage("");
   };
 
   const container = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   };
 
   const item = {
     hidden: { opacity: 0, x: -20 },
-    show: { opacity: 1, x: 0 }
+    show: { opacity: 1, x: 0 },
   };
 
   return (
-    <motion.div 
-      className="min-h-screen bg-background pb-44"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
+    <motion.div className="min-h-screen bg-background pb-44" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
       <div className="relative">
         <div className="absolute inset-0 h-48">
           <img
-            src={group.image_url || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800'}
+            src={group.image_url || "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800"}
             alt={group.name}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
         </div>
-        
+
         <div className="relative z-10 px-6 pt-12 pb-6">
           <div className="flex items-center justify-between mb-4">
             <motion.button
@@ -417,8 +464,8 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               />
             </div>
           </div>
-          
-          <motion.h1 
+
+          <motion.h1
             className="text-2xl font-bold mb-1"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -427,7 +474,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             {group.name}
           </motion.h1>
           {group.description && (
-            <motion.p 
+            <motion.p
               className="text-muted-foreground text-sm mb-2"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -436,19 +483,19 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               {group.description}
             </motion.p>
           )}
-          <motion.p 
+          <motion.p
             className="text-muted-foreground/70 text-xs"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {group.members.length} {t('members')}
+            {group.members.length} {t("members")}
           </motion.p>
         </div>
       </div>
 
       {/* Progress / Competition Stats */}
-      <motion.div 
+      <motion.div
         className="px-6 mb-6"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -461,58 +508,62 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm font-bold text-foreground">{t('competitionMode') || 'Competition'}</span>
+                  <span className="text-sm font-bold text-foreground">{t("competitionMode") || "Competition"}</span>
                 </div>
                 {competitionEndDate && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
-                    <span>{t('endsOn') || 'Ends'}: {new Date(competitionEndDate).toLocaleDateString()}</span>
+                    <span>
+                      {t("endsOn") || "Ends"}: {new Date(competitionEndDate).toLocaleDateString()}
+                    </span>
                   </div>
                 )}
               </div>
-              
+
               {/* Stats Row */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div className="text-center p-2 rounded-xl bg-secondary/50">
                   <p className="text-lg font-bold text-foreground">{group.members.length}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">{t('members')}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">{t("members")}</p>
                 </div>
                 <div className="text-center p-2 rounded-xl bg-secondary/50">
                   <p className="text-lg font-bold text-primary">{formatCurrency(group.current_amount)}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">{t('totalSaved') || 'Total'}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">{t("totalSaved") || "Total"}</p>
                 </div>
                 <div className="text-center p-2 rounded-xl bg-secondary/50">
                   <p className="text-lg font-bold text-foreground">
-                    {currentMembership?.savings_percentage?.toFixed(1) || '0'}%
+                    {currentMembership?.savings_percentage?.toFixed(1) || "0"}%
                   </p>
-                  <p className="text-[10px] text-muted-foreground uppercase">{t('yourPercentage') || 'Your %'}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">{t("yourPercentage") || "Your %"}</p>
                 </div>
               </div>
 
               {/* Your contribution + visibility */}
               <div className="pt-3 border-t border-border space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t('yourContribution')}</span>
+                  <span className="text-muted-foreground">{t("yourContribution")}</span>
                   <span className="font-semibold text-success">{formatCurrency(group.user_contribution)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <button 
-                    onClick={() => setShowSalaryModal(true)}
-                    className="text-xs text-primary underline"
-                  >
-                    {currentMembership?.salary ? `${t('salary') || 'Salary'}: ${formatCurrency(currentMembership.salary)}` : (t('setSalary') || 'Set your salary')}
+                  <button onClick={() => setShowSalaryModal(true)} className="text-xs text-primary underline">
+                    {currentMembership?.salary
+                      ? `${t("salary") || "Salary"}: ${formatCurrency(currentMembership.salary)}`
+                      : t("setSalary") || "Set your salary"}
                   </button>
-                  <button 
+                  <button
                     onClick={async () => {
                       if (!user || !currentMembership) return;
                       const newVal = !currentMembership.show_amount;
-                      await supabase.from('group_memberships').update({ show_amount: newVal }).eq('id', currentMembership.id);
+                      await supabase
+                        .from("group_memberships")
+                        .update({ show_amount: newVal })
+                        .eq("id", currentMembership.id);
                       await refreshGroups();
                     }}
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {currentMembership?.show_amount ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                    {currentMembership?.show_amount ? (t('amountVisible') || 'Visible') : (t('amountHidden') || 'Hidden')}
+                    {currentMembership?.show_amount ? t("amountVisible") || "Visible" : t("amountHidden") || "Hidden"}
                   </button>
                 </div>
               </div>
@@ -520,14 +571,15 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           ) : (
             <>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-muted-foreground">{t('groupGoal')}</span>
-                <motion.span 
+                <span className="text-sm text-muted-foreground">{t("groupGoal")}</span>
+                <motion.span
                   className="text-sm font-semibold text-primary"
                   key={progress}
                   initial={{ scale: 1.2 }}
                   animate={{ scale: 1 }}
                 >
-                  <AnimatedCounter value={progress} suffix="%" duration={1.5} className="font-semibold" /> {t('reached')}
+                  <AnimatedCounter value={progress} suffix="%" duration={1.5} className="font-semibold" />{" "}
+                  {t("reached")}
                 </motion.span>
               </div>
               <AnimatedProgressBar progress={progress} height={12} showMilestones />
@@ -537,14 +589,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               </div>
               <div className="mt-3 pt-3 border-t border-border">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t('yourContribution')}</span>
+                  <span className="text-muted-foreground">{t("yourContribution")}</span>
                   <span className="font-semibold text-success">{formatCurrency(group.user_contribution)}</span>
                 </div>
                 {group.user_pending > 0 && (
                   <div className="flex items-center justify-between text-xs mt-1.5">
                     <span className="text-amber-500 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {t('pendingVerification') || 'Pending Verification'}
+                      {t("pendingVerification") || "Pending Verification"}
                     </span>
                     <span className="text-amber-500 font-medium">{formatCurrency(group.user_pending)}</span>
                   </div>
@@ -569,15 +621,15 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 <UserPlus className="w-5 h-5 text-amber-500" />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-bold text-foreground mb-1">{t('pendingBannerTitle')}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-3">{t('pendingBannerDesc')}</p>
+                <h3 className="text-sm font-bold text-foreground mb-1">{t("pendingBannerTitle")}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-3">{t("pendingBannerDesc")}</p>
                 <Button
                   size="sm"
                   onClick={() => setShowInviteModal(true)}
                   className="rounded-full btn-primary text-primary-foreground font-semibold px-5 h-9"
                 >
                   <Share2 className="w-4 h-4 mr-1.5" />
-                  {t('inviteMembers')}
+                  {t("inviteMembers")}
                 </Button>
               </div>
             </div>
@@ -595,7 +647,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         >
           <GoalProofSubmit
             groupId={groupId}
-            userId={user?.id || ''}
+            userId={user?.id || ""}
             totalAmount={group.current_amount}
             members={group.members}
             formatCurrency={formatCurrency}
@@ -617,39 +669,42 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       <div className="px-6 relative z-10">
         <Tabs defaultValue="consistency" className="w-full">
           <TabsList className="w-full bg-secondary mb-4 flex-wrap">
-            <TabsTrigger value="consistency" className="flex-1">{t('consistency')}</TabsTrigger>
-            <TabsTrigger value="chat" className="flex-1">{t('chat')}</TabsTrigger>
-            <TabsTrigger value="receipts" className="flex-1">{t('receipts') || 'Receipts'}</TabsTrigger>
-            <TabsTrigger value="dream" className="flex-1">{t('dreamPanel')}</TabsTrigger>
+            <TabsTrigger value="consistency" className="flex-1">
+              {t("consistency")}
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="flex-1">
+              {t("chat")}
+            </TabsTrigger>
+            <TabsTrigger value="receipts" className="flex-1">
+              {t("receipts") || "Receipts"}
+            </TabsTrigger>
+            <TabsTrigger value="dream" className="flex-1">
+              {t("dreamPanel")}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="consistency">
-            <div className="h-[60vh] overflow-y-auto pr-1">
-              <ConsistencyRanking
-                members={group.members}
-                currentUserId={profile?.id}
-              />
+            <div className="h-[48vh] overflow-y-auto pr-1">
+              <ConsistencyRanking members={group.members} currentUserId={profile?.id} />
             </div>
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-0">
-            <div className="h-[60vh] overflow-y-auto pr-1 flex flex-col">
+            <div className="h-[48vh] overflow-y-auto pr-1 flex flex-col">
               <div className="glass-card p-4 flex-1 min-h-0 overflow-y-auto space-y-3">
                 {/* Bot welcome message */}
-                <motion.div 
-                  className="flex gap-3"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
+                <motion.div className="flex gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4 text-primary" />
                   </div>
                   <div className="bg-secondary rounded-2xl rounded-tl-none px-4 py-2 max-w-[80%]">
                     <p className="text-xs text-primary font-medium mb-1">Bili Bot</p>
-                    <p className="text-sm">{t('welcomeToGroup')} {group.name}! {t('startContributing')} 🚀</p>
+                    <p className="text-sm">
+                      {t("welcomeToGroup")} {group.name}! {t("startContributing")} 🚀
+                    </p>
                   </div>
                 </motion.div>
-                
+
                 {chatLoading ? (
                   <div className="flex justify-center py-4">
                     <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
@@ -659,9 +714,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     {chatMessages.map((msg) => {
                       const isOwn = msg.user_id === user?.id;
                       return (
-                        <motion.div 
-                          key={msg.id} 
-                          className={`flex gap-3 ${isOwn ? 'justify-end' : ''}`}
+                        <motion.div
+                          key={msg.id}
+                          className={`flex gap-3 ${isOwn ? "justify-end" : ""}`}
                           initial={{ opacity: 0, scale: 0.8, y: 20 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.8 }}
@@ -670,22 +725,20 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                             <Avatar className="w-8 h-8 flex-shrink-0">
                               <AvatarImage src={msg.profile?.avatar_url || undefined} />
                               <AvatarFallback className="bg-primary p-0">
-                                <DefaultAvatar name={msg.profile?.name || 'U'} size={32} />
+                                <DefaultAvatar name={msg.profile?.name || "U"} size={32} />
                               </AvatarFallback>
                             </Avatar>
                           )}
-                          <div className={`max-w-[80%] ${isOwn ? 'text-right' : ''}`}>
-                            {!isOwn && (
-                              <p className="text-xs text-muted-foreground mb-0.5">{msg.profile?.name}</p>
-                            )}
-                            <div className={`inline-block rounded-2xl ${
-                              isOwn 
-                                ? 'bg-primary text-primary-foreground rounded-tr-sm' 
-                                : 'bg-secondary rounded-tl-sm'
-                            }`}>
-                              {msg.content && (
-                                <p className="text-sm px-4 py-2">{msg.content}</p>
-                              )}
+                          <div className={`max-w-[80%] ${isOwn ? "text-right" : ""}`}>
+                            {!isOwn && <p className="text-xs text-muted-foreground mb-0.5">{msg.profile?.name}</p>}
+                            <div
+                              className={`inline-block rounded-2xl ${
+                                isOwn
+                                  ? "bg-primary text-primary-foreground rounded-tr-sm"
+                                  : "bg-secondary rounded-tl-sm"
+                              }`}
+                            >
+                              {msg.content && <p className="text-sm px-4 py-2">{msg.content}</p>}
                               {msg.audio_url && (
                                 <div className="px-3 py-2">
                                   <audio src={msg.audio_url} controls className="h-8 max-w-[200px]" />
@@ -700,24 +753,29 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 )}
                 <div ref={chatEndRef} />
               </div>
-              
+
               {/* Audio preview */}
               {pendingAudio && (
                 <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 border border-border mt-2">
                   <audio src={URL.createObjectURL(pendingAudio)} controls className="h-8 flex-1" />
-                  <Button variant="ghost" size="icon" onClick={() => setPendingAudio(null)} className="shrink-0 w-8 h-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setPendingAudio(null)}
+                    className="shrink-0 w-8 h-8"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               )}
-              
+
               <div className="flex gap-2 mt-2">
                 <AudioRecorder onAudioReady={(blob) => setPendingAudio(blob)} disabled={false} />
                 <Input
-                  placeholder={t('typeMessage')}
+                  placeholder={t("typeMessage")}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   className="bg-secondary"
                 />
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -734,15 +792,15 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </TabsContent>
 
           <TabsContent value="receipts">
-            <div className="h-[60vh] overflow-y-auto pr-1">
+            <div className="h-[48vh] overflow-y-auto pr-1">
               <ReceiptValidationHistory groupId={groupId} />
             </div>
           </TabsContent>
 
           <TabsContent value="dream">
-            <div className="h-[60vh] overflow-y-auto pr-1">
-              <PartnerCoupons 
-                userLevel={profile?.level || 1} 
+            <div className="h-[48vh] overflow-y-auto pr-1">
+              <PartnerCoupons
+                userLevel={profile?.level || 1}
                 groupProgress={progress}
                 isPremium={profile?.is_premium || false}
               />
@@ -767,7 +825,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             whileTap={{ scale: group.user_contribution > 0 ? 0.98 : 1 }}
           >
             <Minus className="w-5 h-5" />
-            {t('withdraw')}
+            {t("withdraw")}
           </motion.button>
           <motion.button
             onClick={() => {
@@ -777,42 +835,61 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 setShowContributeModal(true);
               }
             }}
-            className={`flex-[2] h-14 font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg ${isSharedPending ? 'bg-amber-500 text-white' : 'btn-primary text-primary-foreground'}`}
+            className={`flex-[2] h-14 font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-lg ${isSharedPending ? "bg-amber-500 text-white" : "btn-primary text-primary-foreground"}`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            animate={isSharedPending ? {} : {
-              boxShadow: [
-                '0 0 20px hsl(var(--primary) / 0.3)',
-                '0 0 40px hsl(var(--primary) / 0.5)',
-                '0 0 20px hsl(var(--primary) / 0.3)',
-              ],
-            }}
+            animate={
+              isSharedPending
+                ? {}
+                : {
+                    boxShadow: [
+                      "0 0 20px hsl(var(--primary) / 0.3)",
+                      "0 0 40px hsl(var(--primary) / 0.5)",
+                      "0 0 20px hsl(var(--primary) / 0.3)",
+                    ],
+                  }
+            }
             transition={{
               boxShadow: { duration: 2, repeat: Infinity },
             }}
           >
             {isSharedPending ? (
-              <><UserPlus className="w-5 h-5" />{t('inviteMembers')}</>
+              <>
+                <UserPlus className="w-5 h-5" />
+                {t("inviteMembers")}
+              </>
             ) : (
-              <><Plus className="w-5 h-5" />{t('addContribution')}</>
+              <>
+                <Plus className="w-5 h-5" />
+                {t("addContribution")}
+              </>
             )}
           </motion.button>
         </div>
       </motion.div>
 
       {/* Contribute Modal */}
-      <Dialog open={showContributeModal} onOpenChange={(open) => { setShowContributeModal(open); if (!open) { clearReceipt(); setContributionAmount(''); } }}>
+      <Dialog
+        open={showContributeModal}
+        onOpenChange={(open) => {
+          setShowContributeModal(open);
+          if (!open) {
+            clearReceipt();
+            setContributionAmount("");
+          }
+        }}
+      >
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="w-5 h-5 text-success" />
-              {t('addContribution')}
+              {t("addContribution")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {/* Quick amounts */}
             <div className="space-y-2">
-               <p className="text-sm text-muted-foreground">{t('quickAmounts')}</p>
+              <p className="text-sm text-muted-foreground">{t("quickAmounts")}</p>
               <div className="flex flex-wrap gap-2">
                 {QUICK_AMOUNTS.map((amount) => (
                   <motion.button
@@ -820,9 +897,9 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     onClick={() => handleQuickContribute(amount)}
                     disabled={contributing}
                     className={`flex-1 min-w-[60px] h-12 rounded-xl font-semibold transition-colors ${
-                      contributionAmount === String(amount) 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-secondary hover:bg-secondary/80'
+                      contributionAmount === String(amount)
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary hover:bg-secondary/80"
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -835,10 +912,10 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
             {/* Custom amount */}
             <div className="space-y-2">
-               <p className="text-sm text-muted-foreground">{t('customAmount')}</p>
+              <p className="text-sm text-muted-foreground">{t("customAmount")}</p>
               <Input
                 type="number"
-                placeholder={t('enterAmount')}
+                placeholder={t("enterAmount")}
                 value={contributionAmount}
                 onChange={(e) => setContributionAmount(e.target.value)}
                 className="bg-secondary"
@@ -849,21 +926,38 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground flex items-center gap-1">
                 <FileText className="w-4 h-4" />
-                {t('attachReceipt') || 'Attach receipt'} <span className="text-destructive">*</span>
+                {t("attachReceipt") || "Attach receipt"} <span className="text-destructive">*</span>
               </p>
-              <p className="text-xs text-muted-foreground">{t('receiptRequiredDesc') || 'A receipt is required for group approval.'}</p>
-              <input type="file" ref={receiptInputRef} onChange={handleReceiptSelect} accept="image/*,.pdf" className="hidden" />
+              <p className="text-xs text-muted-foreground">
+                {t("receiptRequiredDesc") || "A receipt is required for group approval."}
+              </p>
+              <input
+                type="file"
+                ref={receiptInputRef}
+                onChange={handleReceiptSelect}
+                accept="image/*,.pdf"
+                className="hidden"
+              />
               {receiptPreview ? (
                 <div className="relative inline-block">
                   <img src={receiptPreview} alt="Receipt" className="h-24 rounded-lg border border-border" />
-                  <button onClick={clearReceipt} className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+                  <button
+                    onClick={clearReceipt}
+                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                  >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => receiptInputRef.current?.click()} disabled={contributing} className="w-full h-11 border-dashed">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => receiptInputRef.current?.click()}
+                  disabled={contributing}
+                  className="w-full h-11 border-dashed"
+                >
                   <Upload className="w-4 h-4 mr-2" />
-                  {t('uploadReceipt') || 'Upload receipt or photo'}
+                  {t("uploadReceipt") || "Upload receipt or photo"}
                 </Button>
               )}
             </div>
@@ -874,12 +968,8 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
               disabled={contributing || !contributionAmount || !receiptFile}
               className="w-full h-12 btn-primary text-primary-foreground font-semibold"
             >
-              {contributing ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : (
-                <Plus className="w-4 h-4 mr-2" />
-              )}
-              {contributing ? (t('sending') || 'Sending...') : (t('addContribution'))}
+              {contributing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+              {contributing ? t("sending") || "Sending..." : t("addContribution")}
             </Button>
           </div>
         </DialogContent>
@@ -891,21 +981,21 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Minus className="w-5 h-5 text-warning" />
-              {t('withdraw')}
+              {t("withdraw")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {/* Available balance */}
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">{t('availableBalance')}</p>
+              <p className="text-sm text-muted-foreground mb-1">{t("availableBalance")}</p>
               <p className="text-2xl font-bold text-success">{formatCurrency(group.user_contribution)}</p>
             </div>
 
             {/* Quick amounts */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('quickAmounts')}</p>
+              <p className="text-sm text-muted-foreground">{t("quickAmounts")}</p>
               <div className="flex flex-wrap gap-2">
-                {QUICK_AMOUNTS.filter(amount => amount <= group.user_contribution).map((amount) => (
+                {QUICK_AMOUNTS.filter((amount) => amount <= group.user_contribution).map((amount) => (
                   <motion.button
                     key={amount}
                     onClick={() => handleQuickWithdraw(amount)}
@@ -925,7 +1015,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {t('withdrawAll')}
+                    {t("withdrawAll")}
                   </motion.button>
                 )}
               </div>
@@ -933,11 +1023,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
             {/* Custom amount */}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('customAmount')}</p>
+              <p className="text-sm text-muted-foreground">{t("customAmount")}</p>
               <div className="flex gap-2">
                 <Input
                   type="number"
-                  placeholder={t('enterAmount')}
+                  placeholder={t("enterAmount")}
                   value={withdrawalAmount}
                   onChange={(e) => setWithdrawalAmount(e.target.value)}
                   max={group.user_contribution}
@@ -948,18 +1038,12 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                   disabled={withdrawing || !withdrawalAmount || parseFloat(withdrawalAmount) > group.user_contribution}
                   className="bg-warning hover:bg-warning/90 text-warning-foreground px-6"
                 >
-                  {withdrawing ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    t('withdraw') || 'Withdraw'
-                  )}
+                  {withdrawing ? <Loader2 className="w-4 h-4 animate-spin" /> : t("withdraw") || "Withdraw"}
                 </Button>
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground text-center">
-              {t('withdrawWarning')}
-            </p>
+            <p className="text-xs text-muted-foreground text-center">{t("withdrawWarning")}</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -995,14 +1079,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             const { error } = await updateGroup(group.id, updates);
             if (error) {
               toast({
-                title: t('error'),
+                title: t("error"),
                 description: error.message,
-                variant: 'destructive',
+                variant: "destructive",
               });
               return { error };
             }
             toast({
-              title: '✅ ' + t('groupUpdated'),
+              title: "✅ " + t("groupUpdated"),
               description: group.name,
             });
             return { error: null };
@@ -1016,16 +1100,17 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-primary" />
-              {t('setSalary') || 'Set Your Salary'}
+              {t("setSalary") || "Set Your Salary"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-sm text-muted-foreground">
-              {t('salaryDesc') || 'Your salary is used to calculate savings percentage for the competition ranking. It stays private.'}
+              {t("salaryDesc") ||
+                "Your salary is used to calculate savings percentage for the competition ranking. It stays private."}
             </p>
             <Input
               type="number"
-              placeholder={t('monthlySalary') || 'Monthly salary'}
+              placeholder={t("monthlySalary") || "Monthly salary"}
               value={salaryInput}
               onChange={(e) => setSalaryInput(e.target.value)}
               className="bg-secondary"
@@ -1035,16 +1120,16 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                 if (!currentMembership || !salaryInput) return;
                 const salary = parseFloat(salaryInput);
                 if (salary <= 0) return;
-                await supabase.from('group_memberships').update({ salary }).eq('id', currentMembership.id);
+                await supabase.from("group_memberships").update({ salary }).eq("id", currentMembership.id);
                 await refreshGroups();
                 setShowSalaryModal(false);
-                setSalaryInput('');
-                toast({ title: '✅', description: t('salaryUpdated') || 'Salary updated!' });
+                setSalaryInput("");
+                toast({ title: "✅", description: t("salaryUpdated") || "Salary updated!" });
               }}
               disabled={!salaryInput || parseFloat(salaryInput) <= 0}
               className="w-full btn-primary text-primary-foreground"
             >
-              {t('save') || 'Save'}
+              {t("save") || "Save"}
             </Button>
           </div>
         </DialogContent>
