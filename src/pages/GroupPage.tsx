@@ -793,7 +793,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
           <TabsContent value="receipts">
             <div className="h-64 overflow-y-auto pr-1">
-              <ReceiptValidationHistory groupId={groupId} />
+              <ReceiptValidationHistory groupId={groupId} memberCount={group.members.length} />
             </div>
           </TabsContent>
 

@@ -1,0 +1,1 @@
+ALTER TABLE public.receipt_validations ADD COLUMN approved_by text[] NOT NULL DEFAULT '{}';
