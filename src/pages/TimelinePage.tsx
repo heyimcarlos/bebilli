@@ -33,7 +33,7 @@ const TimelinePage: React.FC = () => {
     setLoading(true);
 
     let followingIds: string[] = [];
-    if (user && filter === 'following') {
+    if (user) {
       const { data: followData } = await supabase
         .from('user_follows')
         .select('following_id')
@@ -49,7 +49,7 @@ const TimelinePage: React.FC = () => {
       .order('created_at', { ascending: false })
       .limit(50);
 
-    if (filter === 'following' && followingIds.length > 0) {
+    if (followingIds.length > 0) {
       query = query.in('user_id', followingIds);
     }
 
