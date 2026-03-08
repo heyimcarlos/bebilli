@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus, Eye, EyeOff, Flame, Clock } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus, Eye, EyeOff, Flame, Clock, ShieldCheck, AlertTriangle, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
