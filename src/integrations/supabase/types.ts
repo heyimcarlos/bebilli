@@ -893,6 +893,7 @@ export type Database = {
       receipt_validations: {
         Row: {
           amount_match: boolean | null
+          approved_by: string[]
           contribution_id: string
           converted_amount: number | null
           created_at: string
@@ -912,6 +913,7 @@ export type Database = {
         }
         Insert: {
           amount_match?: boolean | null
+          approved_by?: string[]
           contribution_id: string
           converted_amount?: number | null
           created_at?: string
@@ -931,6 +933,7 @@ export type Database = {
         }
         Update: {
           amount_match?: boolean | null
+          approved_by?: string[]
           contribution_id?: string
           converted_amount?: number | null
           created_at?: string

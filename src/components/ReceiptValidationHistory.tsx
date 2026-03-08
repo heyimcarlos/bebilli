@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle, ArrowRightLeft, ChevronRight } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Clock, FileText, Loader2, ZoomIn, Check, X, XCircle, ArrowRightLeft, ChevronRight, Users } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
 
 interface ReceiptValidation {
@@ -25,13 +26,15 @@ interface ReceiptValidation {
   extracted_currency?: string | null;
   converted_amount?: number | null;
   exchange_rate?: number | null;
+  approved_by: string[];
 }
 
 interface ReceiptValidationHistoryProps {
   groupId: string;
+  memberCount: number;
 }
 
-const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ groupId }) => {
+const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ groupId, memberCount }) => {
   const { t, formatCurrency, currency } = useApp();
   const { user } = useAuthContext();
   const [validations, setValidations] = useState<ReceiptValidation[]>([]);
@@ -39,6 +42,8 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
   const [selectedValidation, setSelectedValidation] = useState<ReceiptValidation | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const requiredVotes = Math.max(memberCount - 1, 1);
 
   useEffect(() => {
     const fetchValidations = async () => {
@@ -51,7 +56,10 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
         .limit(50);
 
       if (!error && data) {
-        setValidations(data);
+        setValidations(data.map(d => ({
+          ...d,
+          approved_by: (d as any).approved_by || [],
+        })));
       }
       setLoading(false);
     };
@@ -59,17 +67,30 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
     fetchValidations();
   }, [groupId]);
 
-  const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected') => {
+  const handleApprove = async (id: string) => {
+    if (!user) return;
     setUpdatingId(id);
-    const previous = validations;
+    const item = validations.find(v => v.id === id);
+    if (!item) return;
 
+    const newApprovedBy = [...(item.approved_by || []), user.id];
+    const isUnanimous = newApprovedBy.length >= requiredVotes;
+
+    const previous = validations;
     setValidations(prev =>
-      prev.map(v => v.id === id ? { ...v, validation_status: newStatus } : v)
+      prev.map(v => v.id === id ? {
+        ...v,
+        approved_by: newApprovedBy,
+        validation_status: isUnanimous ? 'approved' : v.validation_status,
+      } : v)
     );
+
+    const updatePayload: any = { approved_by: newApprovedBy };
+    if (isUnanimous) updatePayload.validation_status = 'approved';
 
     const { error } = await supabase
       .from('receipt_validations')
-      .update({ validation_status: newStatus })
+      .update(updatePayload)
       .eq('id', id);
 
     if (error) {
@@ -77,13 +98,42 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
       toast({ title: '❌ Error', description: error.message, variant: 'destructive' });
     } else {
       toast({
-        title: newStatus === 'approved' ? '✅ Approved' : '❌ Rejected',
-        description: newStatus === 'approved'
+        title: isUnanimous ? '✅ Approved' : '👍 Vote recorded',
+        description: isUnanimous
           ? (t('receiptApprovedMsg') || 'Receipt has been approved.')
-          : (t('receiptRejectedMsg') || 'Receipt has been rejected.'),
+          : (t('voteRecorded') || `Your approval has been recorded (${newApprovedBy.length}/${requiredVotes}).`),
       });
-      // Update the selected validation too
-      setSelectedValidation(prev => prev?.id === id ? { ...prev, validation_status: newStatus } : prev);
+      setSelectedValidation(prev => prev?.id === id ? {
+        ...prev,
+        approved_by: newApprovedBy,
+        validation_status: isUnanimous ? 'approved' : prev.validation_status,
+      } : prev);
+    }
+    setUpdatingId(null);
+  };
+
+  const handleReject = async (id: string) => {
+    setUpdatingId(id);
+    const previous = validations;
+
+    setValidations(prev =>
+      prev.map(v => v.id === id ? { ...v, validation_status: 'rejected' } : v)
+    );
+
+    const { error } = await supabase
+      .from('receipt_validations')
+      .update({ validation_status: 'rejected' })
+      .eq('id', id);
+
+    if (error) {
+      setValidations(previous);
+      toast({ title: '❌ Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({
+        title: '❌ Rejected',
+        description: t('receiptRejectedMsg') || 'Receipt has been rejected.',
+      });
+      setSelectedValidation(prev => prev?.id === id ? { ...prev, validation_status: 'rejected' } : prev);
     }
     setUpdatingId(null);
   };
@@ -154,7 +204,8 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
   }
 
   const v = selectedValidation;
-  const canReview = v && (v.validation_status === 'pending' || v.validation_status === 'flagged') && v.user_id !== user?.id;
+  const userAlreadyVoted = v && user ? (v.approved_by || []).includes(user.id) : false;
+  const canReview = v && (v.validation_status === 'pending' || v.validation_status === 'flagged') && v.user_id !== user?.id && !userAlreadyVoted;
 
   return (
     <>
@@ -167,26 +218,36 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
 
       {/* Compact list */}
       <div className="space-y-1">
-        {validations.map((item, i) => (
-          <motion.button
-            key={item.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.03 }}
-            onClick={() => setSelectedValidation(item)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-left"
-          >
-            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getStatusDot(item.validation_status)}`} />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{formatCurrency(item.declared_amount)}</p>
-              <p className="text-[10px] text-muted-foreground">{getStatusLabel(item.validation_status)}</p>
-            </div>
-            <span className="text-[10px] text-muted-foreground flex-shrink-0">
-              {new Date(item.created_at).toLocaleDateString()}
-            </span>
-            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          </motion.button>
-        ))}
+        {validations.map((item, i) => {
+          const voteCount = (item.approved_by || []).length;
+          const isPending = item.validation_status === 'pending' || item.validation_status === 'flagged';
+          return (
+            <motion.button
+              key={item.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.03 }}
+              onClick={() => setSelectedValidation(item)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-left"
+            >
+              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getStatusDot(item.validation_status)}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{formatCurrency(item.declared_amount)}</p>
+                <p className="text-[10px] text-muted-foreground">{getStatusLabel(item.validation_status)}</p>
+              </div>
+              {isPending && (
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0 flex-shrink-0">
+                  <Users className="w-2.5 h-2.5 mr-0.5" />
+                  {voteCount}/{requiredVotes}
+                </Badge>
+              )}
+              <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                {new Date(item.created_at).toLocaleDateString()}
+              </span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* Detail dialog */}
@@ -213,6 +274,20 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                   {new Date(v.created_at).toLocaleDateString()}
                 </span>
               </div>
+
+              {/* Approval progress for pending/flagged */}
+              {(v.validation_status === 'pending' || v.validation_status === 'flagged') && (
+                <div className="glass-card p-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {t('approvals') || 'Approvals'}
+                    </span>
+                    <span className="font-semibold">{(v.approved_by || []).length} / {requiredVotes}</span>
+                  </div>
+                  <Progress value={((v.approved_by || []).length / requiredVotes) * 100} className="h-2" />
+                </div>
+              )}
 
               {/* Amounts */}
               <div className="grid grid-cols-2 gap-3 text-xs">
@@ -282,6 +357,14 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                 </div>
               )}
 
+              {/* Already voted indicator */}
+              {userAlreadyVoted && (v.validation_status === 'pending' || v.validation_status === 'flagged') && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-600">
+                  <Check className="w-4 h-4" />
+                  {t('youApprovedThis') || 'You approved this receipt'}
+                </div>
+              )}
+
               {/* Approve / Reject */}
               {canReview && (
                 <div className="flex items-center gap-2 pt-1">
@@ -289,7 +372,7 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                     size="sm"
                     className="flex-1 h-9 text-xs bg-green-600 hover:bg-green-700 text-white"
                     disabled={updatingId === v.id}
-                    onClick={() => handleUpdateStatus(v.id, 'approved')}
+                    onClick={() => handleApprove(v.id)}
                   >
                     <Check className="w-3.5 h-3.5 mr-1" />
                     {t('approve') || 'Approve'}
@@ -299,7 +382,7 @@ const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ gro
                     variant="ghost"
                     className="flex-1 h-9 text-xs text-destructive hover:bg-destructive/10"
                     disabled={updatingId === v.id}
-                    onClick={() => handleUpdateStatus(v.id, 'rejected')}
+                    onClick={() => handleReject(v.id)}
                   >
                     <X className="w-3.5 h-3.5 mr-1" />
                     {t('reject') || 'Reject'}
