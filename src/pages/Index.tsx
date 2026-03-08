@@ -191,7 +191,7 @@ const AppContent: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} avatarUrl={profile?.avatar_url} userName={profile?.name} />
       <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
       <HiddenGroupsDrawer isOpen={showHiddenGroups} onClose={() => setShowHiddenGroups(false)} />
       <ConfettiCelebration isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
