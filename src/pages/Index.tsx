@@ -41,7 +41,7 @@ const AppContent: React.FC = () => {
   const { requestPermission, sendMilestoneNotification, permission, isSupported } = usePushNotifications();
   const { summary, shouldShow: showWeeklySummary, markSummaryShown } = useWeeklySummary(user?.id);
   const { isPremium } = usePremiumCheck(user?.id);
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('feed');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -147,7 +147,7 @@ const AppContent: React.FC = () => {
     return (
       <>
         <GroupPage groupId={selectedGroupId} onBack={() => setSelectedGroupId(null)} />
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} avatarUrl={profile?.avatar_url} userName={profile?.name} />
         <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
         <HiddenGroupsDrawer isOpen={showHiddenGroups} onClose={() => setShowHiddenGroups(false)} />
         <ConfettiCelebration isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
@@ -182,16 +182,16 @@ const AppContent: React.FC = () => {
             exit={{ opacity: 0, x: activeTab === 'profile' ? -20 : 20 }}
             transition={{ duration: 0.2 }}
           >
-            {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
-            {activeTab === 'groups' && <MyGroupsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'feed' && <TimelinePage />}
+            {activeTab === 'groups' && <MyGroupsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'explore' && <ExplorePage />}
+            {activeTab === 'me' && <HomePage onGroupClick={handleGroupClick} />}
             {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} avatarUrl={profile?.avatar_url} userName={profile?.name} />
       <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
       <HiddenGroupsDrawer isOpen={showHiddenGroups} onClose={() => setShowHiddenGroups(false)} />
       <ConfettiCelebration isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
