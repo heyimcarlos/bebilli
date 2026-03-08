@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Plus, Hash, TrendingUp, Loader2, ImagePlus, X, Crown } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
