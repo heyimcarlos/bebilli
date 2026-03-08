@@ -1339,6 +1339,12 @@ const translations: Record<Language, Record<string, string>> = {
     testimonial3Text: 'I could never stay consistent with money. Billi gamified it and now I don\'t want to break my streak.',
     termsOfUse: 'Terms of Use',
     landingFooterRights: 'All rights reserved.',
+    goalMode: 'Goal Mode',
+    openGoal: 'Open Competition',
+    fixedGoal: 'Fixed Goal',
+    openGoalDesc: 'Whoever saves the highest % of salary wins!',
+    fixedGoalDesc: 'Reach a specific amount together.',
+    competitionEndDate: 'Competition end date',
   },
   fr: {
     welcome: 'Bienvenue',
