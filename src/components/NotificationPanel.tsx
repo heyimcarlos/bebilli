@@ -43,8 +43,9 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose, 
 
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id);
-    if (notification.groupId && onGroupClick) {
-      onGroupClick(notification.groupId);
+    const groupId = notification.data?.group_id;
+    if (groupId && onGroupClick) {
+      onGroupClick(groupId);
       onClose();
     }
   };
