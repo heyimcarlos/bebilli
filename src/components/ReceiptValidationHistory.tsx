@@ -22,6 +22,9 @@ interface ReceiptValidation {
   tolerance_percent: number;
   created_at: string;
   receipt_image_url: string | null;
+  extracted_currency?: string | null;
+  converted_amount?: number | null;
+  exchange_rate?: number | null;
 }
 
 interface ReceiptValidationHistoryProps {
