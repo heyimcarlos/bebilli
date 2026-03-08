@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, X, Star, Zap, Shield, Gift, TrendingUp, Sparkles, CreditCard, Calendar, CheckCircle } from 'lucide-react';
+import { Crown, X, Star, Zap, Shield, Gift, TrendingUp, Sparkles, CreditCard, Calendar, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import PremiumModal from '@/components/PremiumModal';
 import PremiumAnalytics from '@/components/PremiumAnalytics';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface VIPCardProps {
   onClick?: () => void;
@@ -16,6 +17,7 @@ interface VIPCardProps {
 }
 
 interface SubscriptionInfo {
+  id: string;
   plan_type: string;
   amount: number;
   currency: string;
@@ -33,13 +35,14 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'analytics' | 'subscription'>('overview');
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
-
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   useEffect(() => {
     if (!user || !isPremium) return;
     const fetchSub = async () => {
       const { data } = await supabase
         .from('user_subscriptions')
-        .select('plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
+        .select('id, plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .order('created_at', { ascending: false })
@@ -254,6 +257,79 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
                             <CheckCircle className="w-5 h-5 text-emerald-500" />
                             <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{t('subscriptionActive') || 'Subscription active'}</span>
                           </div>
+
+                          {/* Cancel Button */}
+                          {!showCancelConfirm ? (
+                            <motion.button
+                              onClick={() => setShowCancelConfirm(true)}
+                              className="w-full py-2.5 rounded-xl border border-destructive/30 text-destructive text-sm font-medium hover:bg-destructive/10 transition-colors"
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              {t('cancelSubscription') || 'Cancel Subscription'}
+                            </motion.button>
+                          ) : (
+                            <motion.div
+                              initial={{ opacity: 0, y: 5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="p-4 rounded-xl border border-destructive/30 bg-destructive/5 space-y-3"
+                            >
+                              <div className="flex items-start gap-2">
+                                <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-semibold text-destructive">{t('confirmCancel') || 'Confirm cancellation?'}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {t('cancelWarning') || 'You will lose access to all VIP benefits. This action cannot be undone.'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <motion.button
+                                  onClick={() => setShowCancelConfirm(false)}
+                                  className="flex-1 py-2 rounded-lg bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors"
+                                  whileTap={{ scale: 0.97 }}
+                                  disabled={cancelling}
+                                >
+                                  {t('keepSubscription') || 'Keep VIP'}
+                                </motion.button>
+                                <motion.button
+                                  onClick={async () => {
+                                    if (!subscription || !user) return;
+                                    setCancelling(true);
+                                    try {
+                                      const now = new Date().toISOString();
+                                      const { error: subError } = await supabase
+                                        .from('user_subscriptions')
+                                        .update({ status: 'cancelled', cancelled_at: now })
+                                        .eq('id', subscription.id);
+                                      if (subError) throw subError;
+
+                                      const { error: profileError } = await supabase
+                                        .from('profiles')
+                                        .update({ is_premium: false })
+                                        .eq('id', user.id);
+                                      if (profileError) throw profileError;
+
+                                      setSubscription(null);
+                                      setShowCancelConfirm(false);
+                                      toast.success(t('subscriptionCancelled') || 'Subscription cancelled successfully');
+                                      setTimeout(() => window.location.reload(), 1500);
+                                    } catch (err) {
+                                      console.error('Cancel error:', err);
+                                      toast.error(t('cancelError') || 'Failed to cancel subscription');
+                                    } finally {
+                                      setCancelling(false);
+                                    }
+                                  }}
+                                  className="flex-1 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium hover:bg-destructive/90 transition-colors flex items-center justify-center gap-2"
+                                  whileTap={{ scale: 0.97 }}
+                                  disabled={cancelling}
+                                >
+                                  {cancelling && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                                  {t('confirmCancelBtn') || 'Yes, cancel'}
+                                </motion.button>
+                              </div>
+                            </motion.div>
+                          )}
                         </>
                       ) : (
                         <div className="text-center py-6">
