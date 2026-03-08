@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, X, Star, Zap, Shield, Gift, TrendingUp, Sparkles, CreditCard, Calendar, CheckCircle } from 'lucide-react';
+import { Crown, X, Star, Zap, Shield, Gift, TrendingUp, Sparkles, CreditCard, Calendar, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePremiumCheck } from '@/hooks/usePremiumCheck';
@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import PremiumModal from '@/components/PremiumModal';
 import PremiumAnalytics from '@/components/PremiumAnalytics';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface VIPCardProps {
   onClick?: () => void;
