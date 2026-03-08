@@ -477,10 +477,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       {/* Tabs */}
       <div className="px-6">
         <Tabs defaultValue="ranking" className="w-full">
-          <TabsList className="w-full bg-secondary mb-4">
+          <TabsList className="w-full bg-secondary mb-4 flex-wrap">
             <TabsTrigger value="ranking" className="flex-1">{t('ranking')}</TabsTrigger>
             <TabsTrigger value="consistency" className="flex-1">{t('consistency')}</TabsTrigger>
             <TabsTrigger value="chat" className="flex-1">{t('chat')}</TabsTrigger>
+            <TabsTrigger value="receipts" className="flex-1">{t('receipts') || 'Receipts'}</TabsTrigger>
             <TabsTrigger value="dream" className="flex-1">{t('dreamPanel')}</TabsTrigger>
           </TabsList>
 
