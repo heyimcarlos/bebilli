@@ -3136,16 +3136,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return localeMap[language];
   };
 
-  // Format currency WITHOUT conversion - for all app values (groups, contributions)
+  // Format currency WITH live conversion from CAD base
   const formatCurrency = (value: number): string => {
+    const converted = value * (rates[currency] || 1);
     const locale = getLocale();
     const decimals = currencyDecimals[currency];
-    return `${currencySymbols[currency]} ${value.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+    return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
   };
 
-  // Format Premium price WITH conversion from CAD base
+  // Format Premium price WITH live conversion from CAD base
   const formatPremiumPrice = (cadValue: number): string => {
-    const converted = cadValue * currencyRates[currency];
+    const converted = cadValue * (rates[currency] || 1);
     const locale = getLocale();
     const decimals = currencyDecimals[currency];
     return `${currencySymbols[currency]} ${converted.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
