@@ -41,7 +41,7 @@ const HomePage: React.FC<HomePageProps> = ({ onGroupClick }) => {
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [initialCode, setInitialCode] = useState('');
   const [creating, setCreating] = useState(false);
-  const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '', category: 'other', type: 'shared' as 'individual' | 'shared' });
+  const [newGroup, setNewGroup] = useState({ name: '', goal: '', description: '', category: 'other', type: 'shared' as 'individual' | 'shared', goalMode: 'fixed' as 'fixed' | 'competition', competitionEndDate: '' });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
