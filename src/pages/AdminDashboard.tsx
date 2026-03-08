@@ -333,22 +333,30 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   // ===== FETCH WHATSAPP SETTINGS =====
   const fetchWhatsAppSettings = async () => {
-    const [settingsRes, linksRes] = await Promise.all([
-      supabase.from('app_settings' as any).select('value').eq('key', 'whatsapp_bot_number').single(),
+    const [botNumRes, phoneIdRes, linksRes] = await Promise.all([
+      supabase.from('app_settings').select('value').eq('key', 'whatsapp_bot_number').single(),
+      supabase.from('app_settings').select('value').eq('key', 'whatsapp_phone_number_id').single(),
       supabase.from('bot_user_links').select('*').eq('platform', 'whatsapp').order('created_at', { ascending: false }),
     ]);
-    if ((settingsRes.data as any)?.value) setWhatsappBotNumber((settingsRes.data as any).value);
+    if (botNumRes.data?.value) setWhatsappBotNumber(botNumRes.data.value);
+    if (phoneIdRes.data?.value) setWhatsappPhoneNumberId(phoneIdRes.data.value);
     setBotUserLinks(linksRes.data || []);
   };
 
-  const saveWhatsAppNumber = async () => {
+  const saveWhatsAppSettings = async () => {
     setWhatsappNumberSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from('app_settings' as any).update({ value: whatsappBotNumber, updated_by: user?.id, updated_at: new Date().toISOString() } as any).eq('key', 'whatsapp_bot_number');
-    if (error) {
-      toast({ title: t('error'), description: error.message, variant: 'destructive' });
+    const now = new Date().toISOString();
+    const updates = [
+      supabase.from('app_settings').update({ value: whatsappBotNumber, updated_by: user?.id, updated_at: now }).eq('key', 'whatsapp_bot_number'),
+      supabase.from('app_settings').update({ value: whatsappPhoneNumberId, updated_by: user?.id, updated_at: now }).eq('key', 'whatsapp_phone_number_id'),
+    ];
+    const results = await Promise.all(updates);
+    const hasError = results.some(r => r.error);
+    if (hasError) {
+      toast({ title: t('error'), description: 'Failed to save settings', variant: 'destructive' });
     } else {
-      toast({ title: '✅', description: 'WhatsApp number saved!' });
+      toast({ title: '✅', description: 'WhatsApp settings saved!' });
     }
     setWhatsappNumberSaving(false);
   };
