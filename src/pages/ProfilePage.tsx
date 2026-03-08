@@ -357,9 +357,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
                 <SelectItem value="pt">🇧🇷 Português</SelectItem>
                 <SelectItem value="en">🇨🇦 English</SelectItem>
                 <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                <SelectItem value="es">🇪🇸 Español</SelectItem>
-                <SelectItem value="it">🇮🇹 Italiano</SelectItem>
-                <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
               </SelectContent>
             </Select>
           </div>
