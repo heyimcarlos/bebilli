@@ -1499,6 +1499,7 @@ const translations: Record<Language, Record<string, string>> = {
     confidence: 'Confidence',
     extractedDate: 'Extracted date',
     transactionType: 'Transaction type',
+    viewReceipt: 'View receipt',
   },
   fr: {
     welcome: 'Bienvenue',
