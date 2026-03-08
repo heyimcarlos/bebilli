@@ -707,7 +707,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       </motion.div>
 
       {/* Contribute Modal */}
-      <Dialog open={showContributeModal} onOpenChange={setShowContributeModal}>
+      <Dialog open={showContributeModal} onOpenChange={(open) => { setShowContributeModal(open); if (!open) { clearReceipt(); setContributionAmount(''); } }}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
