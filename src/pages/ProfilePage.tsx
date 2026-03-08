@@ -190,10 +190,20 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   };
 
   const handleFollowAction = async (followId: string, action: 'accepted' | 'rejected') => {
+    const request = pendingRequests.find(p => p.id === followId);
     await supabase.from('user_follows').update({ status: action }).eq('id', followId);
     setPendingRequests(prev => prev.filter(p => p.id !== followId));
     if (action === 'accepted') {
       setFollowCounts(prev => ({ ...prev, followers: prev.followers + 1, pending: prev.pending - 1 }));
+      // Create timeline event for accepted follow
+      if (request && user) {
+        await supabase.from('timeline_events').insert({
+          user_id: request.follower_id,
+          event_type: 'new_follow',
+          event_data: { follower_name: profile?.name, following_name: request.name },
+          is_anonymous: false,
+        });
+      }
     } else {
       setFollowCounts(prev => ({ ...prev, pending: prev.pending - 1 }));
     }
