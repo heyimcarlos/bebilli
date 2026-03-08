@@ -109,7 +109,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
             <Crown className="w-6 h-6 text-amber-400 mb-1" />
           </motion.div>
         )}
-        <div className="relative mb-2">
+        <div className="relative mb-6">
           <motion.div
             className={`rounded-full overflow-hidden border-2 ${sizes.border}`}
             style={{ width: sizes.avatar, height: sizes.avatar }}
