@@ -1350,6 +1350,10 @@ const translations: Record<Language, Record<string, string>> = {
     openGoalDesc: 'Whoever saves the highest % of salary wins!',
     fixedGoalDesc: 'Reach a specific amount together.',
     competitionEndDate: 'Competition end date',
+    timelineFeed: 'Social Feed',
+    timelineDesc: 'Anonymous achievements from the community',
+    noEventsYet: 'No achievements yet',
+    beFirstAchievement: 'Start your streak to appear here!',
   },
   fr: {
     welcome: 'Bienvenue',
