@@ -2,3 +2,9 @@ project_id = "nslcrlxwubbapjaowozc"
 
 [functions.admin-user-emails]
 verify_jwt = false
+
+[functions.whatsapp-bot]
+verify_jwt = false
+
+[functions.telegram-bot]
+verify_jwt = false
