@@ -41,7 +41,7 @@ const AppContent: React.FC = () => {
   const { requestPermission, sendMilestoneNotification, permission, isSupported } = usePushNotifications();
   const { summary, shouldShow: showWeeklySummary, markSummaryShown } = useWeeklySummary(user?.id);
   const { isPremium } = usePremiumCheck(user?.id);
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('feed');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
