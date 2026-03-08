@@ -36,7 +36,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
   isOpenGoal = false,
 }) => {
   const { t } = useApp();
-  const maxContribution = Math.max(...members.map(m => m.total_contribution), 1);
+  const maxContribution = Math.max(...members.map((m) => m.total_contribution), 1);
 
   const getDisplayValue = (member: LeaderboardMember): string => {
     if (!member.show_amount && member.user_id !== currentUserId) {
@@ -133,7 +133,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
               <DefaultAvatar name={member.profile.name} size={sizes.avatar} className="w-full h-full" />
             )}
           </motion.div>
-          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-lg">{emojis[rank]}</span>
+          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-lg">{emojis[rank]}</span>
         </div>
         <p className={`${sizes.textSize} font-medium truncate ${sizes.maxW} text-center`}>{member.profile.name}</p>
         <p className={`${sizes.textSize} ${rank === 0 ? "text-primary font-bold" : "text-muted-foreground"}`}>
@@ -151,9 +151,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
         {/* Title */}
         <div className="flex items-center gap-2 mb-5">
           <Trophy className="w-5 h-5 text-amber-500" />
-          <h3 className="text-lg font-bold tracking-tight">
-            {t("leaderboard") || "Leaderboard"}
-          </h3>
+          <h3 className="text-lg font-bold tracking-tight">{t("leaderboard") || "Leaderboard"}</h3>
         </div>
 
         {/* Competition badge */}
@@ -181,9 +179,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
         )}
 
         {/* Divider between podium and rest */}
-        {topThree.length > 0 && rest.length > 0 && (
-          <Separator className="my-2" />
-        )}
+        {topThree.length > 0 && rest.length > 0 && <Separator className="my-2" />}
 
         {/* Rest of the leaderboard */}
         {rest.length > 0 && (
@@ -193,9 +189,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
                 key={member.id}
                 variants={item}
                 className={`rounded-xl p-3 flex items-center gap-3 transition-colors hover:bg-muted/50 border ${
-                  member.user_id === currentUserId
-                    ? "border-primary/30 bg-primary/5"
-                    : "border-transparent"
+                  member.user_id === currentUserId ? "border-primary/30 bg-primary/5" : "border-transparent"
                 }`}
                 whileHover={{ scale: 1.02, x: 5 }}
               >
