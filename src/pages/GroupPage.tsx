@@ -91,6 +91,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   };
 
   const saveReceiptValidation = async (contributionId: string, amount: number, receiptUrl: string) => {
+    // First save the pending record
     await supabase.from('receipt_validations').insert({
       contribution_id: contributionId,
       user_id: user!.id,
@@ -99,6 +100,64 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       receipt_image_url: receiptUrl,
       validation_status: 'pending',
     });
+
+    // Then trigger AI OCR validation in background
+    try {
+      // Convert receipt to base64 for AI processing
+      const response = await fetch(receiptUrl);
+      const blob = await response.blob();
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+
+      const { data: scanResult, error: scanError } = await supabase.functions.invoke('scan-receipt', {
+        body: {
+          imageBase64: base64,
+          declaredAmount: amount,
+          groupId,
+          contributionId,
+        },
+      });
+
+      if (scanError) {
+        console.error('OCR scan error:', scanError);
+        return;
+      }
+
+      // Update the validation record with OCR results
+      if (scanResult) {
+        await supabase
+          .from('receipt_validations')
+          .update({
+            extracted_amount: scanResult.amount || null,
+            extracted_date: scanResult.date || null,
+            extracted_type: scanResult.transaction_type || null,
+            extracted_description: scanResult.description || null,
+            validation_status: scanResult.validation_status || 'pending',
+            amount_match: scanResult.amount_match,
+          })
+          .eq('contribution_id', contributionId)
+          .eq('user_id', user!.id);
+
+        // Show result toast
+        if (scanResult.validation_status === 'approved') {
+          toast({
+            title: '✅ ' + (t('receiptApproved') || 'Receipt approved!'),
+            description: (t('receiptMatchDesc') || 'The receipt amount matches your contribution.'),
+          });
+        } else if (scanResult.validation_status === 'flagged') {
+          toast({
+            title: '⚠️ ' + (t('receiptFlagged') || 'Receipt flagged'),
+            description: (t('receiptMismatchDesc') || 'The extracted amount differs from your declared amount. It will be reviewed.'),
+            variant: 'destructive',
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Receipt OCR processing error:', err);
+    }
   };
 
   const group = groups.find((g) => g.id === groupId);
