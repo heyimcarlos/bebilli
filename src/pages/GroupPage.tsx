@@ -145,8 +145,26 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       return;
     }
 
+    if (!receiptFile) {
+      toast({
+        title: t('error'),
+        description: t('receiptRequired') || 'Please attach a receipt for approval.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setContributing(true);
-    const { error } = await addContribution(groupId, amount);
+
+    // Upload receipt first
+    const receiptUrl = await uploadReceipt(receiptFile);
+    if (!receiptUrl) {
+      setContributing(false);
+      toast({ title: t('error'), description: t('receiptUploadError') || 'Failed to upload receipt.', variant: 'destructive' });
+      return;
+    }
+
+    const { data, error } = await addContribution(groupId, amount);
     setContributing(false);
 
     if (error) {
@@ -156,8 +174,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         variant: 'destructive',
       });
     } else {
+      // Save receipt validation record
+      if (data?.id) {
+        await saveReceiptValidation(data.id, amount, receiptUrl);
+      }
+
       setShowContributeModal(false);
       setContributionAmount('');
+      clearReceipt();
       
       // Show celebration
       setLastContribution({ 
