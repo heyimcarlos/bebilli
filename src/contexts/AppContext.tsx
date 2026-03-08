@@ -2569,7 +2569,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 // Detect language from browser locale
 const getLocaleLanguage = (): Language => {
   const browserLang = navigator.language?.split('-')[0]?.toLowerCase();
-  const supported: Language[] = ['pt', 'en', 'fr'];
+  const supported: Language[] = ['pt', 'en', 'fr', 'es'];
   return supported.includes(browserLang as Language) ? (browserLang as Language) : 'en';
 };
 
@@ -2577,12 +2577,7 @@ const getLocaleLanguage = (): Language => {
 const getLocaleCurrency = (): Currency => {
   const lang = navigator.language?.toLowerCase() || '';
   if (lang.startsWith('pt-br') || lang === 'pt') return 'BRL';
-  if (lang.startsWith('en-ca') || lang.startsWith('fr-ca')) return 'CAD';
   if (lang.startsWith('en-us')) return 'USD';
-  if (lang.startsWith('en-gb')) return 'GBP';
-  if (lang.startsWith('en-au')) return 'AUD';
-  if (lang.startsWith('fr')) return 'EUR';
-  if (lang.startsWith('ja')) return 'JPY';
   return 'CAD';
 };
 
