@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Camera, Upload, Loader2 } from 'lucide-react';
+import { X, Camera, Upload, Loader2, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useGroups } from '@/hooks/useGroups';
@@ -23,6 +23,17 @@ interface ScannerOverlayProps {
   onSuccess: (amount: number, groupId?: string) => void;
 }
 
+interface ScanResult {
+  amount: number;
+  currency: string | null;
+  date: string | null;
+  transaction_type: string | null;
+  description: string;
+  confidence: number;
+  validation_status: string;
+  amount_match: boolean | null;
+}
+
 const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) => {
   const { t, formatCurrency } = useApp();
   const { user } = useAuthContext();
@@ -31,8 +42,7 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
   const [mode, setMode] = useState<'camera' | 'upload' | null>(null);
   const [scanning, setScanning] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [detectedAmount, setDetectedAmount] = useState(0);
-  const [detectedDescription, setDetectedDescription] = useState('');
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [manualAmount, setManualAmount] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -116,7 +126,10 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
     
     try {
       const { data, error } = await supabase.functions.invoke('scan-receipt', {
-        body: { imageBase64: imageData },
+        body: { 
+          imageBase64: imageData,
+          groupId: selectedGroupId || undefined,
+        },
       });
 
       if (error) {
@@ -126,12 +139,19 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
         return;
       }
 
-      const amount = Number(data?.amount) || 0;
-      const description = data?.description || '';
+      const result: ScanResult = {
+        amount: Number(data?.amount) || 0,
+        currency: data?.currency || null,
+        date: data?.date || null,
+        transaction_type: data?.transaction_type || null,
+        description: data?.description || '',
+        confidence: Number(data?.confidence) || 0,
+        validation_status: data?.validation_status || 'pending',
+        amount_match: data?.amount_match ?? null,
+      };
       
-      setDetectedAmount(amount);
-      setDetectedDescription(description);
-      setManualAmount(amount > 0 ? amount.toString() : '');
+      setScanResult(result);
+      setManualAmount(result.amount > 0 ? result.amount.toString() : '');
     } catch (err) {
       console.error('Processing error:', err);
       toast({ title: t('error'), description: 'Error processing image', variant: 'destructive' });
@@ -140,25 +160,80 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
     setScanning(false);
   };
 
-  const handleConfirm = () => {
-    const finalAmount = manualAmount ? parseFloat(manualAmount) : detectedAmount;
-    if (finalAmount > 0) {
-      setShowSuccess(true);
+  const handleConfirm = async () => {
+    const finalAmount = manualAmount ? parseFloat(manualAmount) : (scanResult?.amount || 0);
+    if (finalAmount <= 0) return;
+
+    // Validate the declared amount against extracted amount
+    if (scanResult && scanResult.amount > 0) {
+      const { data, error } = await supabase.functions.invoke('scan-receipt', {
+        body: {
+          imageBase64: imagePreview,
+          declaredAmount: finalAmount,
+          groupId: selectedGroupId || undefined,
+        },
+      });
+
+      if (!error && data) {
+        const status = data.validation_status;
+        const match = data.amount_match;
+
+        if (status === 'flagged' && match === false) {
+          toast({
+            title: '⚠️ ' + (t('amountMismatch') || 'Amount mismatch detected'),
+            description: `${t('extractedAmount') || 'Extracted'}: ${formatCurrency(data.amount || scanResult.amount)} vs ${t('declared') || 'Declared'}: ${formatCurrency(finalAmount)}. ${t('flaggedForReview') || 'Flagged for group review.'}`,
+            variant: 'destructive',
+          });
+        } else if (status === 'approved') {
+          toast({
+            title: '✅ ' + (t('receiptVerified') || 'Receipt verified'),
+            description: t('amountMatches') || 'Amount matches receipt. Auto-approved!',
+          });
+        }
+      }
     }
+
+    setShowSuccess(true);
   };
 
   const handleSuccessComplete = () => {
-    const finalAmount = manualAmount ? parseFloat(manualAmount) : detectedAmount;
+    const finalAmount = manualAmount ? parseFloat(manualAmount) : (scanResult?.amount || 0);
     onSuccess(finalAmount, selectedGroupId);
   };
 
   const resetScanner = () => {
     setMode(null);
     setImagePreview(null);
-    setDetectedAmount(0);
-    setDetectedDescription('');
+    setScanResult(null);
     setManualAmount('');
     setScanning(false);
+  };
+
+  const getValidationBadge = () => {
+    if (!scanResult || scanResult.amount === 0) return null;
+    
+    const confidence = scanResult.confidence;
+    if (confidence >= 80) {
+      return (
+        <div className="flex items-center gap-1.5 text-xs font-medium text-green-600 bg-green-50 dark:bg-green-950/30 px-2 py-1 rounded-full">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          {t('highConfidence') || 'High confidence'}
+        </div>
+      );
+    } else if (confidence >= 50) {
+      return (
+        <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded-full">
+          <AlertTriangle className="w-3.5 h-3.5" />
+          {t('mediumConfidence') || 'Medium confidence'}
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 dark:bg-red-950/30 px-2 py-1 rounded-full">
+        <AlertTriangle className="w-3.5 h-3.5" />
+        {t('lowConfidence') || 'Low confidence'}
+      </div>
+    );
   };
 
   return (
@@ -252,30 +327,61 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
                 )}
               </div>
 
-              {!scanning && detectedAmount > 0 && (
+              {!scanning && scanResult && scanResult.amount > 0 && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 space-y-4">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-1">{t('detectedAmount') || 'Detected Amount'}</p>
-                    <p className="text-3xl font-bold gradient-text">{formatCurrency(detectedAmount)}</p>
-                    {detectedDescription && (
-                      <p className="text-xs text-muted-foreground mt-1">{detectedDescription}</p>
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <p className="text-sm text-muted-foreground">{t('detectedAmount') || 'Detected Amount'}</p>
+                      {getValidationBadge()}
+                    </div>
+                    <p className="text-3xl font-bold gradient-text">{formatCurrency(scanResult.amount)}</p>
+                    {scanResult.description && (
+                      <p className="text-xs text-muted-foreground mt-1">{scanResult.description}</p>
                     )}
                   </div>
+
+                  {/* Extracted details */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {scanResult.date && (
+                      <div className="bg-secondary/50 rounded-lg p-2">
+                        <p className="text-muted-foreground">{t('date') || 'Date'}</p>
+                        <p className="font-medium">{scanResult.date}</p>
+                      </div>
+                    )}
+                    {scanResult.transaction_type && (
+                      <div className="bg-secondary/50 rounded-lg p-2">
+                        <p className="text-muted-foreground">{t('type') || 'Type'}</p>
+                        <p className="font-medium capitalize">{scanResult.transaction_type}</p>
+                      </div>
+                    )}
+                    {scanResult.currency && (
+                      <div className="bg-secondary/50 rounded-lg p-2">
+                        <p className="text-muted-foreground">{t('currency') || 'Currency'}</p>
+                        <p className="font-medium">{scanResult.currency}</p>
+                      </div>
+                    )}
+                    <div className="bg-secondary/50 rounded-lg p-2">
+                      <p className="text-muted-foreground">{t('confidence') || 'Confidence'}</p>
+                      <p className="font-medium">{scanResult.confidence}%</p>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label>{t('adjustAmount') || 'Adjust amount if needed'}</Label>
                     <Input type="number" value={manualAmount} onChange={(e) => setManualAmount(e.target.value)} className="text-center text-lg font-semibold" min="0" step="0.01" />
                   </div>
                   <Button onClick={handleConfirm} disabled={!selectedGroupId} className="w-full h-14 btn-primary text-primary-foreground">
+                    <CheckCircle className="w-5 h-5 mr-2" />
                     {t('confirmContribution')}
                   </Button>
                   <Button onClick={resetScanner} variant="ghost" className="w-full">{t('scanAgain') || 'Scan Again'}</Button>
                 </motion.div>
               )}
 
-              {!scanning && detectedAmount === 0 && imagePreview && (
+              {!scanning && (!scanResult || scanResult.amount === 0) && imagePreview && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 space-y-4">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-1">{detectedDescription || 'Could not detect amount'}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{scanResult?.description || 'Could not detect amount'}</p>
                   </div>
                   <div className="space-y-2">
                     <Label>{t('enterAmount') || 'Enter amount manually'}</Label>
@@ -296,7 +402,7 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ onClose, onSuccess }) =
 
       <ContributionSuccess
         isVisible={showSuccess}
-        amount={manualAmount ? parseFloat(manualAmount) : detectedAmount}
+        amount={manualAmount ? parseFloat(manualAmount) : (scanResult?.amount || 0)}
         onComplete={handleSuccessComplete}
       />
     </motion.div>
