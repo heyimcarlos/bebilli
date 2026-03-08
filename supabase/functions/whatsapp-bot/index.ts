@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const PLATFORM = "whatsapp";
@@ -21,22 +21,24 @@ const t = {
     contributionAdded: "✅ Aporte registrado!",
     total: "Total",
     of: "de",
-    salaryRegistered: "✅ Seu salário foi registrado de forma privada. Ele nunca será compartilhado.",
-    competitionStarted: "🏆 Modo competição ativado! Reset todo dia 1º do mês.",
+    salaryRegistered: "✅ Seu salário foi registrado de forma privada.",
+    competitionStarted: "🏆 Modo competição ativado!",
     champion: "Campeã 👑",
     lastPlace: "Vai que vai! 💪",
     badges: "Badges",
     noBadges: "Nenhum badge ainda. Continue poupando!",
     coupons: "Cupons disponíveis",
     noCoupons: "Nenhum cupom disponível ainda.",
-    help: "📋 Comandos disponíveis:\n/ativar [telefone] — Vincular conta\n/criar meta — Criar grupo\n/aporte — Registrar aporte\n/ranking — Ver ranking\n/progresso — Ver progresso\n/competição — Ativar competição\n/salario — Registrar salário\n/badges — Ver badges\n/cupom — Ver cupons\n/ajuda — Esta mensagem",
+    help: "📋 *Comandos Billi WhatsApp*\n\n/ativar [telefone] — Vincular conta\n/aporte [valor] — Registrar aporte\n/ranking — Ver ranking do grupo\n/progresso — Ver progresso\n/salario [valor] — Registrar salário\n/badges — Ver badges\n/cupom — Ver cupons\n/ajuda — Esta mensagem\n\n💡 Primeiro vincule sua conta com /ativar",
     error: "❌ Erro",
     notFound: "Grupo não encontrado",
     memberNotFound: "Membro não encontrado",
     activated: "✅ Conta vinculada com sucesso! Agora você pode usar o Billi pelo WhatsApp.",
     alreadyActivated: "✅ Sua conta já está vinculada!",
-    phoneNotFound: "❌ Nenhuma conta encontrada com esse telefone. Cadastre-se em billi.app primeiro.",
+    phoneNotFound: "❌ Nenhuma conta encontrada com esse telefone. Cadastre-se em bebilli.lovable.app primeiro.",
     activateFirst: "⚠️ Vincule sua conta primeiro enviando:\n/ativar +5511999999999",
+    welcome: "👋 Olá! Eu sou a *Billi* 🐝\nSeu assistente de economia!\n\nEnvie /ajuda para ver os comandos.",
+    unknownCommand: "🤔 Não entendi. Envie /ajuda para ver os comandos disponíveis.",
   },
   en: {
     ranking: "Ranking",
@@ -50,22 +52,24 @@ const t = {
     contributionAdded: "✅ Contribution registered!",
     total: "Total",
     of: "of",
-    salaryRegistered: "✅ Your salary has been privately registered. It will never be shared.",
-    competitionStarted: "🏆 Competition mode activated! Resets every 1st of month.",
+    salaryRegistered: "✅ Your salary has been privately registered.",
+    competitionStarted: "🏆 Competition mode activated!",
     champion: "Champion 👑",
     lastPlace: "Come on, you got this! 💪",
     badges: "Badges",
     noBadges: "No badges yet. Keep saving!",
     coupons: "Available coupons",
     noCoupons: "No coupons available yet.",
-    help: "📋 Available commands:\n/activate [phone] — Link account\n/create goal — Create group\n/contribute — Register contribution\n/ranking — View ranking\n/progress — View progress\n/competition — Activate competition\n/salary — Register salary\n/badges — View badges\n/coupon — View coupons\n/help — This message",
+    help: "📋 *Billi WhatsApp Commands*\n\n/activate [phone] — Link account\n/contribute [amount] — Register contribution\n/ranking — View ranking\n/progress — View progress\n/salary [amount] — Register salary\n/badges — View badges\n/coupon — View coupons\n/help — This message\n\n💡 First link your account with /activate",
     error: "❌ Error",
     notFound: "Group not found",
     memberNotFound: "Member not found",
     activated: "✅ Account linked successfully! You can now use Billi via WhatsApp.",
     alreadyActivated: "✅ Your account is already linked!",
-    phoneNotFound: "❌ No account found with that phone number. Sign up at billi.app first.",
+    phoneNotFound: "❌ No account found with that phone number. Sign up at bebilli.lovable.app first.",
     activateFirst: "⚠️ Link your account first by sending:\n/activate +1234567890",
+    welcome: "👋 Hi! I'm *Billi* 🐝\nYour savings assistant!\n\nSend /help to see commands.",
+    unknownCommand: "🤔 I didn't understand. Send /help to see available commands.",
   },
   fr: {
     ranking: "Classement",
@@ -79,7 +83,7 @@ const t = {
     contributionAdded: "✅ Contribution enregistrée !",
     total: "Total",
     of: "de",
-    salaryRegistered: "✅ Votre salaire a été enregistré de manière privée.",
+    salaryRegistered: "✅ Votre salaire a été enregistré.",
     competitionStarted: "🏆 Mode compétition activé !",
     champion: "Championne 👑",
     lastPlace: "Allez, tu peux ! 💪",
@@ -87,43 +91,47 @@ const t = {
     noBadges: "Aucun badge pour l'instant.",
     coupons: "Coupons disponibles",
     noCoupons: "Aucun coupon disponible.",
-    help: "📋 Commandes :\n/activer [tel] — Lier compte\n/créer objectif — Créer groupe\n/contribuer — Contribution\n/classement — Classement\n/progression — Progression\n/compétition — Compétition\n/salaire — Salaire\n/badges — Badges\n/coupon — Coupons\n/aide — Aide",
+    help: "📋 *Commandes Billi WhatsApp*\n\n/activer [tel] — Lier compte\n/contribuer [montant] — Contribution\n/classement — Classement\n/progression — Progression\n/salaire [montant] — Salaire\n/badges — Badges\n/coupon — Coupons\n/aide — Aide",
     error: "❌ Erreur",
     notFound: "Groupe introuvable",
     memberNotFound: "Membre introuvable",
-    activated: "✅ Compte lié avec succès ! Vous pouvez maintenant utiliser Billi via WhatsApp.",
+    activated: "✅ Compte lié avec succès !",
     alreadyActivated: "✅ Votre compte est déjà lié !",
-    phoneNotFound: "❌ Aucun compte trouvé avec ce numéro. Inscrivez-vous sur billi.app.",
+    phoneNotFound: "❌ Aucun compte trouvé. Inscrivez-vous sur bebilli.lovable.app.",
     activateFirst: "⚠️ Liez votre compte d'abord :\n/activer +33612345678",
+    welcome: "👋 Bonjour ! Je suis *Billi* 🐝\nVotre assistant épargne !\n\nEnvoyez /aide pour les commandes.",
+    unknownCommand: "🤔 Je n'ai pas compris. Envoyez /aide pour les commandes.",
   },
   es: {
     ranking: "Ranking",
     progress: "Progreso",
     daysLeft: "Faltan {n} días",
     ofSalary: "del salario",
-    groupCreated: "✅ ¡Grupo creado exitosamente!",
+    groupCreated: "✅ ¡Grupo creado!",
     goal: "Meta",
     deadline: "Fecha límite",
     inviteCode: "Código de invitación",
     contributionAdded: "✅ ¡Aporte registrado!",
     total: "Total",
     of: "de",
-    salaryRegistered: "✅ Tu salario ha sido registrado de forma privada.",
+    salaryRegistered: "✅ Tu salario ha sido registrado.",
     competitionStarted: "🏆 ¡Modo competencia activado!",
     champion: "Campeona 👑",
-    lastPlace: "¡Vamos, tú puedes! 💪",
+    lastPlace: "¡Vamos! 💪",
     badges: "Badges",
     noBadges: "Ningún badge aún.",
     coupons: "Cupones disponibles",
     noCoupons: "Ningún cupón disponible.",
-    help: "📋 Comandos:\n/activar [tel] — Vincular cuenta\n/crear meta — Crear grupo\n/aportar — Aporte\n/ranking — Ranking\n/progreso — Progreso\n/competencia — Competencia\n/salario — Salario\n/badges — Badges\n/cupón — Cupones\n/ayuda — Ayuda",
+    help: "📋 *Comandos Billi WhatsApp*\n\n/activar [tel] — Vincular cuenta\n/aportar [monto] — Aporte\n/ranking — Ranking\n/progreso — Progreso\n/salario [monto] — Salario\n/badges — Badges\n/cupón — Cupones\n/ayuda — Ayuda",
     error: "❌ Error",
     notFound: "Grupo no encontrado",
     memberNotFound: "Miembro no encontrado",
-    activated: "✅ ¡Cuenta vinculada exitosamente! Ahora puedes usar Billi por WhatsApp.",
+    activated: "✅ ¡Cuenta vinculada!",
     alreadyActivated: "✅ ¡Tu cuenta ya está vinculada!",
-    phoneNotFound: "❌ No se encontró cuenta con ese teléfono. Regístrate en billi.app primero.",
+    phoneNotFound: "❌ No se encontró cuenta. Regístrate en bebilli.lovable.app.",
     activateFirst: "⚠️ Vincula tu cuenta primero:\n/activar +34612345678",
+    welcome: "👋 ¡Hola! Soy *Billi* 🐝\n¡Tu asistente de ahorro!\n\nEnvía /ayuda para ver comandos.",
+    unknownCommand: "🤔 No entendí. Envía /ayuda para ver los comandos.",
   },
 };
 
@@ -150,8 +158,7 @@ function currencySymbol(currency: string): string {
 }
 
 function formatAmount(amount: number, currency: string): string {
-  const sym = currencySymbol(currency);
-  return `${sym}${amount.toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  return `${currencySymbol(currency)}${amount.toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 function rankEmoji(pos: number): string {
@@ -162,152 +169,181 @@ function rankEmoji(pos: number): string {
 }
 
 function getSupabaseAdmin() {
-  const url = Deno.env.get("SUPABASE_URL")!;
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  return createClient(url, key);
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
 }
 
-// Normalize phone: strip spaces, ensure + prefix
 function normalizePhone(phone: string): string {
-  let p = phone.replace(/[\s\-\(\)]/g, '');
-  if (!p.startsWith('+')) p = '+' + p;
+  let p = phone.replace(/[\s\-\(\)]/g, "");
+  if (!p.startsWith("+")) p = "+" + p;
   return p;
 }
 
-// ===== ACTIVATE / LINK ACCOUNT =====
-async function handleActivate(body: any) {
+// ===== WHATSAPP CLOUD API: SEND MESSAGE =====
+async function sendWhatsAppMessage(to: string, text: string) {
+  const token = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+  if (!token) {
+    console.error("WHATSAPP_ACCESS_TOKEN not configured");
+    return;
+  }
+
+  // Get phone_number_id from app_settings
   const sb = getSupabaseAdmin();
-  const { whatsapp_phone, declared_phone } = body;
-  
-  // whatsapp_phone = the sender's WhatsApp number
-  // declared_phone = the phone number they declare to link (from their Billi profile)
-  const phoneToMatch = normalizePhone(declared_phone || whatsapp_phone);
-  
+  const { data: setting } = await sb
+    .from("app_settings")
+    .select("value")
+    .eq("key", "whatsapp_phone_number_id")
+    .single();
+
+  const phoneNumberId = setting?.value;
+  if (!phoneNumberId) {
+    console.error("WhatsApp phone_number_id not configured in app_settings");
+    return;
+  }
+
+  const url = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to,
+        type: "text",
+        text: { preview_url: false, body: text },
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`WhatsApp API error [${res.status}]: ${err}`);
+    }
+  } catch (e) {
+    console.error("Failed to send WhatsApp message:", e);
+  }
+}
+
+// ===== Get user lang from phone =====
+async function getUserLang(senderPhone: string): Promise<Lang> {
+  const sb = getSupabaseAdmin();
+  const { data: userLink } = await sb
+    .from("bot_user_links")
+    .select("user_id")
+    .eq("platform", PLATFORM)
+    .eq("platform_identifier", normalizePhone(senderPhone))
+    .single();
+
+  if (!userLink) return "pt";
+
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("language")
+    .eq("id", userLink.user_id)
+    .single();
+
+  return getLang(profile?.language || "pt");
+}
+
+// ===== Get user's first group =====
+async function getUserFirstGroup(userId: string) {
+  const sb = getSupabaseAdmin();
+  const { data: membership } = await sb
+    .from("group_memberships")
+    .select("group_id")
+    .eq("user_id", userId)
+    .limit(1)
+    .single();
+
+  return membership?.group_id || null;
+}
+
+// ===== COMMAND HANDLERS =====
+
+async function handleActivate(senderPhone: string, args: string): Promise<string> {
+  const sb = getSupabaseAdmin();
+  const normalizedSender = normalizePhone(senderPhone);
+
   // Check if already linked
   const { data: existing } = await sb
     .from("bot_user_links")
     .select("user_id")
     .eq("platform", PLATFORM)
-    .eq("platform_identifier", normalizePhone(whatsapp_phone))
+    .eq("platform_identifier", normalizedSender)
     .single();
-    
+
   if (existing) {
     const { data: profile } = await sb.from("profiles").select("language").eq("id", existing.user_id).single();
-    const lang = getLang(profile?.language || "en");
-    return { text: t[lang].alreadyActivated };
+    return t[getLang(profile?.language || "pt")].alreadyActivated;
   }
 
-  // Find user by phone in profiles
-  const { data: profile } = await sb
-    .from("profiles")
-    .select("id, language, phone")
-    .eq("phone", phoneToMatch)
-    .single();
-    
+  // The phone to match: use declared phone if provided, otherwise sender's phone
+  const declaredPhone = args.trim() || senderPhone;
+  const phoneToMatch = normalizePhone(declaredPhone);
+
+  // Try to find profile by phone
+  let profile = null;
+  const { data: p1 } = await sb.from("profiles").select("id, language, phone").eq("phone", phoneToMatch).single();
+  profile = p1;
+
   if (!profile) {
-    // Try without + prefix
-    const altPhone = phoneToMatch.startsWith('+') ? phoneToMatch.slice(1) : '+' + phoneToMatch;
-    const { data: profileAlt } = await sb
-      .from("profiles")
-      .select("id, language, phone")
-      .eq("phone", altPhone)
-      .single();
-      
-    if (!profileAlt) {
-      return { text: t.pt.phoneNotFound }; // Default to Portuguese since we don't know user's lang
-    }
-    
-    // Link found with alt phone
-    await sb.from("bot_user_links").insert({
-      user_id: profileAlt.id,
-      platform: PLATFORM,
-      platform_identifier: normalizePhone(whatsapp_phone),
-    });
-    
-    // Also update whatsapp_number on profile
-    await sb.from("profiles").update({ whatsapp_number: normalizePhone(whatsapp_phone) }).eq("id", profileAlt.id);
-    
-    const lang = getLang(profileAlt.language || "en");
-    return { text: t[lang].activated };
+    const altPhone = phoneToMatch.startsWith("+") ? phoneToMatch.slice(1) : "+" + phoneToMatch;
+    const { data: p2 } = await sb.from("profiles").select("id, language, phone").eq("phone", altPhone).single();
+    profile = p2;
+  }
+
+  if (!profile) {
+    // Also try matching whatsapp_number
+    const { data: p3 } = await sb.from("profiles").select("id, language, phone").eq("whatsapp_number", phoneToMatch).single();
+    profile = p3;
+  }
+
+  if (!profile) {
+    return t.pt.phoneNotFound;
   }
 
   // Link the account
   await sb.from("bot_user_links").insert({
     user_id: profile.id,
     platform: PLATFORM,
-    platform_identifier: normalizePhone(whatsapp_phone),
+    platform_identifier: normalizedSender,
   });
-  
-  // Also update whatsapp_number on profile
-  await sb.from("profiles").update({ whatsapp_number: normalizePhone(whatsapp_phone) }).eq("id", profile.id);
 
-  const lang = getLang(profile.language || "en");
-  return { text: t[lang].activated };
+  await sb.from("profiles").update({ whatsapp_number: normalizedSender }).eq("id", profile.id);
+
+  return t[getLang(profile.language || "pt")].activated;
 }
 
-// ===== ROUTE HANDLERS =====
-
-async function handleGroupCreate(body: any) {
+async function handleContribution(senderPhone: string, args: string): Promise<string> {
   const sb = getSupabaseAdmin();
-  const { group_whatsapp_id, goal_name, target_amount, currency, deadline, creator_phone } = body;
+  const normalizedSender = normalizePhone(senderPhone);
 
-  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizePhone(creator_phone)).single();
-  
-  if (!userLink) {
-    return { error: t.pt.activateFirst, status: 404 };
-  }
+  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizedSender).single();
+  if (!userLink) return t.pt.activateFirst;
 
-  const { data: profile } = await sb.from("profiles").select("language").eq("id", userLink.user_id).single();
-  const lang = getLang(profile?.language || "en");
+  const { data: profile } = await sb.from("profiles").select("language, currency").eq("id", userLink.user_id).single();
+  const lang = getLang(profile?.language || "pt");
   const tr = t[lang];
+  const cur = profile?.currency || "CAD";
 
-  const { data: result } = await sb.rpc("create_group_with_admin", {
-    group_name: goal_name,
-    group_goal_amount: target_amount,
-    group_type: "shared",
-    group_category: "other",
-  });
-
-  const parsed = result as any;
-  if (!parsed?.success) {
-    return { error: parsed?.error || "Failed to create group", status: 400 };
+  const amount = parseFloat(args.replace(/[^0-9.,]/g, "").replace(",", "."));
+  if (!amount || amount <= 0) {
+    return `${tr.error}: envie /aporte 100 (ou /contribute 100)`;
   }
 
-  await sb.from("bot_group_links").insert({
-    group_id: parsed.group_id,
-    platform: PLATFORM,
-    platform_group_id: group_whatsapp_id,
-    language: lang,
-  });
-
-  if (deadline) {
-    await sb.from("groups").update({ competition_end_date: deadline }).eq("id", parsed.group_id);
+  const groupId = await getUserFirstGroup(userLink.user_id);
+  if (!groupId) {
+    return `${tr.error}: ${tr.notFound}`;
   }
 
-  const days = deadline ? daysUntil(deadline) : null;
-  const cur = currency || "USD";
-
-  return {
-    text: `${tr.groupCreated}\n\n📌 ${goal_name}\n🎯 ${tr.goal}: ${formatAmount(target_amount, cur)}\n${deadline ? `📅 ${tr.deadline}: ${deadline}\n⏳ ${tr.daysLeft.replace("{n}", String(days))}` : ""}\n🔑 ${tr.inviteCode}: ${parsed.invite_code}\n\n📊 ${progressBar(0)} — ${formatAmount(0, cur)} ${tr.of} ${formatAmount(target_amount, cur)}\n\n👉 billi.app`,
-  };
-}
-
-async function handleContribution(body: any) {
-  const sb = getSupabaseAdmin();
-  const { group_whatsapp_id, member_phone, amount } = body;
-
-  const { data: link } = await sb.from("bot_group_links").select("group_id, language").eq("platform", PLATFORM).eq("platform_group_id", group_whatsapp_id).single();
-  if (!link) return { error: "Group not linked", status: 404 };
-
-  const lang = getLang(link.language);
-  const tr = t[lang];
-
-  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizePhone(member_phone)).single();
-  if (!userLink) return { error: tr.activateFirst, status: 404 };
-
-  // Add contribution with source = 'whatsapp'
   await sb.from("contributions").insert({
-    group_id: link.group_id,
+    group_id: groupId,
     user_id: userLink.user_id,
     amount,
     type: "deposit",
@@ -315,64 +351,33 @@ async function handleContribution(body: any) {
     source: "whatsapp",
   });
 
-  const { data: group } = await sb.from("groups").select("*").eq("id", link.group_id).single();
-  const { data: contributions } = await sb.from("contributions").select("amount, type").eq("group_id", link.group_id);
-  
-  const totalSaved = (contributions || []).reduce((sum: number, c: any) => c.type === "deposit" ? sum + Number(c.amount) : sum - Number(c.amount), 0);
-  const pct = group?.goal_amount > 0 ? (totalSaved / group.goal_amount) * 100 : 0;
-  const cur = "USD";
+  // Get updated progress
+  const { data: group } = await sb.from("groups").select("goal_amount, name").eq("id", groupId).single();
+  const { data: contribs } = await sb.from("contributions").select("amount, type").eq("group_id", groupId);
+  const totalSaved = (contribs || []).reduce((sum: number, c: any) => c.type === "deposit" ? sum + Number(c.amount) : sum - Number(c.amount), 0);
+  const pct = group?.goal_amount && group.goal_amount > 0 ? (totalSaved / group.goal_amount) * 100 : 0;
 
-  return {
-    text: `${tr.contributionAdded}\n\n📊 ${progressBar(Math.min(100, pct))} — ${formatAmount(totalSaved, cur)} ${tr.of} ${formatAmount(group?.goal_amount || 0, cur)}`,
-  };
+  return `${tr.contributionAdded}\n💰 ${formatAmount(amount, cur)}\n\n📊 ${group?.name}\n${progressBar(Math.min(100, pct))} — ${formatAmount(totalSaved, cur)} ${tr.of} ${formatAmount(group?.goal_amount || 0, cur)}`;
 }
 
-async function handleRegisterSalary(body: any) {
+async function handleRanking(senderPhone: string): Promise<string> {
   const sb = getSupabaseAdmin();
-  const { member_phone, salary, group_whatsapp_id } = body;
+  const normalizedSender = normalizePhone(senderPhone);
 
-  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizePhone(member_phone)).single();
-  if (!userLink) return { error: "User not linked", status: 404 };
+  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizedSender).single();
+  if (!userLink) return t.pt.activateFirst;
 
-  let lang: Lang = "en";
-  if (group_whatsapp_id) {
-    const { data: link } = await sb.from("bot_group_links").select("language").eq("platform", PLATFORM).eq("platform_group_id", group_whatsapp_id).single();
-    if (link) lang = getLang(link.language);
-  }
-
-  const { data: memberships } = await sb.from("group_memberships").select("id").eq("user_id", userLink.user_id);
-  if (memberships?.length) {
-    await sb.from("group_memberships").update({ salary }).eq("user_id", userLink.user_id);
-  }
-
-  return { text: t[lang].salaryRegistered };
-}
-
-async function handleCompetitionStart(body: any) {
-  const sb = getSupabaseAdmin();
-  const { group_whatsapp_id } = body;
-
-  const { data: link } = await sb.from("bot_group_links").select("group_id, language").eq("platform", PLATFORM).eq("platform_group_id", group_whatsapp_id).single();
-  if (!link) return { error: "Group not linked", status: 404 };
-
-  const lang = getLang(link.language);
-  await sb.from("groups").update({ is_open_goal: true }).eq("id", link.group_id);
-
-  return { text: t[lang].competitionStarted };
-}
-
-async function handleRanking(groupPlatformId: string) {
-  const sb = getSupabaseAdmin();
-
-  const { data: link } = await sb.from("bot_group_links").select("group_id, language").eq("platform", PLATFORM).eq("platform_group_id", groupPlatformId).single();
-  if (!link) return { error: "Group not linked", status: 404 };
-
-  const lang = getLang(link.language);
+  const { data: profile } = await sb.from("profiles").select("language, currency").eq("id", userLink.user_id).single();
+  const lang = getLang(profile?.language || "pt");
   const tr = t[lang];
+  const cur = profile?.currency || "CAD";
 
-  const { data: group } = await sb.from("groups").select("*").eq("id", link.group_id).single();
-  const { data: memberships } = await sb.from("group_memberships").select("user_id, salary, show_amount").eq("group_id", link.group_id);
-  const { data: contributions } = await sb.from("contributions").select("user_id, amount, type").eq("group_id", link.group_id);
+  const groupId = await getUserFirstGroup(userLink.user_id);
+  if (!groupId) return `${tr.error}: ${tr.notFound}`;
+
+  const { data: group } = await sb.from("groups").select("*").eq("id", groupId).single();
+  const { data: memberships } = await sb.from("group_memberships").select("user_id, salary, show_amount").eq("group_id", groupId);
+  const { data: contributions } = await sb.from("contributions").select("user_id, amount, type").eq("group_id", groupId);
 
   const memberTotals: Record<string, number> = {};
   for (const c of contributions || []) {
@@ -399,7 +404,6 @@ async function handleRanking(groupPlatformId: string) {
 
   const totalSaved = Object.values(memberTotals).reduce((a, b) => a + b, 0);
   const pct = group?.goal_amount > 0 ? (totalSaved / group.goal_amount) * 100 : 0;
-  const cur = "USD";
 
   let text = `🏆 ${tr.ranking} — ${group?.name}\n\n`;
   ranked.forEach((r, i) => {
@@ -413,31 +417,32 @@ async function handleRanking(groupPlatformId: string) {
 
   if (!group?.is_open_goal) {
     text += `\n📊 ${progressBar(Math.min(100, pct))} — ${formatAmount(totalSaved, cur)} ${tr.of} ${formatAmount(group?.goal_amount || 0, cur)}`;
-    if (group?.competition_end_date) {
-      const days = daysUntil(group.competition_end_date);
-      text += `\n📅 ${tr.daysLeft.replace("{n}", String(days))}`;
-    }
   }
 
-  text += `\n\n👉 billi.app`;
-  return { text };
+  text += `\n\n👉 bebilli.lovable.app`;
+  return text;
 }
 
-async function handleProgress(groupPlatformId: string) {
+async function handleProgress(senderPhone: string): Promise<string> {
   const sb = getSupabaseAdmin();
+  const normalizedSender = normalizePhone(senderPhone);
 
-  const { data: link } = await sb.from("bot_group_links").select("group_id, language").eq("platform", PLATFORM).eq("platform_group_id", groupPlatformId).single();
-  if (!link) return { error: "Group not linked", status: 404 };
+  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizedSender).single();
+  if (!userLink) return t.pt.activateFirst;
 
-  const lang = getLang(link.language);
+  const { data: profile } = await sb.from("profiles").select("language, currency").eq("id", userLink.user_id).single();
+  const lang = getLang(profile?.language || "pt");
   const tr = t[lang];
+  const cur = profile?.currency || "CAD";
 
-  const { data: group } = await sb.from("groups").select("*").eq("id", link.group_id).single();
-  const { data: contributions } = await sb.from("contributions").select("amount, type").eq("group_id", link.group_id);
+  const groupId = await getUserFirstGroup(userLink.user_id);
+  if (!groupId) return `${tr.error}: ${tr.notFound}`;
+
+  const { data: group } = await sb.from("groups").select("*").eq("id", groupId).single();
+  const { data: contributions } = await sb.from("contributions").select("amount, type").eq("group_id", groupId);
 
   const totalSaved = (contributions || []).reduce((sum: number, c: any) => c.type === "deposit" ? sum + Number(c.amount) : sum - Number(c.amount), 0);
   const pct = group?.goal_amount > 0 ? (totalSaved / group.goal_amount) * 100 : 0;
-  const cur = "USD";
 
   let text = `📊 ${tr.progress} — ${group?.name}\n\n${progressBar(Math.min(100, pct))} — ${formatAmount(totalSaved, cur)} ${tr.of} ${formatAmount(group?.goal_amount || 0, cur)}`;
 
@@ -446,125 +451,219 @@ async function handleProgress(groupPlatformId: string) {
     text += `\n📅 ${tr.daysLeft.replace("{n}", String(days))}`;
   }
 
-  text += `\n\n👉 billi.app`;
-  return { text };
+  text += `\n\n👉 bebilli.lovable.app`;
+  return text;
 }
 
-async function handleBadges(memberPhone: string) {
+async function handleSalary(senderPhone: string, args: string): Promise<string> {
   const sb = getSupabaseAdmin();
+  const normalizedSender = normalizePhone(senderPhone);
 
-  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizePhone(memberPhone)).single();
-  if (!userLink) return { error: "User not linked", status: 404 };
+  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizedSender).single();
+  if (!userLink) return t.pt.activateFirst;
+
+  const { data: profile } = await sb.from("profiles").select("language").eq("id", userLink.user_id).single();
+  const lang = getLang(profile?.language || "pt");
+
+  const salary = parseFloat(args.replace(/[^0-9.,]/g, "").replace(",", "."));
+  if (!salary || salary <= 0) {
+    return `${t[lang].error}: envie /salario 5000`;
+  }
+
+  await sb.from("group_memberships").update({ salary }).eq("user_id", userLink.user_id);
+  return t[lang].salaryRegistered;
+}
+
+async function handleBadges(senderPhone: string): Promise<string> {
+  const sb = getSupabaseAdmin();
+  const normalizedSender = normalizePhone(senderPhone);
+
+  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizedSender).single();
+  if (!userLink) return t.pt.activateFirst;
 
   const { data: profile } = await sb.from("profiles").select("*").eq("id", userLink.user_id).single();
-  const lang = getLang(profile?.language || "en");
+  const lang = getLang(profile?.language || "pt");
   const tr = t[lang];
 
   const badges: string[] = [];
   if (profile) {
-    if ((profile.total_contributions || 0) >= 1) badges.push("🥇");
-    if ((profile.current_streak || 0) >= 90) badges.push("🔥");
-    if ((profile.level || 0) >= 10) badges.push("🏆");
-    if ((profile.best_streak || 0) >= 365) badges.push("🌟");
+    if ((profile.total_contributions || 0) >= 1) badges.push("🥇 Primeiro aporte");
+    if ((profile.current_streak || 0) >= 7) badges.push("🔥 7 dias seguidos");
+    if ((profile.current_streak || 0) >= 30) badges.push("⚡ 30 dias seguidos");
+    if ((profile.current_streak || 0) >= 90) badges.push("💎 90 dias seguidos");
+    if ((profile.level || 0) >= 5) badges.push("⭐ Nível 5");
+    if ((profile.level || 0) >= 10) badges.push("🏆 Nível 10");
+    if ((profile.best_streak || 0) >= 365) badges.push("🌟 1 ano de streak");
   }
 
-  if (badges.length === 0) return { text: `${tr.badges}\n\n${tr.noBadges}` };
-  return { text: `${tr.badges}\n\n${badges.join(" ")}` };
+  if (badges.length === 0) return `${tr.badges}\n\n${tr.noBadges}`;
+  return `${tr.badges}\n\n${badges.join("\n")}`;
 }
 
-async function handleCoupon(memberPhone: string) {
+async function handleCoupon(senderPhone: string): Promise<string> {
   const sb = getSupabaseAdmin();
+  const normalizedSender = normalizePhone(senderPhone);
 
-  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizePhone(memberPhone)).single();
-  if (!userLink) return { error: "User not linked", status: 404 };
+  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizedSender).single();
+  if (!userLink) return t.pt.activateFirst;
 
   const { data: profile } = await sb.from("profiles").select("language").eq("id", userLink.user_id).single();
-  const lang = getLang(profile?.language || "en");
+  const lang = getLang(profile?.language || "pt");
   const tr = t[lang];
 
   const { data: coupons } = await sb.from("partner_coupons").select("code, description, discount_percentage, discount_amount").eq("is_active", true).limit(5);
 
-  if (!coupons?.length) return { text: `${tr.coupons}\n\n${tr.noCoupons}` };
+  if (!coupons?.length) return `${tr.coupons}\n\n${tr.noCoupons}`;
 
   let text = `🎟️ ${tr.coupons}\n\n`;
   for (const c of coupons) {
     const disc = c.discount_percentage ? `${c.discount_percentage}% OFF` : c.discount_amount ? `$${c.discount_amount} OFF` : "";
-    text += `• ${c.code} — ${c.description} ${disc}\n`;
+    text += `• *${c.code}* — ${c.description} ${disc}\n`;
   }
-  return { text };
+  return text;
 }
 
-async function handleHelp(senderPhone: string) {
-  const sb = getSupabaseAdmin();
-  // Try to find user's language
-  const { data: userLink } = await sb.from("bot_user_links").select("user_id").eq("platform", PLATFORM).eq("platform_identifier", normalizePhone(senderPhone)).single();
-  
-  let lang: Lang = "pt"; // default
-  if (userLink) {
-    const { data: profile } = await sb.from("profiles").select("language").eq("id", userLink.user_id).single();
-    if (profile?.language) lang = getLang(profile.language);
+// ===== COMMAND ALIASES (multi-language) =====
+const COMMAND_MAP: Record<string, string> = {
+  // Portuguese
+  "/ativar": "activate",
+  "/aporte": "contribute",
+  "/ranking": "ranking",
+  "/progresso": "progress",
+  "/salario": "salary",
+  "/salário": "salary",
+  "/badges": "badges",
+  "/cupom": "coupon",
+  "/ajuda": "help",
+  // English
+  "/activate": "activate",
+  "/contribute": "contribute",
+  "/progress": "progress",
+  "/salary": "salary",
+  "/help": "help",
+  "/coupon": "coupon",
+  // French
+  "/activer": "activate",
+  "/contribuer": "contribute",
+  "/classement": "ranking",
+  "/progression": "progress",
+  "/salaire": "salary",
+  "/aide": "help",
+  // Spanish
+  "/activar": "activate",
+  "/aportar": "contribute",
+  "/progreso": "progress",
+  "/ayuda": "help",
+  "/cupón": "coupon",
+};
+
+// ===== PARSE INCOMING MESSAGE & ROUTE =====
+async function processMessage(senderPhone: string, messageText: string): Promise<string> {
+  const text = messageText.trim();
+  const parts = text.split(/\s+/);
+  const command = parts[0].toLowerCase();
+  const args = parts.slice(1).join(" ");
+
+  const action = COMMAND_MAP[command];
+
+  switch (action) {
+    case "activate":
+      return await handleActivate(senderPhone, args);
+    case "contribute":
+      return await handleContribution(senderPhone, args);
+    case "ranking":
+      return await handleRanking(senderPhone);
+    case "progress":
+      return await handleProgress(senderPhone);
+    case "salary":
+      return await handleSalary(senderPhone, args);
+    case "badges":
+      return await handleBadges(senderPhone);
+    case "coupon":
+      return await handleCoupon(senderPhone);
+    case "help": {
+      const lang = await getUserLang(senderPhone);
+      return t[lang].help;
+    }
+    default: {
+      // If message starts with "oi", "hi", "olá", "hello" etc, send welcome
+      const greetings = ["oi", "olá", "ola", "hi", "hello", "hola", "bonjour", "hey"];
+      if (greetings.includes(command.replace("/", ""))) {
+        const lang = await getUserLang(senderPhone);
+        return t[lang].welcome;
+      }
+      const lang = await getUserLang(senderPhone);
+      return t[lang].unknownCommand;
+    }
   }
-  
-  return { text: t[lang].help };
 }
 
-// ===== MAIN HANDLER =====
+// ===== MAIN WEBHOOK HANDLER =====
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const url = new URL(req.url);
-    const path = url.pathname.replace(/^\/whatsapp-bot\/?/, "");
+    // ===== GET: Webhook Verification (Meta sends this when you register the webhook) =====
+    if (req.method === "GET") {
+      const url = new URL(req.url);
+      const mode = url.searchParams.get("hub.mode");
+      const token = url.searchParams.get("hub.verify_token");
+      const challenge = url.searchParams.get("hub.challenge");
 
-    let result: any;
+      const VERIFY_TOKEN = Deno.env.get("WHATSAPP_VERIFY_TOKEN");
 
-    if (req.method === "POST") {
-      const body = await req.json();
-
-      if (path === "activate" || path === "api/whatsapp/activate") {
-        result = await handleActivate(body);
-      } else if (path === "group-create" || path === "api/whatsapp/group-create") {
-        result = await handleGroupCreate(body);
-      } else if (path === "contribution" || path === "api/whatsapp/contribution") {
-        result = await handleContribution(body);
-      } else if (path === "competition/register-salary" || path === "api/whatsapp/competition/register-salary") {
-        result = await handleRegisterSalary(body);
-      } else if (path === "competition/start" || path === "api/whatsapp/competition/start") {
-        result = await handleCompetitionStart(body);
-      } else if (path === "help" || path === "api/whatsapp/help") {
-        result = await handleHelp(body.sender_phone || "");
+      if (mode === "subscribe" && token === VERIFY_TOKEN) {
+        console.log("Webhook verified successfully");
+        return new Response(challenge, { status: 200, headers: corsHeaders });
       } else {
-        result = { error: "Unknown endpoint", status: 404 };
-      }
-    } else if (req.method === "GET") {
-      const parts = path.split("/");
-      
-      if (parts[0] === "ranking" && parts[1]) {
-        result = await handleRanking(parts[1]);
-      } else if (parts[0] === "progress" && parts[1]) {
-        result = await handleProgress(parts[1]);
-      } else if (parts[0] === "badges" && parts[1]) {
-        result = await handleBadges(parts[1]);
-      } else if (parts[0] === "coupon" && parts[1]) {
-        result = await handleCoupon(parts[1]);
-      } else if (parts[0] === "help") {
-        result = await handleHelp(parts[1] || "");
-      } else {
-        result = { error: "Unknown endpoint", status: 404 };
+        console.error("Webhook verification failed", { mode, token: token?.slice(0, 4) + "..." });
+        return new Response("Forbidden", { status: 403, headers: corsHeaders });
       }
     }
 
-    const status = result?.status || (result?.error ? 400 : 200);
-    return new Response(JSON.stringify(result), {
-      status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // ===== POST: Incoming Messages from WhatsApp =====
+    if (req.method === "POST") {
+      const body = await req.json();
+
+      // WhatsApp Cloud API sends notifications in this structure
+      const entry = body?.entry?.[0];
+      const changes = entry?.changes?.[0];
+      const value = changes?.value;
+
+      // Check if it's a message notification (not a status update)
+      if (value?.messages && value.messages.length > 0) {
+        for (const message of value.messages) {
+          // Only handle text messages
+          if (message.type === "text" && message.text?.body) {
+            const senderPhone = message.from; // e.g. "5511999999999"
+            const messageText = message.text.body;
+
+            console.log(`Incoming message from ${senderPhone}: ${messageText}`);
+
+            // Process the command and get reply
+            const reply = await processMessage(senderPhone, messageText);
+
+            // Send reply back via WhatsApp API
+            await sendWhatsAppMessage(senderPhone, reply);
+          }
+        }
+      }
+
+      // Always return 200 to WhatsApp (they'll retry if not 200)
+      return new Response(JSON.stringify({ status: "ok" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 500,
+    console.error("Webhook error:", error);
+    // Still return 200 to prevent WhatsApp from retrying
+    return new Response(JSON.stringify({ status: "error" }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

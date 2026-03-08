@@ -132,6 +132,7 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   // WhatsApp settings
   const [whatsappBotNumber, setWhatsappBotNumber] = useState('');
+  const [whatsappPhoneNumberId, setWhatsappPhoneNumberId] = useState('');
   const [whatsappNumberSaving, setWhatsappNumberSaving] = useState(false);
   const [botUserLinks, setBotUserLinks] = useState<any[]>([]);
 
@@ -332,22 +333,30 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   // ===== FETCH WHATSAPP SETTINGS =====
   const fetchWhatsAppSettings = async () => {
-    const [settingsRes, linksRes] = await Promise.all([
-      supabase.from('app_settings' as any).select('value').eq('key', 'whatsapp_bot_number').single(),
+    const [botNumRes, phoneIdRes, linksRes] = await Promise.all([
+      supabase.from('app_settings').select('value').eq('key', 'whatsapp_bot_number').single(),
+      supabase.from('app_settings').select('value').eq('key', 'whatsapp_phone_number_id').single(),
       supabase.from('bot_user_links').select('*').eq('platform', 'whatsapp').order('created_at', { ascending: false }),
     ]);
-    if ((settingsRes.data as any)?.value) setWhatsappBotNumber((settingsRes.data as any).value);
+    if (botNumRes.data?.value) setWhatsappBotNumber(botNumRes.data.value);
+    if (phoneIdRes.data?.value) setWhatsappPhoneNumberId(phoneIdRes.data.value);
     setBotUserLinks(linksRes.data || []);
   };
 
-  const saveWhatsAppNumber = async () => {
+  const saveWhatsAppSettings = async () => {
     setWhatsappNumberSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from('app_settings' as any).update({ value: whatsappBotNumber, updated_by: user?.id, updated_at: new Date().toISOString() } as any).eq('key', 'whatsapp_bot_number');
-    if (error) {
-      toast({ title: t('error'), description: error.message, variant: 'destructive' });
+    const now = new Date().toISOString();
+    const updates = [
+      supabase.from('app_settings').update({ value: whatsappBotNumber, updated_by: user?.id, updated_at: now }).eq('key', 'whatsapp_bot_number'),
+      supabase.from('app_settings').update({ value: whatsappPhoneNumberId, updated_by: user?.id, updated_at: now }).eq('key', 'whatsapp_phone_number_id'),
+    ];
+    const results = await Promise.all(updates);
+    const hasError = results.some(r => r.error);
+    if (hasError) {
+      toast({ title: t('error'), description: 'Failed to save settings', variant: 'destructive' });
     } else {
-      toast({ title: '✅', description: 'WhatsApp number saved!' });
+      toast({ title: '✅', description: 'WhatsApp settings saved!' });
     }
     setWhatsappNumberSaving(false);
   };
@@ -1242,20 +1251,48 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <div className="glass-card p-4 space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                <h3 className="text-sm font-bold">WhatsApp Bot Number</h3>
+                <h3 className="text-sm font-bold">WhatsApp Bot Configuration</h3>
               </div>
-              <p className="text-xs text-muted-foreground">Configure the official Billi WhatsApp number that users will message to interact with the bot.</p>
-              <div className="flex gap-2">
+              <p className="text-xs text-muted-foreground">Configure the official Billi WhatsApp number and the Meta Phone Number ID for webhook replies.</p>
+              
+              <div className="space-y-2">
+                <label className="text-xs font-medium">Bot Phone Number (displayed to users)</label>
                 <Input
                   placeholder="+5511999999999"
                   value={whatsappBotNumber}
                   onChange={(e) => setWhatsappBotNumber(e.target.value)}
                   className="bg-secondary text-sm"
                 />
-                <Button onClick={saveWhatsAppNumber} disabled={whatsappNumberSaving} size="sm" className="px-4">
-                  {whatsappNumberSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-3 h-3 mr-1" />Save</>}
-                </Button>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium">Meta Phone Number ID (from WhatsApp Business API)</label>
+                <Input
+                  placeholder="123456789012345"
+                  value={whatsappPhoneNumberId}
+                  onChange={(e) => setWhatsappPhoneNumberId(e.target.value)}
+                  className="bg-secondary text-sm font-mono"
+                />
+                <p className="text-[10px] text-muted-foreground">Find this in Meta Business Suite → WhatsApp → API Setup</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium">Webhook URL (paste this in Meta)</label>
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={`https://nslcrlxwubbapjaowozc.supabase.co/functions/v1/whatsapp-bot`}
+                    className="bg-muted text-xs font-mono"
+                  />
+                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(`https://nslcrlxwubbapjaowozc.supabase.co/functions/v1/whatsapp-bot`); toast({ title: '📋 Copied!' }); }}>
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+
+              <Button onClick={saveWhatsAppSettings} disabled={whatsappNumberSaving} size="sm" className="w-full">
+                {whatsappNumberSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-3 h-3 mr-1" />Save WhatsApp Settings</>}
+              </Button>
             </div>
 
             {/* Source Stats */}
