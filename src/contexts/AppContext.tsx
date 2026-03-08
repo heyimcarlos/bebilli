@@ -2855,6 +2855,7 @@ const translations: Record<Language, Record<string, string>> = {
     confidence: 'Confianza',
     extractedDate: 'Fecha extraída',
     transactionType: 'Tipo de transacción',
+    viewReceipt: 'Ver comprobante',
   },
 };
 
