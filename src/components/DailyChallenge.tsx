@@ -111,7 +111,7 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
       
       setTodayChallenge({
         title: targetGroup 
-          ? `${t('save') || 'Save'} ${formatCurrency(finalAmount)} → ${targetGroup.name}`
+          ? `${t('save')} ${formatCurrency(finalAmount)} → ${targetGroup.name}`
           : template.title,
         amount: finalAmount,
         reward: template.reward,
