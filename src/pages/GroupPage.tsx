@@ -540,6 +540,15 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                   <span className="text-muted-foreground">{t('yourContribution')}</span>
                   <span className="font-semibold text-success">{formatCurrency(group.user_contribution)}</span>
                 </div>
+                {group.user_pending > 0 && (
+                  <div className="flex items-center justify-between text-xs mt-1.5">
+                    <span className="text-amber-500 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {t('pendingVerification') || 'Pending Verification'}
+                    </span>
+                    <span className="text-amber-500 font-medium">{formatCurrency(group.user_pending)}</span>
+                  </div>
+                )}
               </div>
             </>
           )}

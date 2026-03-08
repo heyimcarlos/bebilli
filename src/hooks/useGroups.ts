@@ -45,6 +45,7 @@ export interface GroupWithDetails extends Group {
   members: GroupMemberWithProfile[];
   current_amount: number;
   user_contribution: number;
+  user_pending: number;
 }
 
 export type ContributionType = 'deposit' | 'withdrawal';
@@ -144,18 +145,53 @@ export const useGroups = (userId: string | undefined) => {
         // Fetch contributions totals (accounting for deposits and withdrawals)
         const { data: contributions } = await supabase
           .from('contributions')
-          .select('user_id, amount, type')
+          .select('id, user_id, amount, type')
           .eq('group_id', group.id);
 
-        const contributionsByUser = (contributions || []).reduce((acc, c) => {
+        // Fetch receipt validations to filter unapproved contributions
+        const { data: receiptValidations } = await supabase
+          .from('receipt_validations')
+          .select('contribution_id, validation_status')
+          .eq('group_id', group.id);
+
+        // Build set of contribution IDs that have a non-approved validation
+        const unapprovedContribIds = new Set(
+          (receiptValidations || [])
+            .filter(rv => rv.validation_status !== 'approved')
+            .map(rv => rv.contribution_id)
+        );
+
+        // Build set of pending/flagged contribution IDs (for pending indicator)
+        const pendingContribIds = new Set(
+          (receiptValidations || [])
+            .filter(rv => rv.validation_status === 'pending' || rv.validation_status === 'flagged')
+            .map(rv => rv.contribution_id)
+        );
+
+        const contributionsByUser: Record<string, number> = {};
+        const pendingByUser: Record<string, number> = {};
+
+        (contributions || []).forEach(c => {
           const amount = Number(c.amount);
           const adjustedAmount = c.type === 'withdrawal' ? -amount : amount;
-          acc[c.user_id] = (acc[c.user_id] || 0) + adjustedAmount;
-          return acc;
-        }, {} as Record<string, number>);
+
+          // Track pending amounts separately
+          if (pendingContribIds.has(c.id)) {
+            pendingByUser[c.user_id] = (pendingByUser[c.user_id] || 0) + adjustedAmount;
+            return; // Don't count toward totals
+          }
+
+          // Skip unapproved (rejected) contributions entirely
+          if (unapprovedContribIds.has(c.id)) {
+            return;
+          }
+
+          contributionsByUser[c.user_id] = (contributionsByUser[c.user_id] || 0) + adjustedAmount;
+        });
 
         const totalAmount = Math.max(0, Object.values(contributionsByUser).reduce((sum, val) => sum + val, 0));
         const userContribution = contributionsByUser[userId] || 0;
+        const userPending = pendingByUser[userId] || 0;
 
         const membersWithContributions: GroupMemberWithProfile[] = (members || []).map((m: any) => {
           const contribution = contributionsByUser[m.user_id] || 0;
@@ -189,6 +225,7 @@ export const useGroups = (userId: string | undefined) => {
           }),
           current_amount: totalAmount,
           user_contribution: userContribution,
+          user_pending: userPending,
         } as GroupWithDetails;
       })
     );
