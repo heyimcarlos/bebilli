@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Users, Compass, User } from 'lucide-react';
+import { Home, Users, Compass, Activity } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 
 interface BottomNavProps {
