@@ -161,7 +161,7 @@ const AppContent: React.FC = () => {
     <>
       {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-card border-b border-border">
-        <div className="flex items-center justify-between px-4 h-14 max-w-md mx-auto">
+        <div className="flex items-center justify-between px-4 h-14 max-w-screen-xl mx-auto">
           <BilliLogo size={32} showText />
           <div className="flex items-center gap-1">
             <NotificationBell onClick={() => setShowNotifications(true)} />
