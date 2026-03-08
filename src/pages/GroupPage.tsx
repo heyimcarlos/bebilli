@@ -53,6 +53,7 @@ import ConsistencyRanking from "@/components/ConsistencyRanking";
 import ReceiptValidationHistory from "@/components/ReceiptValidationHistory";
 import GoalProofSubmit from "@/components/GoalProofSubmit";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 interface GroupPageProps {
