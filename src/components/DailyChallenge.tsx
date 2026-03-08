@@ -66,38 +66,38 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({
       // Dynamic challenge titles based on type
       const challengeTemplates = {
         standard: {
-          title: t('dailySaveChallenge') || `Save ${formatCurrency(finalAmount)} today`,
-          description: t('standardChallengeDesc') || 'A balanced step towards your dreams',
+          title: `${t('dailySaveChallenge')}: ${formatCurrency(finalAmount)}`,
+          description: t('standardChallengeDesc'),
           reward: '⭐ 10 XP'
         },
         easy: {
-          title: t('easyDayChallenge') || `Quick save: ${formatCurrency(finalAmount)}`,
-          description: t('easyChallengeDesc') || 'Small steps lead to big achievements',
+          title: `${t('easyDayChallenge')}: ${formatCurrency(finalAmount)}`,
+          description: t('easyChallengeDesc'),
           reward: '💫 5 XP'
         },
         ambitious: {
-          title: t('ambitiousChallenge') || `Big push: ${formatCurrency(finalAmount)}`,
-          description: t('ambitiousChallengeDesc') || 'Challenge yourself to reach higher',
+          title: `${t('ambitiousChallenge')}: ${formatCurrency(finalAmount)}`,
+          description: t('ambitiousChallengeDesc'),
           reward: '🚀 15 XP'
         },
         balanced: {
-          title: t('balancedChallenge') || `Steady save: ${formatCurrency(finalAmount)}`,
-          description: t('balancedChallengeDesc') || 'Consistency is the key to success',
+          title: `${t('balancedChallenge')}: ${formatCurrency(finalAmount)}`,
+          description: t('balancedChallengeDesc'),
           reward: '🌟 8 XP'
         },
         challenge: {
-          title: t('doubleChallenge') || `Power day: ${formatCurrency(finalAmount)}`,
-          description: t('doubleChallengeDesc') || 'Push your limits today!',
+          title: `${t('doubleChallenge')}: ${formatCurrency(finalAmount)}`,
+          description: t('doubleChallengeDesc'),
           reward: '🔥 20 XP + Streak Bonus'
         },
         micro: {
-          title: t('microChallenge') || `Micro save: ${formatCurrency(finalAmount)}`,
-          description: t('microChallengeDesc') || 'Every cent counts on your journey',
+          title: `${t('microChallenge')}: ${formatCurrency(finalAmount)}`,
+          description: t('microChallengeDesc'),
           reward: '✨ 3 XP'
         },
         growth: {
-          title: t('growthChallenge') || `Growth step: ${formatCurrency(finalAmount)}`,
-          description: t('growthChallengeDesc') || 'Invest in your future self',
+          title: `${t('growthChallenge')}: ${formatCurrency(finalAmount)}`,
+          description: t('growthChallengeDesc'),
           reward: '📈 12 XP'
         }
       };
