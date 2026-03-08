@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus, Eye, EyeOff, Flame, Clock, ShieldCheck, AlertTriangle, FileText } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Lock, Check, Gift, Share2, Plus, Minus, DollarSign, Loader2, Pencil, Trash2, Users, UserPlus, Eye, EyeOff, Flame, Clock, ShieldCheck, AlertTriangle, FileText, X, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -60,6 +60,45 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   const [lastContribution, setLastContribution] = useState({ amount: 0, streak: 0 });
   const [salaryInput, setSalaryInput] = useState('');
   const [showAmountToggle, setShowAmountToggle] = useState(true);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReceiptSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReceiptFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => setReceiptPreview(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearReceipt = () => {
+    setReceiptFile(null);
+    setReceiptPreview(null);
+    if (receiptInputRef.current) receiptInputRef.current.value = '';
+  };
+
+  const uploadReceipt = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
+    const { error } = await supabase.storage.from('receipt-images').upload(fileName, file);
+    if (error) { console.error('Receipt upload error:', error); return null; }
+    const { data } = supabase.storage.from('receipt-images').getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
+  const saveReceiptValidation = async (contributionId: string, amount: number, receiptUrl: string) => {
+    await supabase.from('receipt_validations').insert({
+      contribution_id: contributionId,
+      user_id: user!.id,
+      group_id: groupId,
+      declared_amount: amount,
+      receipt_image_url: receiptUrl,
+      validation_status: 'pending',
+    });
+  };
 
   const group = groups.find((g) => g.id === groupId);
   const { messages: chatMessages, loading: chatLoading, sendMessage: sendChatMessage, uploadAudio } = useGroupChat(groupId, user?.id);
@@ -106,8 +145,26 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       return;
     }
 
+    if (!receiptFile) {
+      toast({
+        title: t('error'),
+        description: t('receiptRequired') || 'Please attach a receipt for approval.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setContributing(true);
-    const { error } = await addContribution(groupId, amount);
+
+    // Upload receipt first
+    const receiptUrl = await uploadReceipt(receiptFile);
+    if (!receiptUrl) {
+      setContributing(false);
+      toast({ title: t('error'), description: t('receiptUploadError') || 'Failed to upload receipt.', variant: 'destructive' });
+      return;
+    }
+
+    const { data, error } = await addContribution(groupId, amount);
     setContributing(false);
 
     if (error) {
@@ -117,8 +174,14 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         variant: 'destructive',
       });
     } else {
+      // Save receipt validation record
+      if (data?.id) {
+        await saveReceiptValidation(data.id, amount, receiptUrl);
+      }
+
       setShowContributeModal(false);
       setContributionAmount('');
+      clearReceipt();
       
       // Show celebration
       setLastContribution({ 
@@ -207,30 +270,8 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
     }
   };
 
-  const handleQuickContribute = async (amount: number) => {
-    setContributing(true);
-    const { error } = await addContribution(groupId, amount);
-    setContributing(false);
-
-    if (error) {
-      toast({
-        title: t('error'),
-        description: error.message,
-        variant: 'destructive',
-      });
-    } else {
-      setShowContributeModal(false);
-      
-      // Show celebration
-      setLastContribution({ 
-        amount, 
-        streak: (profile?.current_streak || 0) + 1 
-      });
-      setShowWinModal(true);
-      
-      // Refresh groups to update progress
-      await refreshGroups();
-    }
+  const handleQuickContribute = (amount: number) => {
+    setContributionAmount(String(amount));
   };
 
   const handleSendMessage = async () => {
@@ -666,7 +707,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       </motion.div>
 
       {/* Contribute Modal */}
-      <Dialog open={showContributeModal} onOpenChange={setShowContributeModal}>
+      <Dialog open={showContributeModal} onOpenChange={(open) => { setShowContributeModal(open); if (!open) { clearReceipt(); setContributionAmount(''); } }}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -684,7 +725,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
                     key={amount}
                     onClick={() => handleQuickContribute(amount)}
                     disabled={contributing}
-                    className="flex-1 min-w-[60px] h-12 rounded-xl bg-secondary hover:bg-secondary/80 font-semibold transition-colors"
+                    className={`flex-1 min-w-[60px] h-12 rounded-xl font-semibold transition-colors ${
+                      contributionAmount === String(amount) 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-secondary hover:bg-secondary/80'
+                    }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -697,27 +742,51 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
             {/* Custom amount */}
             <div className="space-y-2">
                <p className="text-sm text-muted-foreground">{t('customAmount')}</p>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                   placeholder={t('enterAmount')}
-                  value={contributionAmount}
-                  onChange={(e) => setContributionAmount(e.target.value)}
-                  className="bg-secondary"
-                />
-                <Button
-                  onClick={handleContribute}
-                  disabled={contributing || !contributionAmount}
-                  className="btn-primary text-primary-foreground px-6"
-                >
-                  {contributing ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    t('add') || 'Add'
-                  )}
-                </Button>
-              </div>
+              <Input
+                type="number"
+                placeholder={t('enterAmount')}
+                value={contributionAmount}
+                onChange={(e) => setContributionAmount(e.target.value)}
+                className="bg-secondary"
+              />
             </div>
+
+            {/* Receipt attachment - required */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground flex items-center gap-1">
+                <FileText className="w-4 h-4" />
+                {t('attachReceipt') || 'Attach receipt'} <span className="text-destructive">*</span>
+              </p>
+              <p className="text-xs text-muted-foreground">{t('receiptRequiredDesc') || 'A receipt is required for group approval.'}</p>
+              <input type="file" ref={receiptInputRef} onChange={handleReceiptSelect} accept="image/*,.pdf" className="hidden" />
+              {receiptPreview ? (
+                <div className="relative inline-block">
+                  <img src={receiptPreview} alt="Receipt" className="h-24 rounded-lg border border-border" />
+                  <button onClick={clearReceipt} className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => receiptInputRef.current?.click()} disabled={contributing} className="w-full h-11 border-dashed">
+                  <Upload className="w-4 h-4 mr-2" />
+                  {t('uploadReceipt') || 'Upload receipt or photo'}
+                </Button>
+              )}
+            </div>
+
+            {/* Submit */}
+            <Button
+              onClick={handleContribute}
+              disabled={contributing || !contributionAmount || !receiptFile}
+              className="w-full h-12 btn-primary text-primary-foreground font-semibold"
+            >
+              {contributing ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Plus className="w-4 h-4 mr-2" />
+              )}
+              {contributing ? (t('sending') || 'Sending...') : (t('addContribution'))}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
