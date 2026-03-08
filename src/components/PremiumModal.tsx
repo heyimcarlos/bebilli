@@ -29,28 +29,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, reason = '
   const regionalPricing: Record<string, { monthly: number; symbol: string }> = {
     CAD: { monthly: 9.90, symbol: 'CA$' },
     USD: { monthly: 9.99, symbol: 'US$' },
-    EUR: { monthly: 7.99, symbol: '€' },
-    GBP: { monthly: 7.99, symbol: '£' },
     BRL: { monthly: 9.90, symbol: 'R$' },
-    MXN: { monthly: 99.00, symbol: 'MX$' },
-    AUD: { monthly: 12.99, symbol: 'A$' },
-    CHF: { monthly: 8.99, symbol: 'CHF' },
-    JPY: { monthly: 980, symbol: '¥' },
-    CNY: { monthly: 39.90, symbol: '¥' },
-    INR: { monthly: 299, symbol: '₹' },
-    KRW: { monthly: 9900, symbol: '₩' },
-    SGD: { monthly: 9.90, symbol: 'S$' },
-    HKD: { monthly: 49.90, symbol: 'HK$' },
-    NZD: { monthly: 12.99, symbol: 'NZ$' },
-    SEK: { monthly: 79, symbol: 'kr' },
-    NOK: { monthly: 79, symbol: 'kr' },
-    DKK: { monthly: 59, symbol: 'kr' },
-    PLN: { monthly: 29.90, symbol: 'zł' },
-    ZAR: { monthly: 99.90, symbol: 'R' },
-    AED: { monthly: 29.90, symbol: 'د.إ' },
-    THB: { monthly: 199, symbol: '฿' },
-    MYR: { monthly: 29.90, symbol: 'RM' },
-    PHP: { monthly: 299, symbol: '₱' },
   };
   
   const pricing = regionalPricing[currency] || regionalPricing.USD;
