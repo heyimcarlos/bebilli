@@ -24,7 +24,7 @@ const TimelinePage: React.FC = () => {
   const fetchEvents = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('timeline_events' as any)
+      .from('timeline_events')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(50);
