@@ -42,7 +42,7 @@ const VIPCard: React.FC<VIPCardProps> = ({ onClick, isOpen: externalOpen, onClos
     const fetchSub = async () => {
       const { data } = await supabase
         .from('user_subscriptions')
-        .select('plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
+        .select('id, plan_type, amount, currency, status, subscribed_at, renewal_date, payment_method')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .order('created_at', { ascending: false })
