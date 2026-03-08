@@ -338,7 +338,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         </div>
       </div>
 
-      {/* Progress */}
+      {/* Progress / Competition Stats */}
       <motion.div 
         className="px-6 mb-6"
         initial={{ y: 30, opacity: 0 }}
@@ -346,30 +346,94 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         transition={{ delay: 0.3 }}
       >
         <div className="glass-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-muted-foreground">{t('groupGoal')}</span>
-            <motion.span 
-              className="text-sm font-semibold text-primary"
-              key={progress}
-              initial={{ scale: 1.2 }}
-              animate={{ scale: 1 }}
-            >
-              <AnimatedCounter value={progress} suffix="%" duration={1.5} className="font-semibold" /> {t('reached')}
-            </motion.span>
-          </div>
-          <AnimatedProgressBar progress={progress} height={12} showMilestones />
-          <div className="flex items-center justify-between text-sm mt-3">
-            <span className="text-muted-foreground">{formatCurrency(group.current_amount)}</span>
-            <span className="font-semibold">{formatCurrency(group.goal_amount)}</span>
-          </div>
-          
-          {/* Your contribution */}
-          <div className="mt-3 pt-3 border-t border-border">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{t('yourContribution')}</span>
-              <span className="font-semibold text-success">{formatCurrency(group.user_contribution)}</span>
-            </div>
-          </div>
+          {isOpenGoal ? (
+            <>
+              {/* Competition Mode Header */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-amber-500" />
+                  <span className="text-sm font-bold text-foreground">{t('competitionMode') || 'Competition'}</span>
+                </div>
+                {competitionEndDate && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="w-3 h-3" />
+                    <span>{t('endsOn') || 'Ends'}: {new Date(competitionEndDate).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Stats Row */}
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                <div className="text-center p-2 rounded-xl bg-secondary/50">
+                  <p className="text-lg font-bold text-foreground">{group.members.length}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">{t('members')}</p>
+                </div>
+                <div className="text-center p-2 rounded-xl bg-secondary/50">
+                  <p className="text-lg font-bold text-primary">{formatCurrency(group.current_amount)}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">{t('totalSaved') || 'Total'}</p>
+                </div>
+                <div className="text-center p-2 rounded-xl bg-secondary/50">
+                  <p className="text-lg font-bold text-foreground">
+                    {currentMembership?.savings_percentage?.toFixed(1) || '0'}%
+                  </p>
+                  <p className="text-[10px] text-muted-foreground uppercase">{t('yourPercentage') || 'Your %'}</p>
+                </div>
+              </div>
+
+              {/* Your contribution + visibility */}
+              <div className="pt-3 border-t border-border space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('yourContribution')}</span>
+                  <span className="font-semibold text-success">{formatCurrency(group.user_contribution)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <button 
+                    onClick={() => setShowSalaryModal(true)}
+                    className="text-xs text-primary underline"
+                  >
+                    {currentMembership?.salary ? `${t('salary') || 'Salary'}: ${formatCurrency(currentMembership.salary)}` : (t('setSalary') || 'Set your salary')}
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if (!user || !currentMembership) return;
+                      const newVal = !currentMembership.show_amount;
+                      await supabase.from('group_memberships').update({ show_amount: newVal }).eq('id', currentMembership.id);
+                      await refreshGroups();
+                    }}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {currentMembership?.show_amount ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    {currentMembership?.show_amount ? (t('amountVisible') || 'Visible') : (t('amountHidden') || 'Hidden')}
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">{t('groupGoal')}</span>
+                <motion.span 
+                  className="text-sm font-semibold text-primary"
+                  key={progress}
+                  initial={{ scale: 1.2 }}
+                  animate={{ scale: 1 }}
+                >
+                  <AnimatedCounter value={progress} suffix="%" duration={1.5} className="font-semibold" /> {t('reached')}
+                </motion.span>
+              </div>
+              <AnimatedProgressBar progress={progress} height={12} showMilestones />
+              <div className="flex items-center justify-between text-sm mt-3">
+                <span className="text-muted-foreground">{formatCurrency(group.current_amount)}</span>
+                <span className="font-semibold">{formatCurrency(group.goal_amount)}</span>
+              </div>
+              <div className="mt-3 pt-3 border-t border-border">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('yourContribution')}</span>
+                  <span className="font-semibold text-success">{formatCurrency(group.user_contribution)}</span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
 
