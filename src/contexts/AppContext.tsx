@@ -814,6 +814,7 @@ const translations: Record<Language, Record<string, string>> = {
     confidence: 'Confiança',
     extractedDate: 'Data extraída',
     transactionType: 'Tipo de transação',
+    viewReceipt: 'Ver comprovante',
   },
   en: {
     welcome: 'Welcome',
@@ -1498,6 +1499,7 @@ const translations: Record<Language, Record<string, string>> = {
     confidence: 'Confidence',
     extractedDate: 'Extracted date',
     transactionType: 'Transaction type',
+    viewReceipt: 'View receipt',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -2158,6 +2160,7 @@ const translations: Record<Language, Record<string, string>> = {
     confidence: 'Confiance',
     extractedDate: 'Date extraite',
     transactionType: 'Type de transaction',
+    viewReceipt: 'Voir le reçu',
   },
   es: {
     welcome: 'Bienvenido',
@@ -2852,6 +2855,7 @@ const translations: Record<Language, Record<string, string>> = {
     confidence: 'Confianza',
     extractedDate: 'Fecha extraída',
     transactionType: 'Tipo de transacción',
+    viewReceipt: 'Ver comprobante',
   },
 };
 
