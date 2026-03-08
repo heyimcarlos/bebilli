@@ -60,8 +60,32 @@ const PremiumAnalytics: React.FC = () => {
   const totalWithdrawn = withdrawals.reduce((sum, c) => sum + c.amount, 0);
   const netSaved = totalDeposited - totalWithdrawn;
 
-  // Weekly breakdown (last 4 weeks)
+  // Monthly breakdown (last 6 months)
   const now = new Date();
+  const monthlyData = Array.from({ length: 6 }, (_, i) => {
+    const monthDate = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 0, 23, 59, 59);
+    const monthDeposits = deposits.filter(c => {
+      const d = new Date(c.date);
+      return d >= monthDate && d <= monthEnd;
+    });
+    const monthWithdrawals = withdrawals.filter(c => {
+      const d = new Date(c.date);
+      return d >= monthDate && d <= monthEnd;
+    });
+    const deposited = monthDeposits.reduce((sum, c) => sum + c.amount, 0);
+    const withdrawn = monthWithdrawals.reduce((sum, c) => sum + c.amount, 0);
+    return {
+      label: monthDate.toLocaleDateString(undefined, { month: 'short' }),
+      deposited,
+      withdrawn,
+      net: deposited - withdrawn,
+    };
+  });
+
+  const maxMonthlyAmount = Math.max(...monthlyData.map(m => Math.max(m.deposited, m.withdrawn)), 1);
+
+  // Weekly breakdown (last 4 weeks)
   const weeklyData = Array.from({ length: 4 }, (_, i) => {
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - (i + 1) * 7);
