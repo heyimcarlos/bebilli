@@ -605,7 +605,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       </div>
 
       {/* Tabs */}
-      <div className="px-6">
+      <div className="px-6 relative z-10">
         <Tabs defaultValue="consistency" className="w-full">
           <TabsList className="w-full bg-secondary mb-4 flex-wrap">
             <TabsTrigger value="consistency" className="flex-1">{t('consistency')}</TabsTrigger>
