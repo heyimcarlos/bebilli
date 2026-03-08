@@ -225,6 +225,7 @@ export const useGroups = (userId: string | undefined) => {
           }),
           current_amount: totalAmount,
           user_contribution: userContribution,
+          user_pending: userPending,
         } as GroupWithDetails;
       })
     );
