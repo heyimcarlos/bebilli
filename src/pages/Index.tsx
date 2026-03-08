@@ -13,6 +13,7 @@ import InstallPWA from '@/components/InstallPWA';
 import WeeklySummaryModal from '@/components/WeeklySummaryModal';
 import LoginPage from '@/pages/LoginPage';
 import HomePage from '@/pages/HomePage';
+import MyGroupsPage from '@/pages/MyGroupsPage';
 import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
 import ProfilePage from '@/pages/ProfilePage';
