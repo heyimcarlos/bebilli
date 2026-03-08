@@ -793,7 +793,6 @@ const translations: Record<Language, Record<string, string>> = {
     noValidationsDesc: 'Receipts scanned via the scanner will appear here',
     approved: 'Approved',
     flagged: 'Flagged',
-    pending: 'Pending',
     declared: 'Declared',
     extracted: 'Extracted',
     receiptDate: 'Receipt date',
