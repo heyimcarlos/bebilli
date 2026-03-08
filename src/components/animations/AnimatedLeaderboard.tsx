@@ -112,7 +112,7 @@ const AnimatedLeaderboard: React.FC<AnimatedLeaderboardProps> = ({
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: delays[rank], type: "spring", stiffness: 200 }}
-        className={`flex flex-col items-center ${rank === 0 ? "-mt-6" : ""}`}
+        className={`flex flex-col items-center`}
       >
         {rank === 0 && (
           <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
