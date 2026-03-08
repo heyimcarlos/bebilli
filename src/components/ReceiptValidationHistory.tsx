@@ -32,7 +32,7 @@ interface ReceiptValidationHistoryProps {
 }
 
 const ReceiptValidationHistory: React.FC<ReceiptValidationHistoryProps> = ({ groupId }) => {
-  const { t, formatCurrency } = useApp();
+  const { t, formatCurrency, currency } = useApp();
   const { user } = useAuthContext();
   const [validations, setValidations] = useState<ReceiptValidation[]>([]);
   const [loading, setLoading] = useState(true);
