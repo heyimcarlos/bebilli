@@ -595,7 +595,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       )}
 
       {/* Leaderboard - always visible */}
-      <div className="px-6 mb-4 relative z-0">
+      <div className="px-4 mb-4 relative z-0">
         <AnimatedLeaderboard
           members={group.members}
           currentUserId={profile?.id}
