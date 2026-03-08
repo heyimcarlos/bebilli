@@ -1,9 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Users, Compass, Activity } from 'lucide-react';
+import { Users, Compass, Activity } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import DefaultAvatar from '@/components/DefaultAvatar';
 
 interface BottomNavProps {
   activeTab: string;

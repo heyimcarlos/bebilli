@@ -5,7 +5,6 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import DefaultAvatar from '@/components/DefaultAvatar';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 

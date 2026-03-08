@@ -1144,8 +1144,77 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Share to Feed Modal */}
+      <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg">
+              {t('contributionVerified') || 'Contribution Verified!'} 🚀
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-center text-muted-foreground">
+              {t('wannaShare') || 'Wanna share this milestone with your followers?'}
+            </p>
+            {lastContribData && (
+              <div className="bg-secondary/50 rounded-lg p-3 text-center">
+                <p className="text-sm font-semibold">
+                  {formatCurrency(lastContribData.amount)} → {lastContribData.groupName}
+                </p>
+              </div>
+            )}
+            <Textarea
+              placeholder={t('addCaption') || 'Add a caption... (optional)'}
+              value={shareCaption}
+              onChange={(e) => setShareCaption(e.target.value)}
+              className="resize-none"
+              rows={2}
+            />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowShareModal(false);
+                  setShareCaption('');
+                }}
+              >
+                {t('notNow') || 'Not now'}
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={sharingToFeed}
+                onClick={async () => {
+                  if (!lastContribData || !user) return;
+                  setSharingToFeed(true);
+                  const { error } = await supabase.from('timeline_events').insert({
+                    user_id: user.id,
+                    event_type: 'contribution',
+                    event_data: {
+                      amount: lastContribData.amount,
+                      group_name: lastContribData.groupName,
+                      caption: shareCaption || undefined,
+                    },
+                    is_anonymous: false,
+                  });
+                  setSharingToFeed(false);
+                  setShowShareModal(false);
+                  setShareCaption('');
+                  if (!error) {
+                    toast({ title: '🎉', description: t('sharedToFeed') || 'Shared to Feed!' });
+                  }
+                }}
+              >
+                {sharingToFeed ? <Loader2 className="w-4 h-4 animate-spin" /> : (t('postToFeed') || 'Post to Feed')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
+
 
 export default GroupPage;
