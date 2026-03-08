@@ -113,7 +113,7 @@ export const useGroups = (userId: string | undefined) => {
         // Fetch memberships
         const { data: memberships } = await supabase
           .from('group_memberships')
-          .select('id, user_id, role')
+          .select('id, user_id, role, salary, show_amount, checkin_count')
           .eq('group_id', group.id);
         
         // Check if current user is admin of this group
