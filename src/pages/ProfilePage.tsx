@@ -373,15 +373,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
             }}>
               <SelectTrigger className="w-36 h-8 bg-secondary text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="BRL">🇧🇷 BRL</SelectItem>
                 <SelectItem value="CAD">🇨🇦 CAD</SelectItem>
                 <SelectItem value="USD">🇺🇸 USD</SelectItem>
-                <SelectItem value="EUR">🇪🇺 EUR</SelectItem>
-                <SelectItem value="GBP">🇬🇧 GBP</SelectItem>
-                <SelectItem value="BRL">🇧🇷 BRL</SelectItem>
-                <SelectItem value="MXN">🇲🇽 MXN</SelectItem>
-                <SelectItem value="AUD">🇦🇺 AUD</SelectItem>
-                <SelectItem value="CHF">🇨🇭 CHF</SelectItem>
-                <SelectItem value="JPY">🇯🇵 JPY</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -261,31 +261,10 @@ const LoginPage: React.FC = () => {
             <Label>{t('currency')}</Label>
             <Select value={currency} onValueChange={(v) => setCurrency(v as any)}>
               <SelectTrigger className="h-11 bg-card border-border rounded-xl"><SelectValue /></SelectTrigger>
-              <SelectContent className="max-h-60">
-                <SelectItem value="CAD">CA$ CAD</SelectItem>
-                <SelectItem value="USD">US$ USD</SelectItem>
-                <SelectItem value="EUR">€ EUR</SelectItem>
-                <SelectItem value="GBP">£ GBP</SelectItem>
-                <SelectItem value="BRL">R$ BRL</SelectItem>
-                <SelectItem value="MXN">MX$ MXN</SelectItem>
-                <SelectItem value="CHF">CHF</SelectItem>
-                <SelectItem value="AUD">A$ AUD</SelectItem>
-                <SelectItem value="JPY">¥ JPY</SelectItem>
-                <SelectItem value="CNY">¥ CNY</SelectItem>
-                <SelectItem value="INR">₹ INR</SelectItem>
-                <SelectItem value="KRW">₩ KRW</SelectItem>
-                <SelectItem value="SGD">S$ SGD</SelectItem>
-                <SelectItem value="HKD">HK$ HKD</SelectItem>
-                <SelectItem value="NZD">NZ$ NZD</SelectItem>
-                <SelectItem value="SEK">kr SEK</SelectItem>
-                <SelectItem value="NOK">kr NOK</SelectItem>
-                <SelectItem value="DKK">kr DKK</SelectItem>
-                <SelectItem value="PLN">zł PLN</SelectItem>
-                <SelectItem value="ZAR">R ZAR</SelectItem>
-                <SelectItem value="AED">د.إ AED</SelectItem>
-                <SelectItem value="THB">฿ THB</SelectItem>
-                <SelectItem value="MYR">RM MYR</SelectItem>
-                <SelectItem value="PHP">₱ PHP</SelectItem>
+              <SelectContent>
+                <SelectItem value="BRL">🇧🇷 R$ BRL</SelectItem>
+                <SelectItem value="CAD">🇨🇦 CA$ CAD</SelectItem>
+                <SelectItem value="USD">🇺🇸 US$ USD</SelectItem>
               </SelectContent>
             </Select>
           </div>
