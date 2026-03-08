@@ -2,20 +2,24 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Users, Compass, Activity } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import DefaultAvatar from '@/components/DefaultAvatar';
 
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  avatarUrl?: string | null;
+  userName?: string;
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, avatarUrl, userName }) => {
   const { t } = useApp();
 
   const tabs = [
-    { id: 'home', icon: Home, label: t('home') },
-    { id: 'groups', icon: Users, label: t('myGroups') },
     { id: 'feed', icon: Activity, label: 'Feed' },
+    { id: 'groups', icon: Users, label: t('myGroups') },
     { id: 'explore', icon: Compass, label: t('explore') },
+    { id: 'me', icon: null, label: t('me') || 'Me' },
   ];
 
   return (
@@ -36,9 +40,18 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <motion.div animate={activeTab === tab.id ? { scale: [1, 1.2, 1] } : undefined} transition={{ duration: 0.3 }}>
-              <tab.icon className="w-5 h-5" />
-            </motion.div>
+            {tab.id === 'me' ? (
+              <Avatar className={`w-6 h-6 ring-2 ${activeTab === 'me' ? 'ring-primary' : 'ring-transparent'}`}>
+                <AvatarImage src={avatarUrl || undefined} />
+                <AvatarFallback className="bg-secondary text-[10px]">
+                  {userName ? userName.charAt(0).toUpperCase() : <DefaultAvatar size={24} />}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <motion.div animate={activeTab === tab.id ? { scale: [1, 1.2, 1] } : undefined} transition={{ duration: 0.3 }}>
+                <tab.icon className="w-5 h-5" />
+              </motion.div>
+            )}
             <span className="text-[10px] mt-0.5 font-medium">{tab.label}</span>
             <AnimatePresence>
               {activeTab === tab.id && (

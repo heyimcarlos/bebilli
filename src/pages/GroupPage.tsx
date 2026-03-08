@@ -306,6 +306,11 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
       });
       setShowWinModal(true);
 
+      // Prepare share modal data
+      setLastContribData({ amount, groupName: group.name });
+      setShareCaption('');
+      setShowShareModal(true);
+
       // Refresh groups to update progress
       await refreshGroups();
     }

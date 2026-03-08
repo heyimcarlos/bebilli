@@ -182,10 +182,10 @@ const AppContent: React.FC = () => {
             exit={{ opacity: 0, x: activeTab === 'profile' ? -20 : 20 }}
             transition={{ duration: 0.2 }}
           >
-            {activeTab === 'home' && <HomePage onGroupClick={handleGroupClick} />}
-            {activeTab === 'groups' && <MyGroupsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'feed' && <TimelinePage />}
+            {activeTab === 'groups' && <MyGroupsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'explore' && <ExplorePage />}
+            {activeTab === 'me' && <HomePage onGroupClick={handleGroupClick} />}
             {activeTab === 'profile' && <ProfilePage onLogout={() => signOut()} />}
           </motion.div>
         </AnimatePresence>
