@@ -736,6 +736,10 @@ const translations: Record<Language, Record<string, string>> = {
     openGoalDesc: 'Quem junta mais % do salário vence!',
     fixedGoalDesc: 'Alcance um valor específico juntos.',
     competitionEndDate: 'Data de término',
+    timelineFeed: 'Feed Social',
+    timelineDesc: 'Conquistas anônimas da comunidade',
+    noEventsYet: 'Nenhuma conquista ainda',
+    beFirstAchievement: 'Comece seu streak para aparecer aqui!',
   },
   en: {
     welcome: 'Welcome',
