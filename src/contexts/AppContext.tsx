@@ -2705,7 +2705,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           .maybeSingle();
         
         if (data) {
-          if (data.language && ['pt', 'en', 'fr'].includes(data.language)) {
+          if (data.language && ['pt', 'en', 'fr', 'es'].includes(data.language)) {
             setLanguageState(data.language as Language);
             localStorage.setItem(STORAGE_KEY_LANGUAGE, data.language);
           }
