@@ -675,6 +675,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           best_streak: number | null
+          bio: string | null
           city: string | null
           consistency_days: number | null
           country: string | null
@@ -689,13 +690,16 @@ export type Database = {
           max_saved: number | null
           name: string
           phone: string | null
+          telegram_username: string | null
           total_contributions: number | null
           updated_at: string | null
           username: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           avatar_url?: string | null
           best_streak?: number | null
+          bio?: string | null
           city?: string | null
           consistency_days?: number | null
           country?: string | null
@@ -710,13 +714,16 @@ export type Database = {
           max_saved?: number | null
           name: string
           phone?: string | null
+          telegram_username?: string | null
           total_contributions?: number | null
           updated_at?: string | null
           username?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           avatar_url?: string | null
           best_streak?: number | null
+          bio?: string | null
           city?: string | null
           consistency_days?: number | null
           country?: string | null
@@ -731,9 +738,11 @@ export type Database = {
           max_saved?: number | null
           name?: string
           phone?: string | null
+          telegram_username?: string | null
           total_contributions?: number | null
           updated_at?: string | null
           username?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
