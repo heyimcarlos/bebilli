@@ -136,14 +136,19 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
   };
 
   const saveReceiptValidation = async (contributionId: string, amount: number, receiptUrl: string) => {
-    // First save the pending record
+    const groupForValidation = groups.find((g) => g.id === groupId);
+    const memberCount = groupForValidation?.members.length ?? 1;
+    const requiresGroupApproval = memberCount > 1;
+
+    // First save the record (pending for groups, immediately approved for solo groups)
     await supabase.from("receipt_validations").insert({
       contribution_id: contributionId,
       user_id: user!.id,
       group_id: groupId,
       declared_amount: amount,
       receipt_image_url: receiptUrl,
-      validation_status: "pending",
+      approved_by: [],
+      validation_status: requiresGroupApproval ? "pending" : "approved",
     });
 
     // Then trigger AI OCR validation in background
@@ -171,36 +176,49 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
         return;
       }
 
-      // Update the validation record with OCR results
-      if (scanResult) {
-        await supabase
-          .from("receipt_validations")
-          .update({
-            extracted_amount: scanResult.amount || null,
-            extracted_date: scanResult.date || null,
-            extracted_type: scanResult.transaction_type || null,
-            extracted_description: scanResult.description || null,
-            validation_status: scanResult.validation_status || "pending",
-            amount_match: scanResult.amount_match,
-          })
-          .eq("contribution_id", contributionId)
-          .eq("user_id", user!.id);
+      if (!scanResult) return;
 
-        // Show result toast
-        if (scanResult.validation_status === "approved") {
-          toast({
-            title: "✅ " + (t("receiptApproved") || "Receipt approved!"),
-            description: t("receiptMatchDesc") || "The receipt amount matches your contribution.",
-          });
-        } else if (scanResult.validation_status === "flagged") {
-          toast({
-            title: "⚠️ " + (t("receiptFlagged") || "Receipt flagged"),
-            description:
-              t("receiptMismatchDesc") ||
-              "The extracted amount differs from your declared amount. It will be reviewed.",
-            variant: "destructive",
-          });
-        }
+      const nextStatus = requiresGroupApproval
+        ? (scanResult.amount_match === false || scanResult.validation_status === "flagged" ? "flagged" : "pending")
+        : "approved";
+
+      // Update the validation record with OCR results (do NOT auto-approve for groups)
+      await supabase
+        .from("receipt_validations")
+        .update({
+          extracted_amount: scanResult.amount || null,
+          extracted_date: scanResult.date || null,
+          extracted_type: scanResult.transaction_type || null,
+          extracted_description: scanResult.description || null,
+          validation_status: nextStatus,
+          amount_match: scanResult.amount_match,
+          extracted_currency: scanResult.currency || null,
+        })
+        .eq("contribution_id", contributionId)
+        .eq("user_id", user!.id);
+
+      // Show result toast
+      if (!requiresGroupApproval) {
+        toast({
+          title: "✅ " + (t("receiptApproved") || "Receipt approved!"),
+          description: t("receiptMatchDesc") || "The receipt amount matches your contribution.",
+        });
+        return;
+      }
+
+      if (nextStatus === "flagged") {
+        toast({
+          title: "⚠️ " + (t("receiptFlagged") || "Receipt flagged"),
+          description:
+            t("receiptMismatchDesc") ||
+            "The extracted amount differs from your declared amount. It will be reviewed by the group.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "🕒 " + (t("pendingApproval") || "Pending approval"),
+          description: t("receiptPendingGroup") || "Receipt analyzed — waiting for all group members to approve.",
+        });
       }
     } catch (err) {
       console.error("Receipt OCR processing error:", err);

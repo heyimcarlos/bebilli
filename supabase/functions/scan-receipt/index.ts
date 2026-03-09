@@ -101,7 +101,9 @@ If you cannot detect any amount, return: {"amount": 0, "currency": null, "date":
       const lowerBound = declaredAmount * (1 - tolerance);
       const upperBound = declaredAmount * (1 + tolerance);
       amountMatch = parsed.amount >= lowerBound && parsed.amount <= upperBound;
-      validationStatus = amountMatch ? 'approved' : 'flagged';
+
+      // NOTE: Even when it matches, we keep it pending so the group can approve.
+      validationStatus = amountMatch ? 'pending' : 'flagged';
     }
 
     // Note: DB record is now managed client-side to avoid double-inserts
