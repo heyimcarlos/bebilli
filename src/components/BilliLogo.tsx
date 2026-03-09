@@ -1,5 +1,5 @@
 import React from 'react';
-import billiLogo from '@/assets/billi-logo.png';
+import billiLogo from '@/assets/billi-logo-3d.png';
 
 interface BilliLogoProps {
   className?: string;
@@ -20,11 +20,10 @@ const BilliLogo: React.FC<BilliLogoProps> = ({ className = '', size = 48, showTe
         alt="Billi"
         width={size}
         height={size}
-        className="object-contain"
+        className="object-contain drop-shadow-md"
         style={{
           width: size,
           height: size,
-          borderRadius: '16%',
         }}
       />
       {showText && (
