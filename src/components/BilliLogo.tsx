@@ -20,7 +20,7 @@ const BilliLogo: React.FC<BilliLogoProps> = ({ className = '', size = 48, showTe
         alt="Billi"
         width={size}
         height={size}
-        className="object-contain drop-shadow-md"
+        className="object-contain drop-shadow-md rounded-[30%]"
         style={{
           width: size,
           height: size,
