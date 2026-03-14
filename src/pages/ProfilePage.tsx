@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette, Shield, Users, AtSign, Check, X, Zap, HelpCircle, MessageSquare, Mail, ExternalLink } from 'lucide-react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette, Shield, Users, AtSign, Check, X, Zap, HelpCircle, MessageSquare, Mail, ExternalLink, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
