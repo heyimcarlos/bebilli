@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette, Shield, Users, AtSign, Check, X, Zap, HelpCircle, MessageSquare, Mail, ExternalLink } from 'lucide-react';
+import { Flame, Trophy, Crown, Settings, Globe, DollarSign, LogOut, Camera, Loader2, Share2, Moon, Sun, Palette, Shield, Users, AtSign, Check, X, Zap, HelpCircle, MessageSquare, Mail, ExternalLink, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useApp } from '@/contexts/AppContext';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -86,6 +86,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const [usernameLoading, setUsernameLoading] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [usernameChecking, setUsernameChecking] = useState(false);
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const usernameCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Real-time username availability check
@@ -206,6 +211,28 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
       }
     } else {
       setFollowCounts(prev => ({ ...prev, pending: prev.pending - 1 }));
+    }
+  };
+
+  const handleSetPassword = async () => {
+    if (newPassword.length < 6) {
+      toast({ title: t('error'), description: t('passwordMinLength') || 'Password must be at least 6 characters', variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: t('error'), description: t('passwordsMismatch') || 'Passwords do not match', variant: 'destructive' });
+      return;
+    }
+    setPasswordLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordLoading(false);
+    if (error) {
+      toast({ title: t('error'), description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '✅', description: t('passwordUpdated') || 'Password set successfully! You can now sign in with email + password.' });
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowPasswordSection(false);
     }
   };
 
@@ -368,9 +395,56 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               </SelectContent>
             </Select>
           </div>
+          <div className="h-px bg-border" />
+          <div>
+            <button
+              onClick={() => setShowPasswordSection(!showPasswordSection)}
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-muted-foreground" />
+                <span>{t('setPassword') || 'Set / Change Password'}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">{showPasswordSection ? '▲' : '▼'}</span>
+            </button>
+            {showPasswordSection && (
+              <div className="mt-2 space-y-2">
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder={t('newPassword') || 'New password'}
+                    className="h-8 text-xs bg-secondary pr-8"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={t('confirmPassword') || 'Confirm password'}
+                  className="h-8 text-xs bg-secondary"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleSetPassword}
+                  disabled={passwordLoading || !newPassword || !confirmPassword}
+                  className="w-full h-8 text-xs font-bold"
+                >
+                  {passwordLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <KeyRound className="w-3 h-3 mr-1" />}
+                  {t('savePassword') || 'Save Password'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* Help & Feedback */}
         <div className="flex items-center gap-2 mb-2 mt-4">
           <HelpCircle className="w-4 h-4 text-muted-foreground" />
           <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t('needHelp') || 'Help'}</h2>
