@@ -214,6 +214,28 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
     }
   };
 
+  const handleSetPassword = async () => {
+    if (newPassword.length < 6) {
+      toast({ title: t('error'), description: t('passwordMinLength') || 'Password must be at least 6 characters', variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: t('error'), description: t('passwordsMismatch') || 'Passwords do not match', variant: 'destructive' });
+      return;
+    }
+    setPasswordLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordLoading(false);
+    if (error) {
+      toast({ title: t('error'), description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '✅', description: t('passwordUpdated') || 'Password set successfully! You can now sign in with email + password.' });
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowPasswordSection(false);
+    }
+  };
+
   const levelTitle = getLevelTitle(profile?.level || 1, language);
 
   return (
