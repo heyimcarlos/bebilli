@@ -86,6 +86,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
   const [usernameLoading, setUsernameLoading] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [usernameChecking, setUsernameChecking] = useState(false);
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const usernameCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Real-time username availability check
