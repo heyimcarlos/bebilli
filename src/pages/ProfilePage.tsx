@@ -395,9 +395,56 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onLogout }) => {
               </SelectContent>
             </Select>
           </div>
+          <div className="h-px bg-border" />
+          <div>
+            <button
+              onClick={() => setShowPasswordSection(!showPasswordSection)}
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-muted-foreground" />
+                <span>{t('setPassword') || 'Set / Change Password'}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">{showPasswordSection ? '▲' : '▼'}</span>
+            </button>
+            {showPasswordSection && (
+              <div className="mt-2 space-y-2">
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder={t('newPassword') || 'New password'}
+                    className="h-8 text-xs bg-secondary pr-8"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={t('confirmPassword') || 'Confirm password'}
+                  className="h-8 text-xs bg-secondary"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleSetPassword}
+                  disabled={passwordLoading || !newPassword || !confirmPassword}
+                  className="w-full h-8 text-xs font-bold"
+                >
+                  {passwordLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <KeyRound className="w-3 h-3 mr-1" />}
+                  {t('savePassword') || 'Save Password'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* Help & Feedback */}
         <div className="flex items-center gap-2 mb-2 mt-4">
           <HelpCircle className="w-4 h-4 text-muted-foreground" />
           <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t('needHelp') || 'Help'}</h2>
