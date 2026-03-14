@@ -16,6 +16,7 @@ import HomePage from '@/pages/HomePage';
 import MyGroupsPage from '@/pages/MyGroupsPage';
 import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
+import GroupChatsPage from '@/pages/GroupChatsPage';
 import ProfilePage from '@/pages/ProfilePage';
 import PremiumModal from '@/components/PremiumModal';
 import TimelinePage from '@/pages/TimelinePage';
@@ -183,6 +184,7 @@ const AppContent: React.FC = () => {
             transition={{ duration: 0.2 }}
           >
             {activeTab === 'feed' && <TimelinePage />}
+            {activeTab === 'chats' && <GroupChatsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'groups' && <MyGroupsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'explore' && <ExplorePage />}
             {activeTab === 'me' && <HomePage onGroupClick={handleGroupClick} />}

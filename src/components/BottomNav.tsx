@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Compass, Home } from 'lucide-react';
+import { Users, Compass, Home, MessageCircle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -16,6 +16,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, avatarUrl
 
   const tabs = [
     { id: 'feed', icon: Home, label: t('home') || 'Home' },
+    { id: 'chats', icon: MessageCircle, label: t('chats') || 'Chats' },
     { id: 'groups', icon: Users, label: t('myGroups') },
     { id: 'explore', icon: Compass, label: t('explore') },
     { id: 'me', icon: null, label: t('you') || 'You' },
