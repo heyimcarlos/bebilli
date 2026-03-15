@@ -16,7 +16,8 @@ import HomePage from '@/pages/HomePage';
 import MyGroupsPage from '@/pages/MyGroupsPage';
 import ExplorePage from '@/pages/ExplorePage';
 import GroupPage from '@/pages/GroupPage';
-import GroupChatsPage from '@/pages/GroupChatsPage';
+import GroupInboxPage from '@/pages/GroupInboxPage';
+import GroupChatView from '@/pages/GroupChatView';
 import ProfilePage from '@/pages/ProfilePage';
 import PremiumModal from '@/components/PremiumModal';
 import TimelinePage from '@/pages/TimelinePage';
@@ -44,6 +45,8 @@ const AppContent: React.FC = () => {
   const { isPremium } = usePremiumCheck(user?.id);
   const [activeTab, setActiveTab] = useState('feed');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [groupDefaultTab, setGroupDefaultTab] = useState<'consistency' | 'chat' | 'receipts' | 'dream'>('consistency');
+  const [chatViewGroupId, setChatViewGroupId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHiddenGroups, setShowHiddenGroups] = useState(false);
@@ -86,8 +89,24 @@ const AppContent: React.FC = () => {
   };
 
   const handleGroupClick = (groupId: string) => {
+    setGroupDefaultTab('consistency');
     setSelectedGroupId(groupId);
     setShowNotifications(false);
+  };
+
+  const handleGroupChatClick = (groupId: string) => {
+    setChatViewGroupId(groupId);
+    setShowNotifications(false);
+  };
+
+  const handleCloseChatView = () => {
+    setChatViewGroupId(null);
+  };
+
+  const handleViewGroupProfileFromChat = (groupId: string) => {
+    setChatViewGroupId(null);
+    setGroupDefaultTab('consistency');
+    setSelectedGroupId(groupId);
   };
 
   const checkMilestone = (oldProgress: number, newProgress: number, groupName: string) => {
@@ -144,10 +163,27 @@ const AppContent: React.FC = () => {
     );
   }
 
+  if (chatViewGroupId) {
+    return (
+      <>
+        <GroupChatView 
+          groupId={chatViewGroupId} 
+          onBack={handleCloseChatView}
+          onViewGroupProfile={handleViewGroupProfileFromChat}
+        />
+        <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
+        <HiddenGroupsDrawer isOpen={showHiddenGroups} onClose={() => setShowHiddenGroups(false)} />
+        <ConfettiCelebration isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
+        <MilestoneModal isOpen={milestoneData.show} onClose={() => setMilestoneData(prev => ({ ...prev, show: false }))} milestone={milestoneData.milestone} groupName={milestoneData.groupName} reward={milestoneData.reward} />
+        <GoalCelebration isOpen={goalCelebration.show} onClose={() => setGoalCelebration({ show: false, groupName: '' })} groupName={goalCelebration.groupName} />
+      </>
+    );
+  }
+
   if (selectedGroupId) {
     return (
       <>
-        <GroupPage groupId={selectedGroupId} onBack={() => setSelectedGroupId(null)} />
+        <GroupPage groupId={selectedGroupId} onBack={() => setSelectedGroupId(null)} defaultTab={groupDefaultTab} />
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} avatarUrl={profile?.avatar_url} userName={profile?.name} />
         <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} onGroupClick={handleGroupClick} />
         <HiddenGroupsDrawer isOpen={showHiddenGroups} onClose={() => setShowHiddenGroups(false)} />
@@ -184,7 +220,7 @@ const AppContent: React.FC = () => {
             transition={{ duration: 0.2 }}
           >
             {activeTab === 'feed' && <TimelinePage />}
-            {activeTab === 'chats' && <GroupChatsPage onGroupClick={handleGroupClick} />}
+            {activeTab === 'chats' && <GroupInboxPage onGroupClick={handleGroupClick} onGroupChatClick={handleGroupChatClick} />}
             {activeTab === 'groups' && <MyGroupsPage onGroupClick={handleGroupClick} />}
             {activeTab === 'explore' && <ExplorePage />}
             {activeTab === 'me' && <HomePage onGroupClick={handleGroupClick} />}
