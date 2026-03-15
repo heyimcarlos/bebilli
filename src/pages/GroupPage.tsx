@@ -59,6 +59,7 @@ import { useToast } from "@/hooks/use-toast";
 interface GroupPageProps {
   groupId: string;
   onBack: () => void;
+  defaultTab?: 'consistency' | 'chat' | 'receipts' | 'dream';
 }
 
 const QUICK_AMOUNTS_BY_CURRENCY: Record<string, number[]> = {
@@ -68,7 +69,7 @@ const QUICK_AMOUNTS_BY_CURRENCY: Record<string, number[]> = {
   EUR: [5, 10, 20, 50, 100],
 };
 
-const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
+const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack, defaultTab = 'consistency' }) => {
   const { t, formatCurrency, currency } = useApp();
   const QUICK_AMOUNTS = QUICK_AMOUNTS_BY_CURRENCY[currency] || QUICK_AMOUNTS_BY_CURRENCY.CAD;
   const {
@@ -695,7 +696,7 @@ const GroupPage: React.FC<GroupPageProps> = ({ groupId, onBack }) => {
 
       {/* Tabs */}
       <div className="px-6 relative z-10">
-        <Tabs defaultValue="consistency" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="w-full bg-secondary mb-4 flex-wrap">
             <TabsTrigger value="consistency" className="flex-1">
               {t("consistency")}
