@@ -13,6 +13,7 @@ import OAuthCallback from "./pages/OAuthCallback";
 import AdminPartnersPage from "./pages/AdminPartnersPage";
 import AdminGroupsPage from "./pages/AdminGroupsPage";
 import AdminCouponsPage from "./pages/AdminCouponsPage";
+import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfUsePage from "./pages/TermsOfUsePage";
