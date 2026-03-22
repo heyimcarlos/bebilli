@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import SocialProofCounter from '@/components/SocialProofCounter';
 import { motion } from 'framer-motion';
 import { ArrowRight, Loader2, Mail, UserPlus, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award, Quote } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
@@ -324,6 +325,7 @@ const LoginPage: React.FC = () => {
               <h1 className="text-4xl md:text-5xl xl:text-6xl font-black text-foreground leading-[1.1] mb-5">
                 {t('landingHeroTitle')}
               </h1>
+              <SocialProofCounter />
               <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-3">
                 {t('landingHeroSubtitle')}
               </p>
