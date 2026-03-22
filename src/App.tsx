@@ -13,6 +13,7 @@ import OAuthCallback from "./pages/OAuthCallback";
 import AdminPartnersPage from "./pages/AdminPartnersPage";
 import AdminGroupsPage from "./pages/AdminGroupsPage";
 import AdminCouponsPage from "./pages/AdminCouponsPage";
+import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfUsePage from "./pages/TermsOfUsePage";
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/admin/partners" element={<AdminPartnersPage onBack={() => window.history.back()} />} />
                 <Route path="/admin/groups" element={<AdminGroupsPage onBack={() => window.history.back()} />} />
                 <Route path="/admin/coupons" element={<AdminCouponsPage onBack={() => window.history.back()} />} />
+                <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage onBack={() => window.history.back()} />} />
                 <Route path="/admin" element={<AdminDashboard onBack={() => window.history.back()} />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
