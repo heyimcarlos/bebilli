@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import SocialProofCounter from '@/components/SocialProofCounter';
 import { motion } from 'framer-motion';
 import { ArrowRight, Loader2, Mail, UserPlus, TrendingUp, Users, Trophy, ChevronDown, Flame, Target, Award, Quote } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
