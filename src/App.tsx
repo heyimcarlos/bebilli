@@ -38,6 +38,7 @@ const App = () => (
                 <Route path="/admin/partners" element={<AdminPartnersPage onBack={() => window.history.back()} />} />
                 <Route path="/admin/groups" element={<AdminGroupsPage onBack={() => window.history.back()} />} />
                 <Route path="/admin/coupons" element={<AdminCouponsPage onBack={() => window.history.back()} />} />
+                <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage onBack={() => window.history.back()} />} />
                 <Route path="/admin" element={<AdminDashboard onBack={() => window.history.back()} />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
